@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-marketplace.json",
+  "name": "neo-forvaltning",
+  "description": "Neo Systems sine plugins til Claude Code for kommuner, virksomheter og partnere som forvalter oppsettet sitt i Neo, og for Altinn-skjemaer.",
+  "owner": { "name": "Neo Systems AS", "url": "https://github.com/Neo-Systems-AI" },
+  "plugins": [
+    {
+      "name": "forvaltning",
+      "source": "./plugins/forvaltning",
+      "description": "Forvaltning av oppsettet i Neo gjennom MCP: snapshot, plan og gjennomføring i sandkassen. Brukes i et repo laget fra neo-forvaltning-mal.",
+      "version": "0.1.0",
+      "category": "forvaltning"
+    },
+    {
+      "name": "altinn",
+      "source": "./plugins/altinn",
+      "description": "Bygg og publiser Altinn Studio-apper (skjemaer): Digdirs sju skills låst til en sha (MIT), og vår egen altinn-publisering med to kontrollskript, fra tom app til publisert i tt02.",
+      "version": "0.4.0",
+      "category": "altinn"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "repo": "Altinn/altinn-studio",
+  "path": "src/AI/agents/agents/skills",
+  "sha": "34a9ed553912a6e17954d115f79f2261749afb3a",
+  "committed": "2026-09-28T20:35:15Z",
+  "license": "MIT",
+  "skills": [
+    "altinn-datamodel",
+    "altinn-docs",
+    "altinn-expressions",
+    "altinn-planning",
+    "altinn-policy",
+    "altinn-prefill",
+    "altinn-resources"
+  ]
+}
