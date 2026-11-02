@@ -11,9 +11,23 @@ const repo = (plugin = {}, extra = {}) => {
   mkdirSync(join(root, "plugins/p/.claude-plugin"), { recursive: true });
   writeFileSync(join(root, ".claude-plugin/marketplace.json"), JSON.stringify({ name: "m", owner: {}, plugins: [{ name: "p", source: "./plugins/p", description: "d", version: "1.0.0" }] }));
   writeFileSync(join(root, "plugins/p/.claude-plugin/plugin.json"), JSON.stringify({ name: "p", description: "d", version: "1.0.0", license: "MIT", ...plugin }));
+  writeFileSync(join(root, "plugins/p/neo-config.keys.json"), JSON.stringify({ plugin: "p", neo: false, keys: [] }));
   for (const [f, t] of Object.entries(extra)) writeFileSync(join(root, f), t);
   return root;
 };
+
+test("en plugin uten nøkkelfil, og en kopi av en felles modul som har glidd, stoppes", () => {
+  const root = repo();
+  writeFileSync(join(root, "plugins/p/neo-config.keys.json"), JSON.stringify({ plugin: "q", keys: [] }));
+  mkdirSync(join(root, "shared/neo-config"), { recursive: true });
+  mkdirSync(join(root, "plugins/p/scripts/lib"), { recursive: true });
+  writeFileSync(join(root, "shared/neo-config/neo-config.mjs"), "// ny\n");
+  writeFileSync(join(root, "plugins/p/scripts/lib/neo-config.mjs"), "// gammel\n");
+  const msgs = run(root).filter((x) => x.check === "config").map((x) => x.message);
+  assert.equal(msgs.length, 2);
+  assert.match(msgs[0], /plugin er «q»/);
+  assert.match(msgs[1], /Ikke lik shared/);
+});
 
 test("et rent repo har ingen funn", () => assert.deepEqual(run(repo()), []));
 test("ulik versjon og manglende lisens stoppes", () => {

@@ -1,0 +1,11 @@
+{
+  "plugin": "konfig",
+  "neo": true,
+  "keys": [
+    {
+      "path": "off",
+      "fallback": [],
+      "doc": "Reglene som er slått av i dette repoet, med navn"
+    }
+  ]
+}

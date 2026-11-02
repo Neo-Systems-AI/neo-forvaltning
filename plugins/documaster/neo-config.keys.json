@@ -1,0 +1,41 @@
+{
+  "plugin": "documaster",
+  "neo": false,
+  "environments": true,
+  "keys": [
+    {
+      "path": "defaultEnv",
+      "doc": "Miljøet som brukes når --miljo ikke er sagt (ellers det første i documaster.environments)"
+    },
+    {
+      "path": "apiUrl",
+      "perEnv": true,
+      "required": true,
+      "doc": "Adressen til API-et på instansen, for eksempel https://<instans>:8083. Ikke nettsiden på /v2/, som svarer 200 med HTML på alle stier"
+    },
+    {
+      "path": "tokenUrl",
+      "perEnv": true,
+      "required": true,
+      "doc": "Token-adressen til innloggingen: Documasters egen IdP, eller Entra ID (https://login.microsoftonline.com/<tenant>/oauth2/v2.0/token)"
+    },
+    {
+      "path": "clientId",
+      "perEnv": true,
+      "required": true,
+      "doc": "Klient-ID-en kunden har fått av Documaster (eller registrert i Entra ID)"
+    },
+    {
+      "path": "clientSecret",
+      "perEnv": true,
+      "required": true,
+      "doc": "Hemmeligheten til klienten, bare som referanse: { \"$env\": \"DOCUMASTER_CLIENT_SECRET\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\" }"
+    },
+    {
+      "path": "scope",
+      "perEnv": true,
+      "required": true,
+      "doc": "Scopet i token-kallet: openid mot Documasters IdP, api://<app-id>/.default mot Entra ID"
+    }
+  ]
+}

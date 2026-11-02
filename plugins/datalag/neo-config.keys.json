@@ -1,0 +1,11 @@
+{
+  "plugin": "datalag",
+  "neo": true,
+  "keys": [
+    {
+      "path": "maxRows",
+      "fallback": 50,
+      "doc": "Flest rader datalag viser i ett svar"
+    }
+  ]
+}

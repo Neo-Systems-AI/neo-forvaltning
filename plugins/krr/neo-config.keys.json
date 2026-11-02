@@ -1,0 +1,14 @@
+{
+  "plugin": "krr",
+  "neo": false,
+  "environments": true,
+  "maskinporten": true,
+  "keys": [
+    {
+      "path": "klient",
+      "fallback": "krr",
+      "required": false,
+      "doc": "Navnet på Maskinporten-klienten KRR-oppslaget bruker, under maskinporten.byEnv.<miljø>.klienter. Klienten, nøkkelen og scopet står bare der, aldri her"
+    }
+  ]
+}

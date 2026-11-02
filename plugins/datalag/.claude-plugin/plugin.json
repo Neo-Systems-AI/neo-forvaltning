@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "datalag",
+  "version": "0.1.0",
+  "description": "Spørsmål om sakene i Neo uten å skrive spørringen: hvor mange, hvilke, hvor står saken, hvem er parter og oppgaver. Bare lesing, gjennom Neo sin MCP-server med personens egne rettigheter. Maskerer fødselsnummer, telefon og e-post i svaret.",
+  "author": {
+    "name": "Neo Systems AS",
+    "url": "https://github.com/Neo-Systems-AI"
+  },
+  "repository": "https://github.com/Neo-Systems-AI/neo-forvaltning",
+  "license": "MIT",
+  "keywords": [
+    "neo",
+    "saker",
+    "data",
+    "spørsmål",
+    "mcp"
+  ]
+}

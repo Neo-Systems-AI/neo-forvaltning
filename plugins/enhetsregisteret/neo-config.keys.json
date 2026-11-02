@@ -1,0 +1,13 @@
+{
+  "plugin": "enhetsregisteret",
+  "neo": false,
+  "environments": true,
+  "maskinporten": false,
+  "keys": [
+    {
+      "path": "orgnr",
+      "required": false,
+      "doc": "Organisasjonsnummeret som slås opp når ingen er sagt, for eksempel kommunens eget. Ikke hemmelig: Enhetsregisteret er åpent"
+    }
+  ]
+}

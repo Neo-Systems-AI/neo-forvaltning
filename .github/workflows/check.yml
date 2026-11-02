@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test "scripts/*.test.mjs" "plugins/**/*.test.mjs"
+      - run: node --test "scripts/*.test.mjs" "shared/**/*.test.mjs" "plugins/**/*.test.mjs"
 
   plugins:
     name: plugins (form, versjoner, hooks, offentlig)
@@ -27,6 +27,7 @@ jobs:
         with:
           node-version: 22
       - run: node scripts/check.mjs --annotate --summary
+      - run: node scripts/sync-shared.mjs --check
 
   secrets:
     name: secrets (gitleaks)

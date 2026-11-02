@@ -6,6 +6,7 @@
 //   node scripts/check.mjs [--annotate] [--summary] [--root <dir>]
 import { appendFileSync, existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import { plan } from "./sync-shared.mjs";
 
 export const CHECKS = [
   { name: "manifests", about: "Markedsplassen og hver plugin har et gyldig manifest med beskrivelse og lisens" },
@@ -13,6 +14,7 @@ export const CHECKS = [
   { name: "versions", about: "Versjonen er lik i plugin.json og marketplace.json" },
   { name: "hooks", about: "Hvert skript en hook nevner, finnes" },
   { name: "public", about: "Ingenting internt eller om en kunde: interne verter, repoer og stier" },
+  { name: "config", about: "Hver plugin har neo-config.keys.json, og kopiene av de felles modulene er like shared/" },
 ];
 
 // Det som aldri skal stå i et offentlig repo. Kundenavn holdes ute ved review; her står det som kan sjekkes.
@@ -83,6 +85,18 @@ export function run(root) {
     text.split("\n").forEach((line, i) => {
       for (const { re, why } of INTERNAL) if (re.test(line)) f.push({ check: "public", file: rel, line: i + 1, message: `Linja nevner ${why}. Repoet er offentlig` });
     });
+  }
+  const plugins = existsSync(join(root, "plugins")) ? readdirSync(join(root, "plugins"), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name) : [];
+  for (const p of plugins) {
+    const kf = `plugins/${p}/neo-config.keys.json`;
+    if (!existsSync(join(root, kf))) f.push({ check: "config", file: kf, message: "Mangler. Hver plugin sier hva den leser fra .claude/neo.config.json, også når det er ingenting" });
+    else {
+      const keys = readJson(root, kf, f, "config");
+      if (keys && keys.plugin !== p) f.push({ check: "config", file: kf, message: `plugin er «${keys.plugin}», mappa er «${p}»` });
+    }
+  }
+  if (existsSync(join(root, "shared"))) {
+    for (const i of plan(root).filter((x) => !x.same)) f.push({ check: "config", file: `plugins/${i.plugin}/scripts/lib/${i.mod.split("/")[1]}`, message: `Ikke lik shared/${i.mod}. Kjør node scripts/sync-shared.mjs` });
   }
   return f.map((x) => ({ level: "fail", ...x }));
 }

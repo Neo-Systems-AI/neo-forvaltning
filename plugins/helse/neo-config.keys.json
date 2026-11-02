@@ -1,0 +1,11 @@
+{
+  "plugin": "helse",
+  "neo": true,
+  "keys": [
+    {
+      "path": "window",
+      "fallback": "24h",
+      "doc": "Tidsvinduet helsa ser på (24h, 7d, 30d)"
+    }
+  ]
+}

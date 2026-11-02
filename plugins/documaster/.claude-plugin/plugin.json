@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "documaster",
+  "version": "0.1.0",
+  "description": "Rå lese-kall mot kundens Documaster-arkiv (Noark 5), til feilsøk: ble journalposten arkivert, i hvilken mappe, med hvilke dokumenter. Ett skript uten avhengigheter (scripts/documaster.mjs) henter et token med kundens egen klient og spør med Noark 5-spørringen: arkivdeler, mappe på id eller saksnummer, registrering og journalpost på id eller registreringsIdent, registreringene i en mappe, dokumentversjonene til en registrering, og et fritt søk. Bare lesing: ingen kall som oppretter, endrer eller sletter. Instansen og klienten hos Documaster er kundens, og hemmeligheten står bare som referanse i .claude/neo.config.json.",
+  "author": {
+    "name": "Neo Systems AS",
+    "url": "https://github.com/Neo-Systems-AI"
+  },
+  "license": "MIT",
+  "keywords": ["documaster", "noark5", "arkiv", "journalpost", "feilsøk", "kommune"],
+  "repository": "https://github.com/Neo-Systems-AI/neo-forvaltning"
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "konfig",
+  "version": "0.1.0",
+  "description": "Gjennomgang av oppsettet i Neo mot regler: sakstyper, felt, oppgavemaler og flyter som mangler noe, er dobbelt, eller ikke er publisert. Leser siste snapshot, med en prioritert liste over tiltak. Bare lesing.",
+  "author": {
+    "name": "Neo Systems AS",
+    "url": "https://github.com/Neo-Systems-AI"
+  },
+  "repository": "https://github.com/Neo-Systems-AI/neo-forvaltning",
+  "license": "MIT",
+  "keywords": [
+    "neo",
+    "konfigurasjon",
+    "gjennomgang",
+    "kvalitet"
+  ]
+}

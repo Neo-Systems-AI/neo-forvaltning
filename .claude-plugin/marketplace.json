@@ -2,21 +2,87 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-marketplace.json",
   "name": "neo-forvaltning",
   "description": "Neo Systems sine plugins til Claude Code for kommuner, virksomheter og partnere som forvalter oppsettet sitt i Neo, og for Altinn-skjemaer.",
-  "owner": { "name": "Neo Systems AS", "url": "https://github.com/Neo-Systems-AI" },
+  "owner": {
+    "name": "Neo Systems AS",
+    "url": "https://github.com/Neo-Systems-AI"
+  },
   "plugins": [
     {
       "name": "forvaltning",
       "source": "./plugins/forvaltning",
-      "description": "Forvaltning av oppsettet i Neo gjennom MCP: snapshot, plan og gjennomføring i sandkassen. Brukes i et repo laget fra neo-forvaltning-mal.",
+      "description": "Forvaltning av oppsettet i Neo gjennom MCP: oppstarten som skriver config-fila og skrur på pluginene, snapshot av det som kjører, plan mot repoet, gjennomføring i sandkassen, og hemmelighetene fra kundens hvelv (bare navn, aldri verdier). Brukes i et repo laget fra neo-forvaltning-mal.",
       "version": "0.1.0",
       "category": "forvaltning"
     },
     {
+      "name": "helse",
+      "source": "./plugins/helse",
+      "description": "Helsa til oppsettet i Neo: flytene og kjøringene i et tidsvindu, hva som har feilet og hvorfor, og feilsøk av én kjøring. Bare lesing, gjennom Neo sin MCP-server. Sier UKJENT når den ikke kan se, aldri OK.",
+      "version": "0.1.0",
+      "category": "forvaltning"
+    },
+    {
+      "name": "konfig",
+      "source": "./plugins/konfig",
+      "description": "Gjennomgang av oppsettet i Neo mot regler: sakstyper, felt, oppgavemaler og flyter som mangler noe, er dobbelt, eller ikke er publisert. Leser siste snapshot, med en prioritert liste over tiltak. Bare lesing.",
+      "version": "0.1.0",
+      "category": "forvaltning"
+    },
+    {
+      "name": "datalag",
+      "source": "./plugins/datalag",
+      "description": "Spørsmål om sakene i Neo uten å skrive spørringen: hvor mange, hvilke, hvor står saken, hvem er parter og oppgaver. Bare lesing, gjennom Neo sin MCP-server med personens egne rettigheter. Maskerer fødselsnummer, telefon og e-post i svaret.",
+      "version": "0.1.0",
+      "category": "forvaltning"
+    },
+    {
+      "name": "ki",
+      "source": "./plugins/ki",
+      "description": "KI-oppsettet i Neo per sakstype: modellen, verktøyene agenten har, og feltene KI-en foreslår eller henter ut. Leser siste snapshot og foreslår endringer som går gjennom /forvaltning:plan.",
+      "version": "0.1.0",
+      "category": "forvaltning"
+    },
+    {
+      "name": "maskinporten",
+      "source": "./plugins/maskinporten",
+      "description": "Maskinporten slik den selv svarer: well-known for miljøet, og et token for kundens egen klient med scopet og utløpet som faktisk ble innvilget. Bare lesing; tokenet skrives aldri ut.",
+      "version": "0.1.0",
+      "category": "system"
+    },
+    {
+      "name": "fiks",
+      "source": "./plugins/fiks",
+      "description": "Rå lese-kall mot KS Fiks: SvarUt (forsendelsestyper, mottakersystem, status og hendelser), SvarInn (nye forsendelser) og Folkeregisteret via Fiks. For feilsøk: hva sier Fiks selv, satt opp mot det Neo gjorde. Bare lesing; hemmelighetene sladdes og fødselsnummer maskeres.",
+      "version": "0.1.0",
+      "category": "system"
+    },
+    {
+      "name": "documaster",
+      "source": "./plugins/documaster",
+      "description": "Rå lese-kall mot kundens Documaster-arkiv (Noark 5), til feilsøk: ble journalposten arkivert, i hvilken mappe, med hvilke dokumenter. Ett skript uten avhengigheter (scripts/documaster.mjs) henter et token med kundens egen klient og spør med Noark 5-spørringen: arkivdeler, mappe på id eller saksnummer, registrering og journalpost på id eller registreringsIdent, registreringene i en mappe, dokumentversjonene til en registrering, og et fritt søk. Bare lesing: ingen kall som oppretter, endrer eller sletter. Instansen og klienten hos Documaster er kundens, og hemmeligheten står bare som referanse i .claude/neo.config.json.",
+      "version": "0.1.0",
+      "category": "system"
+    },
+    {
       "name": "altinn",
       "source": "./plugins/altinn",
-      "description": "Bygg og publiser Altinn Studio-apper (skjemaer): Digdirs sju skills låst til en sha (MIT), og vår egen altinn-publisering med to kontrollskript, fra tom app til publisert i tt02.",
+      "description": "Bygg og publiser Altinn Studio-apper (skjemaer) fra Claude Code, og les hva Altinn 3 selv sier ved feilsøk. Tre deler. (1) Digdirs egne skills, vanilje: de sju skillene bak KI-assistenten i Altinn Studio, kopiert byte-identisk fra Altinn/altinn-studio (MIT) og låst til en sha i UPSTREAM.json — altinn-planning, altinn-datamodel, altinn-policy, altinn-resources, altinn-prefill, altinn-expressions og altinn-docs. De forklarer hvordan filene skal se ut. (2) Vår egen skill altinn-publisering: hele løpet fra tom app til publisert i tt02, med hva bare et menneske kan gjøre (Studio-bruker, tokens, testbruker-innlogging), mal fra en app som kjører, tilgangsregler og forhåndsutfylling for et fagsystem (nøstede prefill-stier droppes UTEN feil ved skrivefeil), metadata, «Lag kopi» til tjenesteeier-org-en, bygg og publiser (versjonsfeltet godtar ikke punktum), og kontroll mot miljøet i stedet for mot Studio, som henger etter. Den har to avhengighetsfrie kontrollskript som erstatter verktøyene Digdirs skills forutsetter: check-app.mjs kryss-sjekker at filene henger sammen (tre modellfiler, sider, bindinger, uttrykk, tekstnøkler, vedleggsdatatyper, hemmeligheter), og check-deployed.mjs sier om klonen er det som kjører i tt02. Begge er verifisert mot fem apper i tt02. Publiseringen trenger ingen env-variabler eller tokens: hver utvikler bruker sin egen Studio-bruker. (3) Vår egen skill altinn-kall: rå lese-kall mot Altinn 3 til feilsøk mot det Neo gjorde, med scripts/altinn.mjs uten avhengigheter. Maskinporten-tokenet til kundens klient veksles til et Altinn-token, og skriptet leser instanser, én instans, prosessen, data-elementene (metadata; innhold bare når det bes om), hendelsene og appens metadata, i tt02 eller produksjon. Bare lesing, fødselsnumre skjult, nøkkelen bare som referanse i .claude/neo.config.json. scripts/sync-skills.mjs henter ny versjon av Digdirs skills (--ref main) og melder drift (--check), uten å røre våre egne.",
       "version": "0.4.0",
-      "category": "altinn"
+      "category": "system"
+    },
+    {
+      "name": "krr",
+      "source": "./plugins/krr",
+      "description": "Oppslag i Kontakt- og reservasjonsregisteret (KRR) for én eller flere personer, slik registeret selv svarer, med Maskinporten-klienten fra maskinporten-delen av config-fila. Bare lesing; personnummeret maskeres.",
+      "version": "0.1.0",
+      "category": "system"
+    },
+    {
+      "name": "enhetsregisteret",
+      "source": "./plugins/enhetsregisteret",
+      "description": "Oppslag av enheter og underenheter i Enhetsregisteret, slik Brønnøysundregistrene selv svarer, gjennom det åpne API-et. Bare lesing, uten innlogging.",
+      "version": "0.1.0",
+      "category": "system"
     }
   ]
 }

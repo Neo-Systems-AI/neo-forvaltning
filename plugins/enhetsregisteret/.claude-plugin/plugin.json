@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "enhetsregisteret",
+  "version": "0.1.0",
+  "description": "Oppslag av enheter og underenheter i Enhetsregisteret, slik Brønnøysundregistrene selv svarer, gjennom det åpne API-et. Bare lesing, uten innlogging.",
+  "author": {
+    "name": "Neo Systems AS",
+    "url": "https://github.com/Neo-Systems-AI"
+  },
+  "repository": "https://github.com/Neo-Systems-AI/neo-forvaltning",
+  "license": "MIT",
+  "keywords": ["neo", "enhetsregisteret", "brreg", "organisasjonsnummer", "feilsøk"]
+}

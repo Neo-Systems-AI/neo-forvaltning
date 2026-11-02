@@ -27,7 +27,7 @@ const UPSTREAM_DIR = "src/AI/agents/agents/skills";
 const PLUGIN_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SKILLS_DIR = join(PLUGIN_ROOT, "skills");
 const UPSTREAM_FILE = join(PLUGIN_ROOT, "UPSTREAM.json");
-const OWN_SKILLS = ["altinn-publisering"];
+const OWN_SKILLS = ["altinn-publisering", "altinn-kall", "env"];
 
 const args = process.argv.slice(2);
 const check = args.includes("--check");

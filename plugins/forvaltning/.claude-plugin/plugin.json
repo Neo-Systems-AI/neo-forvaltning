@@ -2,9 +2,18 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "forvaltning",
   "version": "0.1.0",
-  "description": "Forvaltning av kommunens (eller virksomhetens) oppsett i Neo fra Claude Code, gjennom Neo sin MCP-server: snapshot av det som kjører, plan mot det ønskede oppsettet i repoet, og gjennomføring i sandkassen. Brukes i et repo laget fra neo-forvaltning-mal.",
-  "author": { "name": "Neo Systems AS", "url": "https://github.com/Neo-Systems-AI" },
+  "description": "Forvaltning av oppsettet i Neo gjennom MCP: oppstarten som skriver config-fila og skrur på pluginene, snapshot av det som kjører, plan mot repoet, gjennomføring i sandkassen, og hemmelighetene fra kundens hvelv (bare navn, aldri verdier). Brukes i et repo laget fra neo-forvaltning-mal.",
+  "author": {
+    "name": "Neo Systems AS",
+    "url": "https://github.com/Neo-Systems-AI"
+  },
   "repository": "https://github.com/Neo-Systems-AI/neo-forvaltning",
   "license": "MIT",
-  "keywords": ["neo", "forvaltning", "mcp", "saksbehandling", "konfigurasjon"]
+  "keywords": [
+    "neo",
+    "forvaltning",
+    "mcp",
+    "saksbehandling",
+    "konfigurasjon"
+  ]
 }

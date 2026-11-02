@@ -1,0 +1,26 @@
+{
+  "plugin": "forvaltning",
+  "neo": true,
+  "keys": [
+    {
+      "path": "oppsettDir",
+      "fallback": "oppsett",
+      "doc": "Det ønskede oppsettet"
+    },
+    {
+      "path": "snapshotDir",
+      "fallback": "snapshots",
+      "doc": "Snapshotene per miljø"
+    },
+    {
+      "path": "stateDir",
+      "fallback": "state",
+      "doc": "Låsefilene per miljø"
+    },
+    {
+      "path": "reportsDir",
+      "fallback": "reports",
+      "doc": "Planer og rapporter"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "altinn",
   "version": "0.4.0",
-  "description": "Bygg og publiser Altinn Studio-apper (skjemaer) fra Claude Code. To deler. (1) Digdirs egne skills, vanilje: de sju skillene bak KI-assistenten i Altinn Studio, kopiert byte-identisk fra Altinn/altinn-studio (MIT) og låst til en sha i UPSTREAM.json — altinn-planning, altinn-datamodel, altinn-policy, altinn-resources, altinn-prefill, altinn-expressions og altinn-docs. De forklarer hvordan filene skal se ut. (2) Vår egen skill altinn-publisering: hele løpet fra tom app til publisert i tt02, med hva bare et menneske kan gjøre (Studio-bruker, tokens, testbruker-innlogging), mal fra en app som kjører, tilgangsregler og forhåndsutfylling for et fagsystem (nøstede prefill-stier droppes UTEN feil ved skrivefeil), metadata, «Lag kopi» til tjenesteeier-org-en, bygg og publiser (versjonsfeltet godtar ikke punktum), og kontroll mot miljøet i stedet for mot Studio, som henger etter. Den har to avhengighetsfrie kontrollskript som erstatter verktøyene Digdirs skills forutsetter: check-app.mjs kryss-sjekker at filene henger sammen (tre modellfiler, sider, bindinger, uttrykk, tekstnøkler, vedleggsdatatyper, hemmeligheter), og check-deployed.mjs sier om klonen er det som kjører i tt02. Begge er verifisert mot fem apper i tt02. Trenger ingen env-variabler eller tokens: hver utvikler bruker sin egen Studio-bruker. scripts/sync-skills.mjs henter ny versjon av Digdirs skills (--ref main) og melder drift (--check), uten å røre våre egne.",
+  "description": "Bygg og publiser Altinn Studio-apper (skjemaer) fra Claude Code, og les hva Altinn 3 selv sier ved feilsøk. Tre deler. (1) Digdirs egne skills, vanilje: de sju skillene bak KI-assistenten i Altinn Studio, kopiert byte-identisk fra Altinn/altinn-studio (MIT) og låst til en sha i UPSTREAM.json — altinn-planning, altinn-datamodel, altinn-policy, altinn-resources, altinn-prefill, altinn-expressions og altinn-docs. De forklarer hvordan filene skal se ut. (2) Vår egen skill altinn-publisering: hele løpet fra tom app til publisert i tt02, med hva bare et menneske kan gjøre (Studio-bruker, tokens, testbruker-innlogging), mal fra en app som kjører, tilgangsregler og forhåndsutfylling for et fagsystem (nøstede prefill-stier droppes UTEN feil ved skrivefeil), metadata, «Lag kopi» til tjenesteeier-org-en, bygg og publiser (versjonsfeltet godtar ikke punktum), og kontroll mot miljøet i stedet for mot Studio, som henger etter. Den har to avhengighetsfrie kontrollskript som erstatter verktøyene Digdirs skills forutsetter: check-app.mjs kryss-sjekker at filene henger sammen (tre modellfiler, sider, bindinger, uttrykk, tekstnøkler, vedleggsdatatyper, hemmeligheter), og check-deployed.mjs sier om klonen er det som kjører i tt02. Begge er verifisert mot fem apper i tt02. Publiseringen trenger ingen env-variabler eller tokens: hver utvikler bruker sin egen Studio-bruker. (3) Vår egen skill altinn-kall: rå lese-kall mot Altinn 3 til feilsøk mot det Neo gjorde, med scripts/altinn.mjs uten avhengigheter. Maskinporten-tokenet til kundens klient veksles til et Altinn-token, og skriptet leser instanser, én instans, prosessen, data-elementene (metadata; innhold bare når det bes om), hendelsene og appens metadata, i tt02 eller produksjon. Bare lesing, fødselsnumre skjult, nøkkelen bare som referanse i .claude/neo.config.json. scripts/sync-skills.mjs henter ny versjon av Digdirs skills (--ref main) og melder drift (--check), uten å røre våre egne.",
   "author": {
     "name": "Neo Systems AS",
     "url": "https://github.com/Neo-Systems-AI"
@@ -15,7 +15,9 @@
     "skjema",
     "forms",
     "skills",
-    "tt02"
+    "tt02",
+    "maskinporten",
+    "feilsøk"
   ],
   "repository": "https://github.com/Neo-Systems-AI/neo-forvaltning"
 }

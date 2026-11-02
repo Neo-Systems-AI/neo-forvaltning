@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ki",
+  "version": "0.1.0",
+  "description": "KI-oppsettet i Neo per sakstype: modellen, verktøyene agenten har, og feltene KI-en foreslår eller henter ut. Leser siste snapshot og foreslår endringer som går gjennom /forvaltning:plan.",
+  "author": {
+    "name": "Neo Systems AS",
+    "url": "https://github.com/Neo-Systems-AI"
+  },
+  "repository": "https://github.com/Neo-Systems-AI/neo-forvaltning",
+  "license": "MIT",
+  "keywords": [
+    "neo",
+    "ki",
+    "ai",
+    "modell",
+    "agent"
+  ]
+}

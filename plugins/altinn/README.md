@@ -1,15 +1,18 @@
 # altinn
 
-Bygg og publiser Altinn Studio-apper — skjemaene innbyggere og virksomheter sender inn i Altinn — fra Claude Code. Pluginen har to deler:
+Bygg og publiser Altinn Studio-apper — skjemaene innbyggere og virksomheter sender inn i Altinn — fra Claude Code, og les hva Altinn 3 selv sier når noe skal feilsøkes. Pluginen har tre deler:
 
 - **Digdirs egne skills (vanilje).** De sju skillene bak KI-assistenten i Altinn Studio, kopiert byte-identisk fra [`Altinn/altinn-studio`](https://github.com/Altinn/altinn-studio/tree/main/src/AI/agents/agents/skills) (MIT, lisensen deres står i [`LICENSE-DIGDIR`](./LICENSE-DIGDIR)). De forklarer hvordan filene i en app skal se ut. Digdir skriver selv at de kan brukes fra Claude Code.
 - **Vår egen skill, `altinn-publisering`.** Den dekker hele løpet ut til publisert i tt02, med de to kontrollskriptene Claude Code mangler. Den er skrevet etter publiseringen av `ddlabs/uttalelse` (2026-09-29) og verifisert mot fem apper som kjører i tt02.
+- **Vår egen skill, `altinn-kall`.** Rå lese-kall mot Altinn 3 med kundens Maskinporten-klient, til feilsøk: instansen, prosessen, data-elementene, hendelsene og appens metadata, satt opp mot det Neo gjorde (`/helse:feilsok`). Se [Lese-kallene](#lese-kallene).
 
 ## Skillene
 
 | Skill | Kilde | Last før du … |
 |---|---|---|
 | `altinn-publisering` | **egen** | lager, endrer eller publiserer en app. **Last denne først.** Den gir rekkefølgen, hva bare et menneske kan gjøre, og hvordan hvert steg kontrolleres |
+| `altinn-kall` | **egen** | feilsøker hva Altinn har for en instans eller en app: status, prosess, data-elementer, hendelser |
+| `env` | **egen** | lurer på hva som er satt i `.claude/neo.config.json` |
 | `altinn-planning` | Digdir | gjør en endring som rører flere filer. Hvilke filer per endringstype, rekkefølge, og at en ny side trenger **både** en plass i `pages.order` og en `NavigationButtons` |
 | `altinn-datamodel` | Digdir | rører `App/models/`. `model.schema.json`, `model.xsd` og `model.cs` er ett synkront sett |
 | `altinn-policy` | Digdir | rører `App/config/authorization/policy.xml` |
@@ -41,7 +44,7 @@ Digdirs skills er skrevet for deres agent-løkke inne i Studio:
 
 ## Tilgang til Altinn Studio
 
-Pluginen kobler seg **ikke** til Altinn Studio, og trenger ingen env-variabler, brukernavn eller tokens. Den bærer bare kunnskap og lese-skript. Koblingen er vanlig git mot app-repoet, med utviklerens egen innlogging.
+Pluginen kobler seg **ikke** til Altinn Studio, og publiseringen trenger ingen env-variabler, brukernavn eller tokens. Den bærer bare kunnskap og lese-skript. (Lese-kallene mot Altinn 3 bruker kundens Maskinporten-klient; se [Lese-kallene](#lese-kallene).) Koblingen er vanlig git mot app-repoet, med utviklerens egen innlogging.
 
 **Hver utvikler har sin egen bruker.** Det er ikke noe som skal deles:
 
@@ -65,7 +68,7 @@ Oppsett for en ny utvikler:
 
 **Uten bruker kan man fortsatt lese.** Offentlige app-repoer kan klones uten innlogging, og `check-deployed.mjs` trenger ingen innlogging. Bare push og publisering krever bruker.
 
-**Maskinporten er noe annet.** Identiteten et fagsystem bruker mot Altinn når det kjører (opprette instanser, lese innsendinger, sende meldinger), hører til fagsystemet og konfigureres der. Den har ingenting med pluginen eller utviklernes Studio-brukere å gjøre.
+**Maskinporten er noe annet.** Identiteten et fagsystem bruker mot Altinn når det kjører (opprette instanser, lese innsendinger, sende meldinger), hører til fagsystemet og konfigureres der. Den har ingenting med publiseringen eller utviklernes Studio-brukere å gjøre. Lese-kallene under bruker en Maskinporten-klient kunden eier.
 
 ## Arbeidsflyt og publisering
 
@@ -80,6 +83,62 @@ Står i [`skills/altinn-publisering/SKILL.md`](./skills/altinn-publisering/SKILL
 7. Bygg og publiser.
 8. `check-deployed.mjs`.
 9. Et menneske tester innsending med en syntetisk testbruker.
+
+## Lese-kallene
+
+`scripts/altinn.mjs`, uten avhengigheter (Node 22), brukt av skillen [`altinn-kall`](./skills/altinn-kall/SKILL.md). Bare lesing: ingen kall som oppretter, sender, flytter prosessen, kvitterer eller sletter.
+
+**Tokenet.** Et Maskinporten-token for kundens klient (JWT-grant) veksles til et Altinn-token med `GET /authentication/api/v1/exchange/maskinporten` på plattform-verten. Altinn-tokenet brukes mot Storage, app-API-et og Events.
+
+| Kommando | Endepunkt | Bevist |
+|---|---|---|
+| `token` | Maskinporten, så vekslingen | i labben (tt02) |
+| `instanser [--app \| --org] [--part] [--ko] [--antall]` | `GET <plattform>/storage/api/v1/instances?appId=…` | i labben (tt02) |
+| `instans <part>/<guid>` | `GET <plattform>/storage/api/v1/instances/{part}/{guid}` | i labben (tt02) |
+| `data <part>/<guid>` | instansdokumentets `data`, bare metadata | i labben (tt02) |
+| `data <part>/<guid> <dataGuid> --innhold` | `GET <plattform>/storage/api/v1/instances/{part}/{guid}/data/{dataGuid}` | i labben (tt02) |
+| `prosess <part>/<guid> [--historikk]` | `GET https://<org>.apps.<miljø>/<org>/<app>/instances/{part}/{guid}/process[/history]` | i labben (tt02) |
+| `hendelser [--alle]` | `GET <plattform>/events/api/v1/events?resource=urn:altinn:resource:app_<org>_<app>&after=…` | i labben (tt02) |
+| `hendelser --tjenesteeier` | `GET <plattform>/events/api/v1/app/{org}/{app}` | i labben (tt02) |
+| `appmeta` | `GET https://<org>.apps.<miljø>/<org>/<app>/api/v1/applicationmetadata` | i labben (tt02) |
+
+Plattform-verten er `platform.tt02.altinn.no` i tt02 og `platform.altinn.no` i produksjon. Produksjon er ikke prøvd.
+
+Hver kjøring skriver miljøet, `GET <adresse> → <status> (<ms>)` og svaret, med tokenene og hemmelighetene sladdet. **Fødselsnumre er skjult** (`personNumber`, `/person/…`) med mindre `--vis-person` er sagt, og innholdet i et data-element hentes bare med `--innhold`. Exit 0 ved 2xx, 1 ved feil eller ikke-2xx, 2 ved feil bruk.
+
+**Det kunden må ha selv.** Kunden eier klienten og nøkkelen; vi eier koden.
+
+- **En Maskinporten-klient per miljø** (test-Maskinporten for tt02, Maskinporten for produksjon), registrert på kundens organisasjonsnummer, med tjenesteeier-scopes for Altinn. For lesing: `altinn:serviceowner/instances.read`, og for hendelsene `altinn:serviceowner/events` og `altinn:events.subscribe`. Maskinporten avviser hele kallet om klienten mangler ett scope, så `scopes` settes til dem klienten har.
+- **Kunden er tjenesteeier i Altinn** (akronymet i `org`), ellers får tokenet ikke `urn:altinn:org`, og Storage svarer 400.
+- **Nøkkelen i kundens nøkkelhvelv.** Config-fila sier bare hvor den ligger; et menneske henter den til `.keys/` med `/forvaltning:hemmeligheter`.
+
+I `.claude/neo.config.json`:
+
+```json
+{
+  "version": 1,
+  "altinn": {
+    "org": "ttd",
+    "apps": ["ttd/<app>"],
+    "environments": ["tt02", "produksjon"],
+    "byEnv": {
+      "tt02": {
+        "maskinporten": {
+          "clientId": "<klient-id>",
+          "nokkel": { "$env": "ALTINN_TT02_MASKINPORTEN_NOKKEL", "kilde": "azure-keyvault:<hvelv>/<navn>", "fil": true },
+          "scopes": ["altinn:serviceowner/instances.read", "altinn:serviceowner/events", "altinn:events.subscribe"]
+        }
+      }
+    }
+  }
+}
+```
+
+`kid` er valgfri (uten den brukes thumbprinten til nøkkelen), og `subscriptionKey` settes bare om kunden har fått en. Miljøene og Maskinporten-nøklene trengs bare til lese-kallene, ikke til publiseringen. Sjekk oppsettet med `/altinn:env`.
+
+```bash
+node --test plugins/altinn/scripts/*.test.mjs
+```
 
 ## Oppdatere Digdirs skills
 

@@ -1,0 +1,53 @@
+{
+  "plugin": "fiks",
+  "neo": false,
+  "environments": true,
+  "maskinporten": true,
+  "keys": [
+    {
+      "path": "maskinporten.klientId",
+      "perEnv": true,
+      "doc": "Klient-ID-en til Maskinporten-klienten med scopet ks:fiks (SvarUt og Folkeregisteret). Ikke hemmelig"
+    },
+    {
+      "path": "maskinporten.kid",
+      "perEnv": true,
+      "doc": "Nøkkel-id-en (kid) selvbetjeningen ga nøkkelen. Valgfri: uten den brukes fingeravtrykket"
+    },
+    {
+      "path": "maskinporten.nokkel",
+      "perEnv": true,
+      "doc": "HEMMELIG. Den private nøkkelen til klienten, som referanse med \"fil\": true, for eksempel { \"$env\": \"FIKS_MASKINPORTEN_NOKKEL\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\", \"fil\": true }"
+    },
+    {
+      "path": "integrasjon.id",
+      "perEnv": true,
+      "doc": "Id-en til integrasjonen i Fiks forvaltning (headeren IntegrasjonId), for SvarUt og Folkeregisteret. Ikke hemmelig"
+    },
+    {
+      "path": "integrasjon.passord",
+      "perEnv": true,
+      "doc": "HEMMELIG. Integrasjonens servicepassord (headeren IntegrasjonPassord), som referanse: { \"$env\": \"FIKS_INTEGRASJON_PASSORD\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\" }"
+    },
+    {
+      "path": "svarut.kontoId",
+      "perEnv": true,
+      "doc": "Id-en til SvarUt-kontoen (avsenderkontoen) i Fiks forvaltning. Trengs bare for svarut status. Ikke hemmelig"
+    },
+    {
+      "path": "svarinn.mottakersystemId",
+      "perEnv": true,
+      "doc": "Id-en til SvarInn-mottakersystemet (brukernavnet i Basic auth). Ikke hemmelig"
+    },
+    {
+      "path": "svarinn.passord",
+      "perEnv": true,
+      "doc": "HEMMELIG. Service-passordet til mottakersystemet, som referanse: { \"$env\": \"FIKS_SVARINN_PASSORD\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\" }"
+    },
+    {
+      "path": "folkeregister.rolleId",
+      "perEnv": true,
+      "doc": "Id-en til rollen i Fiks forvaltning (Fiks register) som gir hjemmel og bestemmer hvilke opplysninger oppslaget får. Integrasjonen må kunne bruke rollen. Ikke hemmelig"
+    }
+  ]
+}

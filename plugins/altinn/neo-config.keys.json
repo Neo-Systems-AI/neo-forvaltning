@@ -1,0 +1,52 @@
+{
+  "plugin": "altinn",
+  "neo": false,
+  "environments": true,
+  "maskinporten": true,
+  "keys": [
+    {
+      "path": "org",
+      "doc": "Tjenesteeieren i Altinn Studio (akronymet), når kunden har en"
+    },
+    {
+      "path": "apps",
+      "fallback": [],
+      "doc": "Appene kunden har i Altinn, som <org>/<app>. Med én app trenger altinn-kall ikke --app"
+    },
+    {
+      "path": "miljo",
+      "fallback": "tt02",
+      "doc": "Miljøet appene publiseres til før produksjon, og miljøet altinn-kall bruker når --miljo ikke er sagt"
+    },
+    {
+      "path": "maskinporten.clientId",
+      "perEnv": true,
+      "doc": "Klient-ID-en til kundens Maskinporten-klient med tjenesteeier-scopes (trengs bare til altinn-kall, ikke til publiseringen)"
+    },
+    {
+      "path": "maskinporten.kid",
+      "perEnv": true,
+      "doc": "kid til nøkkelen. Uten den brukes thumbprinten, slik selvbetjeningen gjør"
+    },
+    {
+      "path": "maskinporten.nokkel",
+      "perEnv": true,
+      "doc": "Den private nøkkelen (PEM), bare som referanse: { \"$env\": \"ALTINN_TT02_MASKINPORTEN_NOKKEL\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\", \"fil\": true } (trengs bare til altinn-kall)"
+    },
+    {
+      "path": "maskinporten.scopes",
+      "perEnv": true,
+      "fallback": [
+        "altinn:serviceowner/instances.read",
+        "altinn:serviceowner/events",
+        "altinn:events.subscribe"
+      ],
+      "doc": "Scopene tokenet bes om. Maskinporten avviser hele kallet om klienten mangler ett, så sett bare dem klienten har"
+    },
+    {
+      "path": "subscriptionKey",
+      "perEnv": true,
+      "doc": "Ocp-Apim-Subscription-Key, bare om kunden har fått en. Som referanse: { \"$env\": …, \"kilde\": … }"
+    }
+  ]
+}

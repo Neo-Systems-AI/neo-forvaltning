@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "helse",
+  "version": "0.1.0",
+  "description": "Helsa til oppsettet i Neo: flytene og kjøringene i et tidsvindu, hva som har feilet og hvorfor, og feilsøk av én kjøring. Bare lesing, gjennom Neo sin MCP-server. Sier UKJENT når den ikke kan se, aldri OK.",
+  "author": {
+    "name": "Neo Systems AS",
+    "url": "https://github.com/Neo-Systems-AI"
+  },
+  "repository": "https://github.com/Neo-Systems-AI/neo-forvaltning",
+  "license": "MIT",
+  "keywords": [
+    "neo",
+    "helse",
+    "overvåking",
+    "feilsøk",
+    "mcp"
+  ]
+}

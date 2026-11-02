@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "maskinporten",
+  "version": "0.1.0",
+  "description": "Maskinporten slik den selv svarer: well-known for miljøet, og et token for kundens egen klient med scopet og utløpet som faktisk ble innvilget. Bare lesing; tokenet skrives aldri ut.",
+  "author": {
+    "name": "Neo Systems AS",
+    "url": "https://github.com/Neo-Systems-AI"
+  },
+  "repository": "https://github.com/Neo-Systems-AI/neo-forvaltning",
+  "license": "MIT",
+  "keywords": ["neo", "maskinporten", "digdir", "token", "feilsøk"]
+}
