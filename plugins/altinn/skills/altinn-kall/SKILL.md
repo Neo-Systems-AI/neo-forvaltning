@@ -39,9 +39,36 @@ Instans-id-en er `<part>/<guid>`, slik Altinn og Neo skriver den.
 4. **Hendelsene.** `hendelser --alle`, gjerne med `--part <n>`. `after=0` gir bare første side, og de nyeste kan
    mangle; uten `--alle` sier skriptet det. Kom hendelsen, men Neo reagerte ikke, ligger feilen i abonnementet eller
    i Neo. Kom den ikke, ligger den i Altinn eller appen.
-5. **Appen.** `appmeta` når datatypene eller prosessen er det Neo ikke forstod.
+5. **Appen.** `appmeta` når datatypene eller prosessen er det Neo ikke forstod. Mangler PDF-en (`ref-data-as-pdf`),
+   se `enablePdfCreation` på skjemadatatypen: uten `true` lager appen ingen PDF, selv om datatypen står i lista.
 
 Avgjør så hvor feilen er, slik `/helse:feilsok` sier: oppsettet, data eller produktet.
+
+## Hvem som får tilgang
+
+- **App-policyen avgjør**, ikke org-en i app-id-en. Org-segmentet (`<org>/<app>`) trenger ikke være lik
+  `urn:altinn:org` i tokenet, og en app kan gi tilgang til flere tjenesteeiere. Et avslag leses derfor i
+  `policy.xml`, ikke i app-id-en (avklart med Digdir 2026-10-12).
+- **En leverandør med delegering** fra tjenesteeieren står som `supplier` i Maskinporten-tokenet, og tjenesteeieren
+  som `consumer`. Med et tjenesteeier-scope setter Altinn da `urn:altinn:org` til tjenesteeierens kode. `token`
+  viser begge.
+- **Hendelsesabonnementer** listes per tjenesteeier-kode (`consumer`), ikke etter app-policyen.
+- **Ressursregisteret:** en ressurs bærer `hasCompetentAuthority.organization` fra da den ble publisert. Bytter
+  tjenesteeieren organisasjonsnummer, må ressursen publiseres på nytt, og statusen kan bli «Withdrawn». Sjekk den.
+
+## Melding i skjemaets tråd
+
+Sender fagsystemet en melding (Correspondence) som svar på et skjema, kan den legges i skjemaets tråd i Arbeidsflate
+i stedet for som et eget innslag (målt i tt02 2026-09-30):
+
+- `externalReferences` med `DialogportenDialogId` = instansens `dataValues["dialog.id"]` (se `instans`). Meldingen
+  blir en forsendelse i den dialogen som finnes. Correspondence kaller Dialogporten selv, så
+  `digdir:dialogporten.serviceprovider` trengs **ikke**.
+- Kravene: én mottaker, og den må være dialogens eier; ingen `replyOptions` og ingen `isConfirmationNeeded`; samme
+  tjenesteeier på dialogens ressurs og meldingstjenesten. Lenker (for eksempel til en klage) går i brødteksten som
+  markdown.
+- `DialogportenTransmissionType` gir merkelappen (`Decision` = «Avgjørelse»).
+- Kom meldingen som et eget innslag, mangler referansen eller har feil dialog-id. Avvises den, sjekk kravene over.
 
 ## Regler
 

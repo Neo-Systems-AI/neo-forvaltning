@@ -55,6 +55,7 @@ Det skillene forutsetter at et verktøy gjør, gjør du selv:
 - **Tomme forhåndsutfylte felt skjules** med `hidden` (`["or", ["equals", ["dataModel", "x"], null], ["equals", ["dataModel", "x"], ""]]`), så skjemaet virker også uten forhåndsutfylling, både i forhåndsvisningen og ved manuell start.
 - **`disallowUserInstantiation: true`** sørger for at bare fagsystemet kan starte appen. Da virker trolig ikke forhåndsvisningen i Studio. Det er et valg mennesket tar, og det må nevnes.
 - **Vedlegg:** komponent-id-en til `FileUpload` *er* datatype-id-en. Fagsystemet leser vedlegg og PDF (`ref-data-as-pdf`) som egne dataelementer.
+- **PDF-en lages bare med `enablePdfCreation: true`** på skjemadatatypen (`model` eller det den heter). At `ref-data-as-pdf` står i `dataTypes`, betyr ikke at appen lager PDF. Sett feltet når fagsystemet skal hente PDF-en, og kontroller det med `appmeta` i `altinn-kall` og en faktisk instans. Målt 2026-10-19: Digdirs generiske testapp `ettersend-info` har `false` på alle datatyper, og ingen av instansene har PDF. Trenger du annen oppførsel i en app du ikke eier, lag en egen kopi (punkt 7).
 
 ## 4. Kryss-sjekk før commit
 
