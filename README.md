@@ -24,7 +24,13 @@ sitt i [Neo](https://neosystems.ai), og for den som lager Altinn-skjemaer.
 | [`krr`](./plugins/krr) | Kontakt- og reservasjonsregisteret |
 | [`enhetsregisteret`](./plugins/enhetsregisteret) | Enheter og underenheter |
 
-Alle leser én config-fil i repoet, `.claude/neo.config.json`: miljøene i Neo, og én del per plugin med systemets egne
+**Oppsett i kundens egne systemer**, steg for steg, med kommandoene et menneske kjører selv:
+
+| Plugin | Hva |
+|---|---|
+| [`entra`](./plugins/entra) | Microsoft-tenanten: SSO og SCIM med Entra ID, og en felles postboks fra Exchange Online |
+
+De som kaller Neo eller et eksternt system, leser én config-fil i repoet, `.claude/neo.config.json`: miljøene i Neo, og én del per plugin med systemets egne
 miljøer (test og produksjon). Hemmelighetene står der bare som referanse til kundens hvelv.
 
 ## Kom i gang

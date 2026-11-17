@@ -71,6 +71,13 @@
       "category": "system"
     },
     {
+      "name": "entra",
+      "source": "./plugins/entra",
+      "description": "Oppsettet i kundens egen Microsoft-tenant for Neo: innlogging med Entra ID (SSO), automatisk brukerprovisjonering (SCIM) med grupper koblet til jobbroller og tilgangsgrupper, og en felles postboks i Exchange Online inn i innboksen. To skills med az- og PowerShell-kommandoene i rekkefølgen Neo krever, kontrollen etter hvert steg og feilene som pleier å komme. Kommandoene kjøres av et menneske med sin egen innlogging; client secret og SCIM-token går aldri gjennom agenten.",
+      "version": "0.1.0",
+      "category": "system"
+    },
+    {
       "name": "krr",
       "source": "./plugins/krr",
       "description": "Oppslag i Kontakt- og reservasjonsregisteret (KRR) for én eller flere personer, slik registeret selv svarer, med Maskinporten-klienten fra maskinporten-delen av config-fila. Bare lesing; personnummeret maskeres.",
