@@ -8,10 +8,12 @@ description: Setter opp innlogging med Microsoft Entra ID (SSO) og automatisk br
 Løpet kobler organisasjonens Entra-tenant til Neo: medlemmene logger inn med Microsoft-kontoen sin, Entra oppretter
 og deaktiverer dem i Neo, og gruppene i Entra gir jobbroller og tilgangsgrupper.
 
-**Hva som er prøvd:** del 1–3 (fram til en bruker er logget inn med SSO) er kjørt mot en Entra-tenant 2026-11-17, og
-feilene under «Feil som pleier å komme» er de som kom da. Del 4–6 (Kun SSO, SCIM og gruppekoblingene) er skrevet etter
-stegene Neo selv viser på SSO-siden og er ikke kjørt ende til ende her. Stemmer ikke et steg med det siden viser, er
-det siden som gjelder.
+**Hva som er prøvd:** del 1–6 er kjørt mot en Entra-tenant 2026-11-17, med `az`-kommandoene slik de står: SSO med
+innlogging, «Kun SSO», SCIM og to grupper koblet til hver sin jobbrolle og tilgangsgruppe. Etter første syklus var tre
+testbrukere medlemmer med riktig rolle og tilgangsgruppe, en bruker som alt hadde logget inn med SSO ble koblet på og
+ikke opprettet på nytt, og tilgangsnivået i Neo sto urørt. Portal-stegene i del 5 og radene om flytting, deaktivering
+og gjenoppretting i del 7 er ikke kjørt. Feilene under «Feil som pleier å komme» er de som kom underveis, pluss de Neo
+selv melder.
 
 ## 0. Hvem gjør hva
 
@@ -187,22 +189,106 @@ Neo slår det ikke på før disse to holder, så ingen låser seg ute:
 - **Du er selv logget inn med organisasjonens Entra ID** i økten du slår det på fra.
 - **Minst én administrator har logget inn med Entra ID.**
 
-I praksis: gi en bruker i domenet administratorrollen i Neo, logg inn som den med SSO, og slå på «Kun SSO» fra
-SSO-innstillingene i den økten.
+I praksis: gi en bruker i domenet tilgangsnivået Administrator i medlemslista i Neo, logg inn som den med SSO, og slå
+på bryteren på kortet «Kun SSO» i den økten. Sjekklista på kortet viser hvilket krav som mangler.
 
 ## 5. SCIM
 
-1. **Neo:** velg «Slå på SCIM» på SSO-siden. Dialogen «Kopier tokenet nå» viser tokenet én gang.
-2. **Entra:** Enterprise applications → appen → Provisioning → «Automatic».
-3. **Entra:** lim inn «Tenant URL» fra siden i Neo og tokenet som «Secret Token», og velg «Test connection».
-4. **Entra:** Mappings → Users: map `userPrincipalName` til både `userName` og `emails[type eq "work"].value`. Neo
-   bruker UPN som e-post ved innlogging. Er de to ulike, blir brukeren opprettet to ganger.
-5. **Entra:** Mappings → Groups: la standardmappingen `objectId` → `externalId` stå. Det er nøkkelen koblingene i Neo
-   slår opp på.
-6. **Entra:** kontroller under Users and groups at gruppene fra del 2 står der, og slå på provisjoneringen.
+I Neo: velg «Slå på SCIM» på SSO-siden. Dialogen «Kopier tokenet nå» viser tokenet én gang, og kortet viser
+«Tenant URL». Resten gjøres i Entra, i portalen eller med `az`.
 
-Entra synker i sykluser, så en endring er ikke i Neo med en gang. «Provision on demand» på samme side synker én bruker med en gang
-og viser hvert steg.
+### I portalen
+
+1. Enterprise applications → appen → Provisioning → «Automatic».
+2. Lim inn «Tenant URL» fra siden i Neo og tokenet som «Secret Token», og velg «Test connection».
+3. Mappings → Users: map `userPrincipalName` til både `userName` og `emails[type eq "work"].value`. Neo bruker UPN
+   som e-post ved innlogging. Er de to ulike, blir brukeren opprettet to ganger.
+4. Mappings → Groups: la standardmappingen `objectId` → `externalId` stå. Det er nøkkelen koblingene i Neo slår opp
+   på.
+5. Kontroller under Users and groups at gruppene fra del 2 står der, og slå på provisjoneringen.
+
+### Med az
+
+Kommandoene bruker `jq`. Mennesket leser tokenet inn i en variabel uten å vise det:
+
+```bash
+read -s "SCIM_TOKEN?SCIM-token: "
+```
+
+```bash
+SCIM_URL="LIM-INN-Tenant-URL-fra-siden"
+```
+
+Lag provisjoneringsjobben fra malen `scim`. ID-en du får tilbake, begynner med `scim.`:
+
+```bash
+JOB_ID=$(az rest --method POST --url "https://graph.microsoft.com/v1.0/servicePrincipals/$SP_ID/synchronization/jobs" --body '{"templateId":"scim"}' --query id -o tsv); echo "$JOB_ID"
+```
+
+Test tilkoblingen og lagre den. Ingen av de to gir utdata når de går bra:
+
+```bash
+az rest --method POST --url "https://graph.microsoft.com/v1.0/servicePrincipals/$SP_ID/synchronization/jobs/$JOB_ID/validateCredentials" --body "{\"credentials\":[{\"key\":\"BaseAddress\",\"value\":\"$SCIM_URL\"},{\"key\":\"SecretToken\",\"value\":\"$SCIM_TOKEN\"}]}"
+```
+
+```bash
+az rest --method PUT --url "https://graph.microsoft.com/v1.0/servicePrincipals/$SP_ID/synchronization/secrets" --body "{\"value\":[{\"key\":\"BaseAddress\",\"value\":\"$SCIM_URL\"},{\"key\":\"SecretToken\",\"value\":\"$SCIM_TOKEN\"}]}"
+```
+
+Bytt kilden for e-posten fra `[mail]` til `[userPrincipalName]`. `userName` hentes alt fra UPN i malen.
+
+```bash
+az rest --method GET --url "https://graph.microsoft.com/v1.0/servicePrincipals/$SP_ID/synchronization/jobs/$JOB_ID/schema" > schema.json
+```
+
+```bash
+jq '(.synchronizationRules[].objectMappings[] | select(.sourceObjectName=="User") | .attributeMappings[] | select(.targetAttributeName=="emails[type eq \"work\"].value") | .source) = {"expression":"[userPrincipalName]","name":"userPrincipalName","type":"Attribute","parameters":[]}' schema.json > schema-ny.json
+```
+
+```bash
+az rest --method PUT --url "https://graph.microsoft.com/v1.0/servicePrincipals/$SP_ID/synchronization/jobs/$JOB_ID/schema" --body @schema-ny.json
+```
+
+Les tilbake det Entra har lagret. Begge linjene skal peke på `[userPrincipalName]`:
+
+```bash
+az rest --method GET --url "https://graph.microsoft.com/v1.0/servicePrincipals/$SP_ID/synchronization/jobs/$JOB_ID/schema" | jq -r '.synchronizationRules[].objectMappings[] | select(.sourceObjectName=="User") | .attributeMappings[] | select(.targetAttributeName=="userName" or (.targetAttributeName|startswith("emails"))) | "\(.targetAttributeName) <- \(.source.expression)"'
+```
+
+Prøv én bruker før jobben startes. Svaret er én tekststreng med JSON inni, så den pakkes ut med `jq`:
+
+```bash
+REGEL=$(jq -r '.synchronizationRules[0].id' schema.json); BRUKER=$(az ad user show --id "neotest2@$DOMENE" --query id -o tsv)
+```
+
+```bash
+az rest --method POST --url "https://graph.microsoft.com/v1.0/servicePrincipals/$SP_ID/synchronization/jobs/$JOB_ID/provisionOnDemand" --body "{\"parameters\":[{\"ruleId\":\"$REGEL\",\"subjects\":[{\"objectId\":\"$BRUKER\",\"objectTypeName\":\"User\"}]}]}" --query value -o tsv | jq -r '.[].provisioningSteps[] | "\(.type): \(.status) \(.description)"'
+```
+
+Stegene er import, treff i Neo, omfang og eksport. Står eksporten som `Skipped` med «already match», er brukeren alt
+lik i Entra og Neo.
+
+**Start jobben.** En prøve for én bruker sender ikke gruppene, og en ny jobb står stille til den er startet:
+
+```bash
+az rest --method POST --url "https://graph.microsoft.com/v1.0/servicePrincipals/$SP_ID/synchronization/jobs/$JOB_ID/start"
+```
+
+```bash
+az rest --method GET --url "https://graph.microsoft.com/v1.0/servicePrincipals/$SP_ID/synchronization/jobs/$JOB_ID" --query "status.{kode:code, sist:lastExecution.state, startet:lastExecution.timeBegan, feil:lastExecution.error.message, karantene:quarantine.reason}"
+```
+
+En jobb som aldri har kjørt, viser `Paused` og `Failed` med tidspunktet `0001-01-01`. Det er standardverdiene, ikke
+en feil. Etter start går `kode` til `Active`, og den første syklusen sender brukerne og gruppene i løpet av noen
+minutter.
+
+```bash
+rm schema.json schema-ny.json; unset SCIM_TOKEN
+```
+
+### Etter at SCIM er på
+
+Entra synker i sykluser, så en endring er ikke i Neo med en gang. «Provision on demand» synker én bruker straks.
 
 Med SCIM på gjelder dette:
 
@@ -252,7 +338,8 @@ En rolle eller tilgangsgruppe gitt for hånd i Neo står, også når gruppen som
 | «Du er ikke tildelt Neo i organisasjonens katalog» | SCIM er på, og brukeren er ikke provisjonert | Legg brukeren i en tildelt gruppe og vent på neste syklus |
 | «Fant ikke TXT-posten med riktig verdi» | DNS er ikke oppdatert ennå, eller posten har feil navn | Vent noen minutter. Navnet skal ha med underdomenet |
 | «Sett opp SSO og verifiser domenet før du slår på SCIM» | Domenet er ikke verifisert | Del 3 |
-| Koblingene under «Roller fra Entra» kan ikke endres | «Kun SSO» er av | Del 4 |
+| Kortet for roller viser «Krever Kun SSO», og koblingene kan ikke endres | «Kun SSO» er av for organisasjonen | Del 4: slå det på med bryteren på SSO-siden, og last siden på nytt |
+| Brukerne er i Neo, men ingen har fått roller fra gruppene | Jobben er ikke startet, så gruppene er ikke sendt | «Start jobben» i del 5 |
 | Brukeren finnes to ganger i Neo | SCIM-e-posten er en annen enn UPN-en | Mappingen i del 5, steg 4 |
 | Medlemmene i en gruppe får ikke rollen | Gruppen er nestet, eller ikke en sikkerhetsgruppe | Legg brukerne inn som direkte medlemmer av en sikkerhetsgruppe |
 
