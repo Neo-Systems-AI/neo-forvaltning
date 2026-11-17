@@ -9,8 +9,9 @@ E-post til en felles postboks kommer inn i innboksen i Neo og synkroniseres auto
 ser henvendelsene. En felles postboks har ingen innlogging, så Neo leser den med appens egen tilgang, og den tilgangen
 avgrenses i Exchange til nettopp de felles postboksene.
 
-**Hva som er prøvd:** stegene er skrevet etter oppsettet Neo selv viser på Microsoft-integrasjonens side, og er ikke
-kjørt ende til ende her. Stemmer ikke et steg med det siden viser, er det siden som gjelder.
+**Hva som er prøvd:** bare del 1 (appen i Entra) er kjørt, 2026-11-17. Del 2–4 er skrevet etter oppsettet Neo selv
+viser på Microsoft-integrasjonens side og er ikke kjørt: tenanten prøven ble gjort i, hadde ikke Exchange Online.
+Stemmer ikke et steg med det siden viser, er det siden som gjelder.
 
 ## 0. Hvem gjør hva
 
@@ -24,14 +25,30 @@ kjørt ende til ende her. Stemmer ikke et steg med det siden viser, er det siden
 
 ## Det du trenger
 
+- **Exchange Online i tenanten.** En tenant med bare Entra ID har ingen Exchange-organisasjon, og da kan verken
+  postboksen eller rollene opprettes. Sjekk det først (under).
 - **I Entra:** en konto som kan opprette apper, for eksempel Application Administrator.
 - **I Exchange Online:** en administrator som kan kjøre `New-ManagementRoleAssignment`, for eksempel Exchange
-  Administrator, og modulen `ExchangeOnlineManagement` i PowerShell.
+  Administrator eller Global Administrator. Det er en Microsoft-konto, ikke en bruker i Neo.
+- **PowerShell 7 med modulen `ExchangeOnlineManagement`.** Postboksen og rollene finnes bare som kommandoer i
+  Exchange Online PowerShell. `az` kan ikke brukes til del 2.
 - **I Neo:** administrator i organisasjonen.
 - **En felles postboks.** Neo kobler bare til postbokser av typen `shared`. En brukers egen postboks avvises, så den
   ikke blir synlig for hele organisasjonen.
 
 Verdier du skal fylle inn, står som `LIM-INN-…`. Skriv aldri `<…>` i en kommando i zsh.
+
+### Sjekk at tenanten har Exchange Online
+
+```bash
+az rest --method GET --url "https://graph.microsoft.com/v1.0/subscribedSkus" --query "value[].{sku:skuPartNumber, exchange:servicePlans[?contains(servicePlanName,'EXCHANGE')].servicePlanName | [0]}" -o table
+```
+
+Minst én rad skal ha en plan med `EXCHANGE` i navnet. Er lista tom, eller mangler planen, har tenanten ikke Exchange
+Online. Da stopper løpet her til organisasjonen har en lisens som gir det, tildelt minst én bruker.
+
+At organisasjonens e-post ligger hos en annen leverandør, hindrer ikke oppsettet, men da må den felles postboksen ha
+en adresse i tenantens `onmicrosoft.com`-domene, ikke i domenet som leveres et annet sted.
 
 ## 1. Appen i Entra
 
@@ -53,10 +70,20 @@ az ad app credential reset --id "$MAIL_APP" --display-name neo --years 1
 
 ## 2. Rollene i Exchange
 
+Alt i denne delen kjøres inne i PowerShell (`pwsh`), ikke i zsh eller bash. På macOS installeres det med
+`brew install powershell`. Variablene fra det andre skallet finnes ikke her, så ID-ene skrives rett inn.
+
+```powershell
+Install-Module ExchangeOnlineManagement -Scope CurrentUser
+Connect-ExchangeOnline -UserPrincipalName admin@kommune.example
+```
+
+Svarer tilkoblingen `UnAuthorized`, mangler kontoen rollen i Exchange, eller tenanten har ikke Exchange Online (sjekken
+over).
+
 Har dere ikke postboksen fra før, lag den:
 
 ```powershell
-Connect-ExchangeOnline
 New-Mailbox -Shared -Name "Postmottak" -PrimarySmtpAddress postmottak@kommune.example
 ```
 
@@ -118,6 +145,8 @@ avgrensningen i Exchange virker.
 
 | Kode | Årsak | Rettes med |
 |---|---|---|
+| `UnAuthorized` fra `Connect-ExchangeOnline` | Kontoen mangler rollen i Exchange, eller tenanten har ikke Exchange Online | Sjekken under «Det du trenger» |
+| `command not found: Connect-ExchangeOnline` | Kommandoen ble kjørt i zsh eller bash | Start `pwsh` først |
 | `MICROSOFT_TENANT_REQUIRED` | Integrasjonen står uten tenant-ID | Sett tenant-ID-en på integrasjonen (del 3) |
 | `MICROSOFT_APP_TOKEN_REJECTED` | Entra avviste appen: feil eller utløpt client secret, eller feil tenant | Lag ny client secret og lagre den i Neo |
 | `MAILBOX_NOT_FOUND` | Adressen finnes ikke i Microsoft 365 | Sjekk adressen |

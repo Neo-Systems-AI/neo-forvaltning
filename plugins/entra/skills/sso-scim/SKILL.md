@@ -11,8 +11,8 @@ og deaktiverer dem i Neo, og gruppene i Entra gir jobbroller og tilgangsgrupper.
 **Hva som er prøvd:** del 1–6 er kjørt mot en Entra-tenant 2026-11-17, med `az`-kommandoene slik de står: SSO med
 innlogging, «Kun SSO», SCIM og to grupper koblet til hver sin jobbrolle og tilgangsgruppe. Etter første syklus var tre
 testbrukere medlemmer med riktig rolle og tilgangsgruppe, en bruker som alt hadde logget inn med SSO ble koblet på og
-ikke opprettet på nytt, og tilgangsnivået i Neo sto urørt. Portal-stegene i del 5 og radene om flytting, deaktivering
-og gjenoppretting i del 7 er ikke kjørt. Feilene under «Feil som pleier å komme» er de som kom underveis, pluss de Neo
+ikke opprettet på nytt, og tilgangsnivået i Neo sto urørt. Flytting mellom grupper og deaktivering i del 7 er også
+kjørt, og kom inn i Neo i neste syklus. Portal-stegene i del 5 og gjenoppretting av en deaktivert bruker er ikke kjørt. Feilene under «Feil som pleier å komme» er de som kom underveis, pluss de Neo
 selv melder.
 
 ## 0. Hvem gjør hva
@@ -35,8 +35,9 @@ secret, skriver den ut i terminalen; den kjøres av mennesket.
   Cloud Application Administrator. Skal du lage testbrukere og grupper, trengs også User Administrator.
 - **I Neo:** administrator i organisasjonen, med organisasjonen som aktiv.
 - **I DNS:** noen som kan legge inn en TXT-post på e-postdomenet.
-- **Lisens:** å tildele grupper (ikke bare enkeltbrukere) til en app krever Entra ID P1 eller P2. Uten det kan SSO og
-  SCIM av enkeltbrukere settes opp, men ikke roller fra grupper.
+- **Lisens:** Neo oppgir at det å tildele grupper (ikke bare enkeltbrukere) til en app krever Entra ID P1 eller P2. I
+  prøven gikk tildelingen med kommandoen i del 2 gjennom i en tenant uten lisens, så kommandoen stopper deg ikke.
+  Avklar lisensen med Microsoft før gruppene tas i bruk for de ansatte.
 - **Azure CLI**, logget inn som deg selv i tenanten. `az account show --query user` skal vise `"type": "user"`.
 
 Sidene i Neo ligger under organisasjonens administrasjon, fanen **SSO**. Den viser redirect-URI-en, TXT-posten,
