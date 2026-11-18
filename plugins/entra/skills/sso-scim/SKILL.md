@@ -433,7 +433,7 @@ En rolle eller tilgangsgruppe gitt for hånd i Neo står, også når gruppen som
 | Kortet for roller viser «Krever Kun SSO», og koblingene kan ikke endres. Fra MCP: `SSO_ONLY_REQUIRED` | «Kun SSO» er av for organisasjonen | Del 4: slå det på med bryteren på SSO-siden, og last siden på nytt |
 | Verktøyene finnes ikke i Claude Code | Tilkoblingen er eldre enn verktøyene, eller gjelder en annen organisasjon | Lag en ny tilkobling under API-klienter i Neo, for organisasjonen SSO settes opp i |
 | Verktøyene svarer med avslag (403) | Personen er ikke eier eller administrator | Få tilgangsnivået av en administrator, eller la en administrator gjøre steget |
-| `GROUP_EXISTS` fra `create_entra_group_mapping` | Gruppen er alt koblet | `update_entra_group_mapping` med `id` fra `list_entra_group_mappings` |
+| `GROUP_EXISTS` fra `create_entra_group_mapping` | Gruppen er alt koblet | Vis mennesket den eksisterende koblingen (`list_entra_group_mappings`). Oppdater først når hen har sagt hva som skal stå: `update_entra_group_mapping` erstatter begge settene |
 | Verktøyene sluttet å virke da «Kun SSO» ble slått på | Tilkoblingen ble godkjent fra en passord-økt | Logg inn på nytt med `/mcp`, med Entra |
 | Brukerne er i Neo, men ingen har fått roller fra gruppene | Jobben er ikke startet, så gruppene er ikke sendt | «Start jobben» i del 5 |
 | Brukeren finnes to ganger i Neo | SCIM-e-posten er en annen enn UPN-en | Mappingen i del 5, steg 4 |
