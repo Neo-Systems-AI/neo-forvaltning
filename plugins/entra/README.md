@@ -1,8 +1,9 @@
 # entra
 
 Oppsettet i kundens egen Microsoft-tenant for Neo: innlogging med Entra ID, brukerprovisjonering med SCIM, og en
-felles postboks i Exchange Online inn i innboksen. Pluginen er veiledning: kommandoene kjøres av et menneske med sin
-egen innlogging, og agenten leser utdataene og finner feilen.
+felles postboks i Exchange Online inn i innboksen. Pluginen er veiledning: kommandoene mot Microsoft kjøres av et
+menneske med sin egen innlogging, og agenten leser utdataene og finner feilen. I Neo gjør agenten det som verken
+bærer en hemmelighet eller kan stenge noen ute, over MCP, når Neo er koblet til; resten gjør mennesket i nettleseren.
 
 | Skill | Hva |
 |---|---|
@@ -13,7 +14,8 @@ De to er uavhengige: en organisasjon kan ha den ene uten den andre, og de bruker
 
 ## Config
 
-Ingen. Pluginen leser ingenting fra `.claude/neo.config.json`, og har ingen egne skript.
+Ingen. Pluginen leser ingenting fra `.claude/neo.config.json`, og har ingen egne skript. `entra:sso-scim` bruker
+Neos MCP-server når den er koblet til for organisasjonen (eier eller administrator), og virker uten.
 
 ## Det kunden må ha selv
 
