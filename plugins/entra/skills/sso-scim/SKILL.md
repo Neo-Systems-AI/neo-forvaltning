@@ -1,6 +1,6 @@
 ---
 name: sso-scim
-description: Setter opp innlogging med Microsoft Entra ID (SSO) og automatisk brukerprovisjonering (SCIM) for en organisasjon i Neo, med grupper i Entra koblet til jobbroller og tilgangsgrupper. Dekker hele løpet i rekkefølgen Neo krever, med az-kommandoene, hva bare et menneske gjør, kontrollen etter hvert steg og feilene som pleier å komme. Last når SSO eller SCIM skal settes opp, prøves på testbrukere eller feilsøkes.
+description: Setter opp innlogging med Microsoft Entra ID (SSO) og automatisk brukerprovisjonering (SCIM) for en organisasjon i Neo, med grupper i Entra koblet til jobbroller og tilgangsgrupper. Dekker hele løpet i rekkefølgen Neo krever, med az-kommandoene, hva agenten gjør i Neo over MCP, hva bare et menneske gjør, kontrollen etter hvert steg og feilene som pleier å komme. Last når SSO eller SCIM skal settes opp, prøves på testbrukere eller feilsøkes.
 ---
 
 # SSO og SCIM mot Entra ID
@@ -13,7 +13,7 @@ innlogging, «Kun SSO», SCIM og to grupper koblet til hver sin jobbrolle og til
 testbrukere medlemmer med riktig rolle og tilgangsgruppe, en bruker som alt hadde logget inn med SSO ble koblet på og
 ikke opprettet på nytt, og tilgangsnivået i Neo sto urørt. Flytting mellom grupper og deaktivering i del 7 er også
 kjørt, og kom inn i Neo i neste syklus. Portal-stegene i del 5 og gjenoppretting av en deaktivert bruker er ikke kjørt. Feilene under «Feil som pleier å komme» er de som kom underveis, pluss de Neo
-selv melder.
+selv melder. Stegene agenten gjør i Neo over MCP (merket **Agenten** under), er ikke kjørt mot en Entra-tenant.
 
 ## 0. Hvem gjør hva
 
@@ -22,12 +22,66 @@ selv melder.
 | Gi kommandoene, lese utdataene, finne feilen | ✅ | |
 | Kjøre `az` mot tenanten | | ✅ med sin egen innlogging |
 | Client secret og SCIM-token | ❌ ser dem aldri | ✅ kopierer rett fra kilden til målet |
-| Lagre oppsettet i Neo, slå på «Kun SSO» og SCIM | | ✅ som administrator i organisasjonen |
+| Lagre SSO-oppsettet i Neo (med client secret) | ❌ | ✅ i nettleseren, som administrator |
+| Lese redirect-URI, TXT-post, Tenant URL og status fra Neo | ✅ over MCP | eller leser dem av SSO-siden |
+| Verifisere domenet i Neo | ✅ over MCP | eller «Verifiser domenet» |
 | TXT-posten i DNS | | ✅ |
+| Gi en bruker tilgangsnivået Administrator | ❌ | ✅ i nettleseren |
+| Slå på «Kun SSO» | ❌ | ✅ i nettleseren, innlogget med Entra |
+| Slå på SCIM og kopiere tokenet | ❌ | ✅ i nettleseren |
+| Lage tilgangsgrupper og koble Entra-grupper til roller | ✅ over MCP | eller «Koble gruppe» |
+| Slå av SCIM og «Kun SSO», koble fra SSO, slette | ❌ | ✅ i nettleseren |
 | Logge inn som en testbruker | ❌ | ✅ |
 
 Client secret og SCIM-tokenet limes aldri inn i chatten, i en fil eller i config. Kommandoen som lager en client
 secret, skriver den ut i terminalen; den kjøres av mennesket.
+
+### Verktøyene i Neo
+
+Er Neo koblet til Claude Code som MCP-server, gjør agenten stegene merket **Agenten** selv. Ellers gjør mennesket
+dem i nettleseren, slik de også står beskrevet. Løpet er det samme.
+
+| Verktøy | Hva |
+|---|---|
+| `get_sso_setup` | Oppsettet: tenant, klient-ID, domene, redirect-URI, TXT-posten, om domenet er verifisert, om «Kun SSO» er på |
+| `verify_sso_domain` | Ber Neo slå opp TXT-posten i DNS |
+| `get_scim_status` | Tenant URL, om SCIM er på, antall provisjonerte brukere, og når hvert token sist ble brukt |
+| `list_access_groups`, `create_access_group` | Tilgangsgruppene med medlemmer, og en ny, tom gruppe |
+| `list_entra_group_mappings`, `create_entra_group_mapping`, `update_entra_group_mapping` | Entra-gruppene koblet til jobbroller og tilgangsgrupper |
+
+For at verktøyene skal finnes:
+
+- **Tilkoblingen må gjelde organisasjonen SSO settes opp i.** Det er produksjonsorganisasjonen, ikke sandkassen:
+  SSO og SCIM finnes ikke der. Sjekk hvilken MCP-server som er koblet til, før du skriver noe.
+- **Personen må være eier eller administrator** i organisasjonen. Andre får avslag på hvert av verktøyene.
+- **Tilkoblingen må være laget etter at Neo fikk verktøyene.** «Koble til Claude» gir tilkoblingen tilgangene som
+  fantes da den ble laget. Mangler verktøyene i en eldre tilkobling, lager en administrator en ny under
+  API-klienter i Neo.
+
+#### Koble til produksjonsorganisasjonen
+
+Hopp over dette når verktøyene alt finnes for riktig organisasjon.
+
+1. **Mennesket**, i Neo, som eier eller administrator i organisasjonen SSO settes opp i: Administrasjon →
+   API-klienter → «Koble til Claude» → Claude Code. Neo viser en kommando med klient-ID-en fylt inn. Klient-ID-en er
+   ikke en hemmelighet.
+2. **Mennesket** kjører kommandoen i repoet. Har repoet en `.claude/neo.config.json` fra `/forvaltning:oppstart`,
+   bruk navnet den har for miljøet (`neo-produksjon`) og `--scope project`, så de andre pluginene finner samme
+   server:
+
+```bash
+claude mcp add --scope project --transport http --client-id LIM-INN-klient-ID neo-produksjon LIM-INN-adresse/api/mcp
+```
+
+3. **Mennesket** logger inn med `/mcp` og velger serveren. Det kan ikke gjøres for dem. Start Claude Code på nytt.
+4. **Agenten:** `get_sso_setup`. Svaret har `organizationId`; kontroller med mennesket at det er riktig
+   organisasjon før noe skrives.
+
+`/forvaltning:oppstart` kobler til sandkassen som standard. Den tilkoblingen kan ikke brukes her.
+
+Det agenten skriver i Neo, gjelder med en gang. En gruppe koblet til en rolle gir rollen til medlemmene straks når
+SCIM er på. Si hva du skal skrive, og få et ja, før `create_access_group`, `create_entra_group_mapping` og
+`update_entra_group_mapping`.
 
 ## Det du trenger
 
@@ -158,18 +212,22 @@ az ad app credential reset --id "$APP_ID" --display-name neo --years 1
 
 ## 3. SSO i Neo
 
-1. Åpne fanen **SSO** i organisasjonens administrasjon.
-2. Fyll inn «Directory (tenant) ID» (`$TENANT`), «Application (client) ID» (`$APP_ID`), «Client secret» og
-   «E-postdomene» (`$DOMENE`). Underdomener av domenet er inkludert.
-3. Velg «Lagre og fortsett». Siden viser nå redirect-URI-en og TXT-posten.
-4. Legg redirect-URI-en inn i Entra, tegn for tegn slik siden viser den:
+1. **Mennesket:** åpne fanen **SSO** i organisasjonens administrasjon.
+2. **Mennesket:** fyll inn «Directory (tenant) ID» (`$TENANT`), «Application (client) ID» (`$APP_ID`), «Client
+   secret» og «E-postdomene» (`$DOMENE`). Underdomener av domenet er inkludert.
+3. **Mennesket:** velg «Lagre og fortsett». Siden viser nå redirect-URI-en og TXT-posten.
+4. **Agenten:** `get_sso_setup`. Kontroller at `entraTenantId`, `clientId` og `domain` er de som ble satt i del 2,
+   og gi kommandoen under med `redirectUri` fylt inn, tegn for tegn. Uten MCP: mennesket kopierer den fra siden.
 
 ```bash
 az ad app update --id "$APP_ID" --web-redirect-uris "LIM-INN-redirect-URI-en-fra-siden"
 ```
 
-5. Legg TXT-posten inn i DNS med navnet og verdien siden viser. Verdien er gyldig i 7 døgn.
-6. Velg «Verifiser domenet». Statusen skal gå fra «Venter på domeneverifisering» til «Aktiv».
+5. **Mennesket:** legg TXT-posten inn i DNS. Navnet og verdien står i `verificationRecord` (`name`, `value`), og på
+   siden. Verdien er gyldig i 7 døgn (`expiresAt`).
+6. **Agenten:** `verify_sso_domain`. Svaret skal ha `domainVerified: true`. Finner Neo ikke posten ennå, vent noen
+   minutter og prøv igjen; endre ingenting. Uten MCP: mennesket velger «Verifiser domenet», og statusen skal gå fra
+   «Venter på domeneverifisering» til «Aktiv».
 
 **Prøv innloggingen nå, før SCIM slås på.** Uten SCIM blir en bruker i domenet medlem første gang hen logger inn. Med
 SCIM på avvises alle Entra ikke har provisjonert, så en feil i SSO-oppsettet er lettere å finne her.
@@ -193,10 +251,20 @@ Neo slår det ikke på før disse to holder, så ingen låser seg ute:
 I praksis: gi en bruker i domenet tilgangsnivået Administrator i medlemslista i Neo, logg inn som den med SSO, og slå
 på bryteren på kortet «Kun SSO» i den økten. Sjekklista på kortet viser hvilket krav som mangler.
 
+Alt i denne delen gjør **mennesket** i nettleseren. Neo slår det ikke på fra en tilkobling, fordi kravet er økten
+du er innlogget i. **Agenten** bekrefter etterpå med `get_sso_setup`: `ssoOnly` skal være `true`.
+
+Slås «Kun SSO» på fra en økt som ikke er en Entra-innlogging, skjer det ikke. Men en tilkobling til Claude som ble
+godkjent fra en passord-økt, slutter å virke i det «Kun SSO» slås på. Logg da inn i Claude Code på nytt med `/mcp`,
+denne gangen med Entra.
+
 ## 5. SCIM
 
-I Neo: velg «Slå på SCIM» på SSO-siden. Dialogen «Kopier tokenet nå» viser tokenet én gang, og kortet viser
-«Tenant URL». Resten gjøres i Entra, i portalen eller med `az`.
+**Mennesket**, i Neo: velg «Slå på SCIM» på SSO-siden. Dialogen «Kopier tokenet nå» viser tokenet én gang, og
+kortet viser «Tenant URL». Resten gjøres i Entra, i portalen eller med `az`.
+
+**Agenten:** `get_scim_status` før mennesket begynner. `ssoReady` skal være `true`, ellers er del 3 ikke ferdig.
+Etterpå skal `state` være `active`, og `tenantUrl` er adressen til `SCIM_URL` under.
 
 ### I portalen
 
@@ -219,6 +287,8 @@ read -s "SCIM_TOKEN?SCIM-token: "
 ```bash
 SCIM_URL="LIM-INN-Tenant-URL-fra-siden"
 ```
+
+Agenten fyller inn `tenantUrl` fra `get_scim_status`. Tokenet leser mennesket inn selv, med linja over.
 
 Lag provisjoneringsjobben fra malen `scim`. ID-en du får tilbake, begynner med `scim.`:
 
@@ -283,6 +353,9 @@ En jobb som aldri har kjørt, viser `Paused` og `Failed` med tidspunktet `0001-0
 en feil. Etter start går `kode` til `Active`, og den første syklusen sender brukerne og gruppene i løpet av noen
 minutter.
 
+**Agenten:** `get_scim_status` når syklusen har gått. `lastUsedAt` på tokenet skal ha fått et tidspunkt (Entra har
+nådd Neo), og `provisionedUsers.active` skal være antallet brukere i de tildelte gruppene.
+
 ```bash
 rm schema.json schema-ny.json; unset SCIM_TOKEN
 ```
@@ -300,7 +373,23 @@ Med SCIM på gjelder dette:
 
 ## 6. Grupper til jobbroller og tilgangsgrupper
 
-Under «Roller og tilgangsgrupper fra Entra» på SSO-siden:
+Avklar med mennesket først hvilke jobbroller og tilgangsgrupper hver gruppe i Entra skal gi. Det er en beslutning
+om hvem som får gjøre hva, og den er organisasjonens.
+
+**Agenten**, over MCP:
+
+1. `list_entra_group_mappings`. `ssoOnly` skal være `true` (del 4), og gruppen skal ikke stå der fra før.
+2. `list_access_groups` for `id`-ene til tilgangsgruppene. Mangler en, lag den med `create_access_group`. En ny
+   gruppe er tom og begrenser ingen saker før en administrator velger den på en sakstype i Neo.
+3. `create_entra_group_mapping` per gruppe, med `externalGroupId` (Object ID-en, `$G1` og `$G2` fra del 1),
+   `label`, `roleCodes` og `teamIds`. Begge listene sendes, og minst én av dem har innhold. Hvilke jobbroller som
+   finnes, står i beskrivelsen av verktøyet.
+4. `appliesAt` i svaret sier når det slår inn: `NOW` med SCIM på, `NEXT_SYNC` ved medlemmenes neste innlogging.
+
+En kobling endres med `update_entra_group_mapping`. Den erstatter begge settene, så send alt gruppen skal gi, også
+det som skal stå. En kobling slettes i nettleseren.
+
+**Uten MCP**, under «Roller og tilgangsgrupper fra Entra» på SSO-siden:
 
 1. Velg «Koble gruppe».
 2. Lim inn gruppens Object ID som «Gruppe-ID (Object ID)». Det er ID-en, ikke gruppenavnet.
@@ -315,7 +404,9 @@ groups»: de sender alle gruppene brukeren er i. Med SCIM på leses ikke claimet
 
 ## 7. Kontroll
 
-Prøv hvert av disse, og se etter resultatet i medlemslista i Neo:
+Prøv hvert av disse, og se etter resultatet i medlemslista i Neo. **Agenten** kan bekrefte to ting over MCP:
+tilgangsgruppene (`list_access_groups` viser medlemmene, med `fromEntra` for dem Entra har gitt) og antallet
+provisjonerte brukere (`get_scim_status`). Jobbrollene til et medlem ser bare mennesket, i medlemslista.
 
 | Handling i Entra | Forventet i Neo |
 |---|---|
@@ -339,14 +430,19 @@ En rolle eller tilgangsgruppe gitt for hånd i Neo står, også når gruppen som
 | «Du er ikke tildelt Neo i organisasjonens katalog» | SCIM er på, og brukeren er ikke provisjonert | Legg brukeren i en tildelt gruppe og vent på neste syklus |
 | «Fant ikke TXT-posten med riktig verdi» | DNS er ikke oppdatert ennå, eller posten har feil navn | Vent noen minutter. Navnet skal ha med underdomenet |
 | «Sett opp SSO og verifiser domenet før du slår på SCIM» | Domenet er ikke verifisert | Del 3 |
-| Kortet for roller viser «Krever Kun SSO», og koblingene kan ikke endres | «Kun SSO» er av for organisasjonen | Del 4: slå det på med bryteren på SSO-siden, og last siden på nytt |
+| Kortet for roller viser «Krever Kun SSO», og koblingene kan ikke endres. Fra MCP: `SSO_ONLY_REQUIRED` | «Kun SSO» er av for organisasjonen | Del 4: slå det på med bryteren på SSO-siden, og last siden på nytt |
+| Verktøyene finnes ikke i Claude Code | Tilkoblingen er eldre enn verktøyene, eller gjelder en annen organisasjon | Lag en ny tilkobling under API-klienter i Neo, for organisasjonen SSO settes opp i |
+| Verktøyene svarer med avslag (403) | Personen er ikke eier eller administrator | Få tilgangsnivået av en administrator, eller la en administrator gjøre steget |
+| `GROUP_EXISTS` fra `create_entra_group_mapping` | Gruppen er alt koblet | Vis mennesket den eksisterende koblingen (`list_entra_group_mappings`). Oppdater først når hen har sagt hva som skal stå: `update_entra_group_mapping` erstatter begge settene |
+| Verktøyene sluttet å virke da «Kun SSO» ble slått på | Tilkoblingen ble godkjent fra en passord-økt | Logg inn på nytt med `/mcp`, med Entra |
 | Brukerne er i Neo, men ingen har fått roller fra gruppene | Jobben er ikke startet, så gruppene er ikke sendt | «Start jobben» i del 5 |
 | Brukeren finnes to ganger i Neo | SCIM-e-posten er en annen enn UPN-en | Mappingen i del 5, steg 4 |
 | Medlemmene i en gruppe får ikke rollen | Gruppen er nestet, eller ikke en sikkerhetsgruppe | Legg brukerne inn som direkte medlemmer av en sikkerhetsgruppe |
 
 ## Rydde etter en prøve
 
-Slå av SCIM og «Kun SSO» og koble fra SSO i Neo først, i den rekkefølgen. Slett så det som ble laget i Entra:
+Slå av SCIM og «Kun SSO» og koble fra SSO i Neo først, i den rekkefølgen. Det gjør mennesket i nettleseren, og
+sletter der også koblingene og tilgangsgruppene fra prøven. Slett så det som ble laget i Entra:
 
 ```bash
 az ad app delete --id "$APP_ID"
