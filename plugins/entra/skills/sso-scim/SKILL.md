@@ -58,6 +58,27 @@ For at verktøyene skal finnes:
   fantes da den ble laget. Mangler verktøyene i en eldre tilkobling, lager en administrator en ny under
   API-klienter i Neo.
 
+#### Koble til produksjonsorganisasjonen
+
+Hopp over dette når verktøyene alt finnes for riktig organisasjon.
+
+1. **Mennesket**, i Neo, som eier eller administrator i organisasjonen SSO settes opp i: Administrasjon →
+   API-klienter → «Koble til Claude» → Claude Code. Neo viser en kommando med klient-ID-en fylt inn. Klient-ID-en er
+   ikke en hemmelighet.
+2. **Mennesket** kjører kommandoen i repoet. Har repoet en `.claude/neo.config.json` fra `/forvaltning:oppstart`,
+   bruk navnet den har for miljøet (`neo-produksjon`) og `--scope project`, så de andre pluginene finner samme
+   server:
+
+```bash
+claude mcp add --scope project --transport http --client-id LIM-INN-klient-ID neo-produksjon LIM-INN-adresse/api/mcp
+```
+
+3. **Mennesket** logger inn med `/mcp` og velger serveren. Det kan ikke gjøres for dem. Start Claude Code på nytt.
+4. **Agenten:** `get_sso_setup`. Svaret har `organizationId`; kontroller med mennesket at det er riktig
+   organisasjon før noe skrives.
+
+`/forvaltning:oppstart` kobler til sandkassen som standard. Den tilkoblingen kan ikke brukes her.
+
 Det agenten skriver i Neo, gjelder med en gang. En gruppe koblet til en rolle gir rollen til medlemmene straks når
 SCIM er på. Si hva du skal skrive, og få et ja, før `create_access_group`, `create_entra_group_mapping` og
 `update_entra_group_mapping`.
