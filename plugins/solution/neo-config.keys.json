@@ -1,0 +1,11 @@
+{
+  "plugin": "solution",
+  "neo": true,
+  "keys": [
+    {
+      "path": "off",
+      "fallback": [],
+      "doc": "Reglene i mønstrene som er slått av i dette repoet, med id"
+    }
+  ]
+}

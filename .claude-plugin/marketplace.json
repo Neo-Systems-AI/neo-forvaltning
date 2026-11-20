@@ -15,6 +15,13 @@
       "category": "forvaltning"
     },
     {
+      "name": "solution",
+      "source": "./plugins/solution",
+      "description": "Å designe og bygge en løsning i Neo, fra en idé eller en kunngjøring til konfig som er testet i UI og gitt til kunden. Løpet er nummerert: research på kunden og på prosessen fra kilder som lagres uendret, kravene, designvalgene, konfigen bygget fra kravene med mønstrene for god konfig (med KI-oppsettet per sakstype), testene, runden i UI med personen som observatør, og sorteringen av funnene i konfig og ønsker til Neo. Ved siden av: gjennomgangen av konfigen i et miljø mot mønstrene, og overleveringen til kunden.",
+      "version": "0.1.0",
+      "category": "forvaltning"
+    },
+    {
       "name": "helse",
       "source": "./plugins/helse",
       "description": "Helsa til oppsettet i Neo: flytene og kjøringene i et tidsvindu, hva som har feilet og hvorfor, og feilsøk av én kjøring. Bare lesing, gjennom Neo sin MCP-server. Sier UKJENT når den ikke kan se, aldri OK.",
