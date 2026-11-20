@@ -1,12 +1,12 @@
 ---
-name: altinn-kall
-description: Rå lese-kall mot Altinn 3 til feilsøk - hvilken status har instansen, hvor står prosessen, hvilke data-elementer og hvilke hendelser kom. Brukes sammen med /helse:feilsok for å sette det Altinn sier opp mot det Neo gjorde. Bare lesing, med kundens Maskinporten-klient.
+name: api
+description: Rå lese-kall mot Altinn 3 til feilsøk - hvilken status har instansen, hvor står prosessen, hvilke data-elementer og hvilke hendelser kom. Settes opp mot det kjøringen i Neo gjorde. Bare lesing, med kundens Maskinporten-klient.
 ---
 
 # Altinn 3: hva Altinn selv sier
 
-Last denne når en flyt i Neo henter, mottar eller reagerer på et Altinn-skjema, og du må vite hva Altinn har. Neo
-sier hva den gjorde (`/helse:feilsok`); dette skriptet sier hva Altinn har.
+Last denne når en flyt i Neo henter, mottar eller reagerer på et Altinn-skjema, og du må vite hva Altinn har. Kjøringen i Neo
+sier hva Neo gjorde; dette skriptet sier hva Altinn har.
 
 ```bash
 A="${CLAUDE_PLUGIN_ROOT}/scripts/altinn.mjs"
@@ -26,7 +26,7 @@ Instans-id-en er `<part>/<guid>`, slik Altinn og Neo skriver den.
 
 ## Slik feilsøker du
 
-1. **Hent kjøringen i Neo** (`/helse:feilsok`). Finn instans-id-en Neo fikk (`<part>/<guid>`), eller tidspunktet.
+1. **Hent kjøringen i Neo.** Finn instans-id-en Neo fikk (`<part>/<guid>`), eller tidspunktet.
 2. **Virker klienten?** `token`. Mangler `urn:altinn:org` i tokenet, svarer Storage-søket 400 og
    tjenesteeier-hendelsene 401: klienten mangler tjenesteeier-scopes. Avslag fra Maskinporten
    (`invalid_scope`, `invalid_client`) er klienten, ikke flyten. Kunden eier klienten.
@@ -42,13 +42,13 @@ Instans-id-en er `<part>/<guid>`, slik Altinn og Neo skriver den.
 5. **Appen.** `appmeta` når datatypene eller prosessen er det Neo ikke forstod. Mangler PDF-en (`ref-data-as-pdf`),
    se `enablePdfCreation` på skjemadatatypen: uten `true` lager appen ingen PDF, selv om datatypen står i lista.
 
-Avgjør så hvor feilen er, slik `/helse:feilsok` sier: oppsettet, data eller produktet.
+Avgjør så hvor feilen er: oppsettet, data eller produktet.
 
 ## Hvem som får tilgang
 
 - **App-policyen avgjør**, ikke org-en i app-id-en. Org-segmentet (`<org>/<app>`) trenger ikke være lik
   `urn:altinn:org` i tokenet, og en app kan gi tilgang til flere tjenesteeiere. Et avslag leses derfor i
-  `policy.xml`, ikke i app-id-en (avklart med Digdir 2026-10-12).
+  `policy.xml`, ikke i app-id-en.
 - **En leverandør med delegering** fra tjenesteeieren står som `supplier` i Maskinporten-tokenet, og tjenesteeieren
   som `consumer`. Med et tjenesteeier-scope setter Altinn da `urn:altinn:org` til tjenesteeierens kode. `token`
   viser begge.
@@ -59,7 +59,7 @@ Avgjør så hvor feilen er, slik `/helse:feilsok` sier: oppsettet, data eller pr
 ## Melding i skjemaets tråd
 
 Sender fagsystemet en melding (Correspondence) som svar på et skjema, kan den legges i skjemaets tråd i Arbeidsflate
-i stedet for som et eget innslag (målt i tt02 2026-09-30):
+i stedet for som et eget innslag:
 
 - `externalReferences` med `DialogportenDialogId` = instansens `dataValues["dialog.id"]` (se `instans`). Meldingen
   blir en forsendelse i den dialogen som finnes. Correspondence kaller Dialogporten selv, så
@@ -79,5 +79,5 @@ i stedet for som et eget innslag (målt i tt02 2026-09-30):
 - **Innholdet i et data-element** kan ha personopplysninger. Hent det med `--innhold` bare når metadata ikke er nok,
   vis bare det som trengs, og skriv det aldri inn i repoet.
 - **Nøkkelen er kundens.** Står den ikke i `.env.local`, sier skriptet navnet og hvor den ligger. Et menneske henter
-  den med `/forvaltning:hemmeligheter`; agenten gjør det aldri.
+  den fra kundens hvelv; agenten gjør det aldri.
 - **Produksjon** er et annet miljø med en annen klient. Si `--miljo produksjon` bare når kunden har bedt om det.

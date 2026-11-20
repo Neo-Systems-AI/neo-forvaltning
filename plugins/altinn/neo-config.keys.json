@@ -11,17 +11,17 @@
     {
       "path": "apps",
       "fallback": [],
-      "doc": "Appene kunden har i Altinn, som <org>/<app>. Med én app trenger altinn-kall ikke --app"
+      "doc": "Appene kunden har i Altinn, som <org>/<app>. Med én app trengs ikke --app i lese-kallene"
     },
     {
       "path": "miljo",
       "fallback": "tt02",
-      "doc": "Miljøet appene publiseres til før produksjon, og miljøet altinn-kall bruker når --miljo ikke er sagt"
+      "doc": "Miljøet appene publiseres til før produksjon, og miljøet lese-kallene bruker når --miljo ikke er sagt"
     },
     {
       "path": "maskinporten.clientId",
       "perEnv": true,
-      "doc": "Klient-ID-en til kundens Maskinporten-klient med tjenesteeier-scopes (trengs bare til altinn-kall, ikke til publiseringen)"
+      "doc": "Klient-ID-en til kundens Maskinporten-klient med tjenesteeier-scopes (trengs bare til lese-kallene, ikke til publiseringen)"
     },
     {
       "path": "maskinporten.kid",
@@ -31,7 +31,7 @@
     {
       "path": "maskinporten.nokkel",
       "perEnv": true,
-      "doc": "Den private nøkkelen (PEM), bare som referanse: { \"$env\": \"ALTINN_TT02_MASKINPORTEN_NOKKEL\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\", \"fil\": true } (trengs bare til altinn-kall)"
+      "doc": "Den private nøkkelen (PEM), bare som referanse: { \"$env\": \"ALTINN_TT02_MASKINPORTEN_NOKKEL\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\", \"fil\": true } (trengs bare til lese-kallene)"
     },
     {
       "path": "maskinporten.scopes",

@@ -1,12 +1,12 @@
 ---
-name: documaster
-description: Rå lese-kall mot kundens Documaster-arkiv (Noark 5) til feilsøk - ble journalposten arkivert, i hvilken mappe, med hvilke dokumenter. Brukes sammen med /helse:feilsok for å sette det arkivet sier opp mot det Neo gjorde. Bare lesing.
+name: api
+description: Rå lese-kall mot kundens Documaster-arkiv (Noark 5) til feilsøk - ble journalposten arkivert, i hvilken mappe, med hvilke dokumenter. Settes opp mot det kjøringen i Neo gjorde. Bare lesing.
 ---
 
 # Documaster: hva arkivet selv sier
 
-Last denne når en flyt i Neo skulle arkivere noe i Documaster, og du må vite om det skjedde. Neo sier hva den
-sendte (`/helse:feilsok`); dette skriptet sier hva arkivet har.
+Last denne når en flyt i Neo skulle arkivere noe i Documaster, og du må vite om det skjedde. Kjøringen i Neo sier hva
+Neo sendte; dette skriptet sier hva arkivet har.
 
 ```bash
 D="${CLAUDE_PLUGIN_ROOT}/scripts/documaster.mjs"
@@ -27,7 +27,7 @@ node "$D" sok --type <Noark-type> --query "felt = @p" --param @p=verdi
 
 ## Slik feilsøker du
 
-1. **Hent kjøringen i Neo** (`/helse:feilsok`). Finn det Neo fikk tilbake fra Documaster: mappe-id, registrerings-id
+1. **Hent kjøringen i Neo.** Finn det Neo fikk tilbake fra Documaster: mappe-id, registrerings-id
    eller saksnummer. Fikk steget en feil, står den der.
 2. **Virker klienten?** `token`. Avslag her (`invalid_client`, `401`) er innloggingen, ikke flyten: hemmeligheten er
    utløpt eller rotert, eller scopet er feil. Kunden eier klienten.
@@ -36,7 +36,7 @@ node "$D" sok --type <Noark-type> --query "felt = @p" --param @p=verdi
 4. **Finnes det Neo sier den laget?** `mappe <id>`, `registrering <id>`, `registreringer --saksnummer …`.
    - **Funnet, og likt det Neo sendte:** arkiveringen er gjort. Feilen er et annet sted.
    - **Funnet, men annerledes** (feil mappe, tittel, klasse): sammenlign med oppsettet til flyten. Det er som regel
-     oppsettet, og rettingen går gjennom `/forvaltning:plan`.
+     oppsettet, og rettingen er en endring i oppsettet.
    - **Ikke funnet, og Neo fikk en id tilbake:** meld det som et produktfunn med id-en og tidspunktet.
    - **Ikke funnet, og Neo fikk ingen id:** steget feilet før arkivet. Les feilen i kjøringen.
 5. **Ble dokumentene med?** `dokumenter --registrering <id>` viser versjonene uten innholdet.
@@ -48,5 +48,5 @@ node "$D" sok --type <Noark-type> --query "felt = @p" --param @p=verdi
 - **Svarene er arkivinnhold.** Titler og parter kan være personopplysninger. Vis det som trengs for feilsøket, og
   skriv det aldri inn i repoet.
 - **Hemmeligheten er kundens.** Står den ikke i `.env.local`, sier skriptet navnet og hvor den ligger. Et menneske
-  henter den med `/forvaltning:hemmeligheter`; agenten gjør det aldri.
+  henter den fra kundens hvelv; agenten gjør det aldri.
 - **Spørrespråket:** bare `felt = @param` er brukt her, det produktet bruker. Om `&&` og `||` virker, er ikke prøvd.

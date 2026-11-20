@@ -1,11 +1,11 @@
 ---
-name: maskinporten
+name: api
 description: Spør Maskinporten selv - well-known for miljøet, og et token for kundens klient med scopet og utløpet som faktisk ble innvilget. Brukes i feilsøk når et kall fra Neo mot KRR, Fiks eller Altinn feiler på tilgang, for å skille «klienten får ikke scopet» fra «tjenesten avviser tokenet». Bare lesing; tokenet skrives aldri ut.
 ---
 
 # Maskinporten
 
-Det rå svaret fra Maskinporten, så det kan settes opp mot det Neo gjorde (`/helse:feilsok`). Avslår Maskinporten,
+Det rå svaret fra Maskinporten, så det kan settes opp mot det Neo gjorde. Avslår Maskinporten,
 er feilen hos klienten eller scopet; får klienten scopet her, men Neo får 401 eller 403 hos tjenesten, er feilen
 lenger ut.
 
@@ -22,8 +22,8 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/maskinporten.mjs" token [<klient>] [--miljo 
 - Avslaget kommer fram som Maskinporten ga det: status, `error` og `error_description`.
 
 Klientene står i `.claude/neo.config.json` under `maskinporten.byEnv.<miljø>`; se `/maskinporten:env`. Mangler
-nøkkelen, sier skriptet navnet på variabelen og hvor den ligger: et menneske henter den med
-`/forvaltning:hemmeligheter`, aldri agenten.
+nøkkelen, sier skriptet navnet på variabelen og hvor den ligger: et menneske henter den fra
+kundens hvelv, aldri agenten.
 
 ## Reglene
 

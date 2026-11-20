@@ -1,5 +1,5 @@
 ---
-name: sso-scim
+name: set-up-sso
 description: Setter opp innlogging med Microsoft Entra ID (SSO) og automatisk brukerprovisjonering (SCIM) for en organisasjon i Neo, med grupper i Entra koblet til jobbroller og tilgangsgrupper. Dekker hele løpet i rekkefølgen Neo krever, med az-kommandoene, hva agenten gjør i Neo over MCP, hva bare et menneske gjør, kontrollen etter hvert steg og feilene som pleier å komme. Last når SSO eller SCIM skal settes opp, prøves på testbrukere eller feilsøkes.
 ---
 
@@ -8,12 +8,9 @@ description: Setter opp innlogging med Microsoft Entra ID (SSO) og automatisk br
 Løpet kobler organisasjonens Entra-tenant til Neo: medlemmene logger inn med Microsoft-kontoen sin, Entra oppretter
 og deaktiverer dem i Neo, og gruppene i Entra gir jobbroller og tilgangsgrupper.
 
-**Hva som er prøvd:** del 1–6 er kjørt mot en Entra-tenant 2026-11-17, med `az`-kommandoene slik de står: SSO med
-innlogging, «Kun SSO», SCIM og to grupper koblet til hver sin jobbrolle og tilgangsgruppe. Etter første syklus var tre
-testbrukere medlemmer med riktig rolle og tilgangsgruppe, en bruker som alt hadde logget inn med SSO ble koblet på og
-ikke opprettet på nytt, og tilgangsnivået i Neo sto urørt. Flytting mellom grupper og deaktivering i del 7 er også
-kjørt, og kom inn i Neo i neste syklus. Portal-stegene i del 5 og gjenoppretting av en deaktivert bruker er ikke kjørt. Feilene under «Feil som pleier å komme» er de som kom underveis, pluss de Neo
-selv melder. Stegene agenten gjør i Neo over MCP (merket **Agenten** under), er ikke kjørt mot en Entra-tenant.
+**Det som ikke er prøvd mot en Entra-tenant:** portal-stegene i del 5, å gjenopprette en deaktivert bruker, og
+stegene agenten gjør i Neo over MCP (merket **Agenten** under). Resten er kjørt med `az`-kommandoene slik de står.
+Feilene under «Feil som pleier å komme» er de som kommer underveis, pluss de Neo selv melder.
 
 ## 0. Hvem gjør hva
 
@@ -65,8 +62,7 @@ Hopp over dette når verktøyene alt finnes for riktig organisasjon.
 1. **Mennesket**, i Neo, som eier eller administrator i organisasjonen SSO settes opp i: Administrasjon →
    API-klienter → «Koble til Claude» → Claude Code. Neo viser en kommando med klient-ID-en fylt inn. Klient-ID-en er
    ikke en hemmelighet.
-2. **Mennesket** kjører kommandoen i repoet. Har repoet en `.claude/neo.config.json` fra `/forvaltning:oppstart`,
-   bruk navnet den har for miljøet (`neo-produksjon`) og `--scope project`, så de andre pluginene finner samme
+2. **Mennesket** kjører kommandoen i repoet. Har repoet en `.claude/neo.config.json`, bruk navnet den har for miljøet (`neo-produksjon`) og `--scope project`, så de andre pluginene finner samme
    server:
 
 ```bash
@@ -77,7 +73,7 @@ claude mcp add --scope project --transport http --client-id LIM-INN-klient-ID ne
 4. **Agenten:** `get_sso_setup`. Svaret har `organizationId`; kontroller med mennesket at det er riktig
    organisasjon før noe skrives.
 
-`/forvaltning:oppstart` kobler til sandkassen som standard. Den tilkoblingen kan ikke brukes her.
+Et repo er som standard koblet til sandkassen. Den tilkoblingen kan ikke brukes her.
 
 Det agenten skriver i Neo, gjelder med en gang. En gruppe koblet til en rolle gir rollen til medlemmene straks når
 SCIM er på. Si hva du skal skrive, og få et ja, før `create_access_group`, `create_entra_group_mapping` og
@@ -89,8 +85,8 @@ SCIM er på. Si hva du skal skrive, og få et ja, før `create_access_group`, `c
   Cloud Application Administrator. Skal du lage testbrukere og grupper, trengs også User Administrator.
 - **I Neo:** administrator i organisasjonen, med organisasjonen som aktiv.
 - **I DNS:** noen som kan legge inn en TXT-post på e-postdomenet.
-- **Lisens:** Neo oppgir at det å tildele grupper (ikke bare enkeltbrukere) til en app krever Entra ID P1 eller P2. I
-  prøven gikk tildelingen med kommandoen i del 2 gjennom i en tenant uten lisens, så kommandoen stopper deg ikke.
+- **Lisens:** Neo oppgir at det å tildele grupper (ikke bare enkeltbrukere) til en app krever Entra ID P1 eller P2.
+  Tildelingen med kommandoen i del 2 går gjennom også i en tenant uten lisens, så kommandoen stopper deg ikke.
   Avklar lisensen med Microsoft før gruppene tas i bruk for de ansatte.
 - **Azure CLI**, logget inn som deg selv i tenanten. `az account show --query user` skal vise `"type": "user"`.
 

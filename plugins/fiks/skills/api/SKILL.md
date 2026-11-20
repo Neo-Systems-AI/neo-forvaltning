@@ -1,12 +1,12 @@
 ---
-name: fiks
+name: api
 description: Rå lese-kall mot KS Fiks - SvarUt (forsendelsestyper, mottakersystem, status og hendelser for en forsendelse), SvarInn (nye forsendelser til mottakersystemet) og Folkeregisteret via Fiks (en person, hendelseslisten). Bruk den i feilsøk for å se hva Fiks selv sier, satt opp mot det Neo gjorde. Bare lesing; sier alltid miljøet.
 ---
 
 # KS Fiks: hva sier Fiks selv
 
 Når Neo sier at en forsendelse er sendt, mottatt eller slått opp, er dette kallet som viser hva Fiks sier om det
-samme. Brukes særlig fra `/helse:feilsok`: finn kjøringen i Neo først, ta id-en derfra (forsendelses-id,
+samme. Finn kjøringen i Neo først, ta id-en derfra (forsendelses-id,
 organisasjonsnummer, fødselsnummer), og spør Fiks.
 
 ```bash
@@ -48,5 +48,5 @@ Utskriften er metoden, adressen, status og tid, så svaret. Exit 1 når Fiks ikk
 - **Personopplysninger:** fødselsnummer maskeres i utskriften (seks første sifre og `*****`). Navn og adresse fra
   Folkeregisteret kommer ut som de er: gjengi bare det feilsøket trenger, og skriv det aldri i en fil i repoet.
 - **Hemmelighetene** sladdes fra alt som skrives ut. Mangler en, sier skriptet navnet og hvor den ligger; et menneske
-  henter den (`/forvaltning:hemmeligheter`), aldri agenten.
+  henter den fra kundens hvelv, aldri agenten.
 - **Config:** mangler noe, kjør `/fiks:env`.

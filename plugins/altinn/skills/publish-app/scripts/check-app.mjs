@@ -72,8 +72,8 @@ try {
 // ── Hendelser ──────────────────────────────────────────────────────────────
 // En ny app fra Studio har RegisterEventsWithEventsComponent = false. Da sender
 // appen INGEN hendelser (ikke engang app.instance.created), og et fagsystem som
-// abonnerer, får aldri vite at noe er sendt inn — uten feil noe sted. Målt på
-// ddlabs/uttalelse 2026-09-29: events-API-et var tomt, abonnementet var gyldig.
+// abonnerer, får aldri vite at noe er sendt inn — uten feil noe sted. Events-API-et
+// er tomt selv om abonnementet er gyldig.
 // Miljøfilene (appsettings.<Miljø>.json) kan overstyre, så de leses også.
 {
   const settingsFiles = readdirSync(app).filter((f) => /^appsettings(\.[A-Za-z]+)?\.json$/.test(f));

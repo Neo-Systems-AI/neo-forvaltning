@@ -46,49 +46,49 @@
       "name": "maskinporten",
       "source": "./plugins/maskinporten",
       "description": "Maskinporten slik den selv svarer: well-known for miljøet, og et token for kundens egen klient med scopet og utløpet som faktisk ble innvilget. Bare lesing; tokenet skrives aldri ut.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "system"
     },
     {
       "name": "fiks",
       "source": "./plugins/fiks",
       "description": "Rå lese-kall mot KS Fiks: SvarUt (forsendelsestyper, mottakersystem, status og hendelser), SvarInn (nye forsendelser) og Folkeregisteret via Fiks. For feilsøk: hva sier Fiks selv, satt opp mot det Neo gjorde. Bare lesing; hemmelighetene sladdes og fødselsnummer maskeres.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "system"
     },
     {
       "name": "documaster",
       "source": "./plugins/documaster",
       "description": "Rå lese-kall mot kundens Documaster-arkiv (Noark 5), til feilsøk: ble journalposten arkivert, i hvilken mappe, med hvilke dokumenter. Ett skript uten avhengigheter (scripts/documaster.mjs) henter et token med kundens egen klient og spør med Noark 5-spørringen: arkivdeler, mappe på id eller saksnummer, registrering og journalpost på id eller registreringsIdent, registreringene i en mappe, dokumentversjonene til en registrering, og et fritt søk. Bare lesing: ingen kall som oppretter, endrer eller sletter. Instansen og klienten hos Documaster er kundens, og hemmeligheten står bare som referanse i .claude/neo.config.json.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "system"
     },
     {
       "name": "altinn",
       "source": "./plugins/altinn",
-      "description": "Bygg og publiser Altinn Studio-apper (skjemaer) fra Claude Code, og les hva Altinn 3 selv sier ved feilsøk. Tre deler. (1) Digdirs egne skills, vanilje: de sju skillene bak KI-assistenten i Altinn Studio, kopiert byte-identisk fra Altinn/altinn-studio (MIT) og låst til en sha i UPSTREAM.json — altinn-planning, altinn-datamodel, altinn-policy, altinn-resources, altinn-prefill, altinn-expressions og altinn-docs. De forklarer hvordan filene skal se ut. (2) Vår egen skill altinn-publisering: hele løpet fra tom app til publisert i tt02, med hva bare et menneske kan gjøre (Studio-bruker, tokens, testbruker-innlogging), mal fra en app som kjører, tilgangsregler og forhåndsutfylling for et fagsystem (nøstede prefill-stier droppes UTEN feil ved skrivefeil), metadata, «Lag kopi» til tjenesteeier-org-en, bygg og publiser (versjonsfeltet godtar ikke punktum), og kontroll mot miljøet i stedet for mot Studio, som henger etter. Den har to avhengighetsfrie kontrollskript som erstatter verktøyene Digdirs skills forutsetter: check-app.mjs kryss-sjekker at filene henger sammen (tre modellfiler, sider, bindinger, uttrykk, tekstnøkler, vedleggsdatatyper, hemmeligheter), og check-deployed.mjs sier om klonen er det som kjører i tt02. Begge er verifisert mot fem apper i tt02. Publiseringen trenger ingen env-variabler eller tokens: hver utvikler bruker sin egen Studio-bruker. (3) Vår egen skill altinn-kall: rå lese-kall mot Altinn 3 til feilsøk mot det Neo gjorde, med scripts/altinn.mjs uten avhengigheter. Maskinporten-tokenet til kundens klient veksles til et Altinn-token, og skriptet leser instanser, én instans, prosessen, data-elementene (metadata; innhold bare når det bes om), hendelsene og appens metadata, i tt02 eller produksjon. Bare lesing, fødselsnumre skjult, nøkkelen bare som referanse i .claude/neo.config.json. scripts/sync-skills.mjs henter ny versjon av Digdirs skills (--ref main) og melder drift (--check), uten å røre våre egne.",
-      "version": "0.4.1",
+      "description": "Bygg og publiser Altinn Studio-apper (skjemaer) fra Claude Code, og les hva Altinn 3 selv sier ved feilsøk. Digdirs sju skills bak KI-assistenten i Altinn Studio, kopiert uendret fra Altinn/altinn-studio (MIT) og låst i UPSTREAM.json, forklarer hvordan filene skal se ut. publish-app er løpet fra tom app til publisert i tt02: hva bare et menneske kan gjøre, mal fra en app som kjører, metadata, «Lag kopi» til tjenesteeier-org-en, bygg og publiser, med to avhengighetsfrie kontrollskript (check-app.mjs for at filene henger sammen, check-deployed.mjs for at klonen er det som kjører). api er rå lese-kall mot Altinn 3 med kundens Maskinporten-klient: instanser, prosessen, data-elementene, hendelsene og appens metadata. Bare lesing, fødselsnumre skjult, nøkkelen bare som referanse.",
+      "version": "0.5.0",
       "category": "system"
     },
     {
       "name": "entra",
       "source": "./plugins/entra",
-      "description": "Oppsettet i kundens egen Microsoft-tenant for Neo: innlogging med Entra ID (SSO), automatisk brukerprovisjonering (SCIM) med grupper koblet til jobbroller og tilgangsgrupper, og en felles postboks i Exchange Online inn i innboksen. To skills med az- og PowerShell-kommandoene i rekkefølgen Neo krever, kontrollen etter hvert steg og feilene som pleier å komme. Kommandoene mot Microsoft kjøres av et menneske med sin egen innlogging, og agenten gjør det som er trygt i Neo over MCP; client secret og SCIM-token går aldri gjennom agenten.",
-      "version": "0.2.0",
+      "description": "Oppsettet i kundens egen Microsoft-tenant for Neo: innlogging med Entra ID (SSO) og automatisk brukerprovisjonering (SCIM) med grupper koblet til jobbroller og tilgangsgrupper (set-up-sso), og en felles postboks i Exchange Online inn i innboksen (set-up-shared-mailbox). Kommandoene i rekkefølgen Neo krever, kontrollen etter hvert steg og feilene som pleier å komme. Kommandoene mot Microsoft kjøres av et menneske med sin egen innlogging, og agenten gjør det som er trygt i Neo over MCP; client secret og SCIM-token går aldri gjennom agenten.",
+      "version": "0.3.0",
       "category": "system"
     },
     {
       "name": "krr",
       "source": "./plugins/krr",
       "description": "Oppslag i Kontakt- og reservasjonsregisteret (KRR) for én eller flere personer, slik registeret selv svarer, med Maskinporten-klienten fra maskinporten-delen av config-fila. Bare lesing; personnummeret maskeres.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "system"
     },
     {
       "name": "enhetsregisteret",
       "source": "./plugins/enhetsregisteret",
       "description": "Oppslag av enheter og underenheter i Enhetsregisteret, slik Brønnøysundregistrene selv svarer, gjennom det åpne API-et. Bare lesing, uten innlogging.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "system"
     }
   ]

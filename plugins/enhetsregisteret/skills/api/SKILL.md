@@ -1,11 +1,11 @@
 ---
-name: enhetsregisteret
+name: api
 description: Slår opp en enhet, en underenhet eller underenhetene til en enhet i Enhetsregisteret, slik Brønnøysundregistrene selv svarer. Brukes i feilsøk når Neo fant feil organisasjon, feil adresse eller en underenhet som er slettet. Bare lesing, åpent API uten innlogging.
 ---
 
 # Enhetsregisteret
 
-Det rå svaret fra Enhetsregisteret, så det kan settes opp mot det Neo gjorde (`/helse:feilsok`): finnes nummeret,
+Det rå svaret fra Enhetsregisteret, så det kan settes opp mot det Neo gjorde: finnes nummeret,
 er det en enhet eller en underenhet, er den slettet, konkurs eller under avvikling, og hvilken enhet hører den til?
 
 ```bash

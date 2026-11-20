@@ -1,11 +1,11 @@
 ---
-name: altinn-publisering
+name: publish-app
 description: Hele løpet for en Altinn Studio-app, fra tom app til publisert i tt02, i Claude Code. Det dekker tilgang, mal, bygging med Digdirs skills, kryss-sjekk, forhåndsvisning, kopi til tjenesteeier-org-en, metadata, bygg og publisering, og kontroll mot miljøet. Last først når en app skal lages, endres eller publiseres.
 ---
 
 # Altinn-app fra start til publisert
 
-Dette er løpet som ble brukt og verifisert da `ddlabs/uttalelse` ble publisert i tt02 (2026-09-29). Digdirs skills (`altinn-planning`, `altinn-datamodel`, `altinn-resources`, `altinn-expressions`, `altinn-policy`, `altinn-prefill`, `altinn-docs`) forklarer *hvordan filene skal se ut*. Denne skillen forklarer *rekkefølgen, hva som bare et menneske kan gjøre, og hvordan hvert steg kontrolleres* i Claude Code.
+Digdirs skills (`altinn-planning`, `altinn-datamodel`, `altinn-resources`, `altinn-expressions`, `altinn-policy`, `altinn-prefill`, `altinn-docs`) forklarer *hvordan filene skal se ut*. Denne skillen forklarer *rekkefølgen, hva som bare et menneske kan gjøre, og hvordan hvert steg kontrolleres* i Claude Code.
 
 Skriptene nevnt under ligger i `scripts/` ved siden av denne fila. Kjør dem med full sti fra skillens mappe.
 
@@ -26,7 +26,7 @@ Skriptene nevnt under ligger i `scripts/` ved siden av denne fila. Kjør dem med
 
 - Hver utvikler har sin **egen** bruker på altinn.studio, med innlogging via Ansattporten. Brukernavnet står på <https://altinn.studio/repos/user/settings>.
 - Den som administrerer tjenesteeier-org-en, gir tilgang per brukernavn til å opprette og publisere.
-  - I en delt org kan skrivetilgangen være smal. I Digdir Labs (`ddlabs`) kan du bare pushe til apper du selv har laget. Andres apper kan leses og redigeres i Studio, men ikke pushes.
+  - I en delt org kan skrivetilgangen være smal: der kan du ofte bare pushe til apper du selv har laget. Andres apper kan leses og redigeres i Studio, men ikke pushes.
 - Git bruker et personlig token (*Innstillinger → Applikasjoner*) som passord, lagret i nøkkelringen (`git config --global credential.helper osxkeychain`). **Aldri** i env, i en fil eller i chatten.
 - Stopper `git clone` eller `git push` på innlogging (`could not read Username`): stopp og gi mennesket kommandoen. Ikke be om tokenet.
 
@@ -49,13 +49,13 @@ Det skillene forutsetter at et verktøy gjør, gjør du selv:
 
 ### Når et fagsystem (for eksempel Neo) oppretter og leser instansene
 
-- **Hendelser må skrus på:** en ny app fra Studio har `AppSettings.RegisterEventsWithEventsComponent = false` i `App/appsettings.json`. Da sender appen **ingen** hendelser, heller ikke `app.instance.created` eller `app.instance.process.completed`. Fagsystemet får aldri vite at noe er sendt inn, og ingenting feiler. Sett den til `true`. Målt på `ddlabs/uttalelse` 2026-09-29: abonnementet var gyldig, men events-API-et var tomt, og svaret nådde aldri Neo. Hendelser for instanser som allerede er sendt inn, kommer ikke i ettertid. `check-app.mjs` advarer når den er av.
+- **Hendelser må skrus på:** en ny app fra Studio har `AppSettings.RegisterEventsWithEventsComponent = false` i `App/appsettings.json`. Da sender appen **ingen** hendelser, heller ikke `app.instance.created` eller `app.instance.process.completed`. Fagsystemet får aldri vite at noe er sendt inn, og ingenting feiler. Sett den til `true`. Abonnementet er da gyldig, men events-API-et er tomt, og svaret når aldri Neo. Hendelser for instanser som allerede er sendt inn, kommer ikke i ettertid. `check-app.mjs` advarer når den er av.
 - **Tilgangsregler:** tjenesteeieren må ha `read`, `write`, `instantiate`, `events` og `complete` gjennom regelen med `[ORG]`. Kopier `policy.xml` fra en nyere app i org-en som har dette. **Aldri** legg inn orgnumre: `urn:altinn:org` er eier-akronymet, og orgnummer-regler i eldre apper viser seg å være rester.
 - **Forhåndsutfylling ved opprettelse:** nøklene kan være stier (`foresporsel.tittel`). Altinn splitter på `.` og lager objektene som mangler. Men ekstern forhåndsutfylling kjøres med `continueOnError = true` (app-lib v8, `PrefillSI.cs`), så en nøkkel som ikke finnes i modellen, **droppes uten feil**. Fagsystemets test må derfor sjekke at verdien står i `model` etter opprettelse, ikke bare at kallet ga 201.
 - **Tomme forhåndsutfylte felt skjules** med `hidden` (`["or", ["equals", ["dataModel", "x"], null], ["equals", ["dataModel", "x"], ""]]`), så skjemaet virker også uten forhåndsutfylling, både i forhåndsvisningen og ved manuell start.
 - **`disallowUserInstantiation: true`** sørger for at bare fagsystemet kan starte appen. Da virker trolig ikke forhåndsvisningen i Studio. Det er et valg mennesket tar, og det må nevnes.
 - **Vedlegg:** komponent-id-en til `FileUpload` *er* datatype-id-en. Fagsystemet leser vedlegg og PDF (`ref-data-as-pdf`) som egne dataelementer.
-- **PDF-en lages bare med `enablePdfCreation: true`** på skjemadatatypen (`model` eller det den heter). At `ref-data-as-pdf` står i `dataTypes`, betyr ikke at appen lager PDF. Sett feltet når fagsystemet skal hente PDF-en, og kontroller det med `appmeta` i `altinn-kall` og en faktisk instans. Målt 2026-10-19: Digdirs generiske testapp `ettersend-info` har `false` på alle datatyper, og ingen av instansene har PDF. Trenger du annen oppførsel i en app du ikke eier, lag en egen kopi (punkt 7).
+- **PDF-en lages bare med `enablePdfCreation: true`** på skjemadatatypen (`model` eller det den heter). At `ref-data-as-pdf` står i `dataTypes`, betyr ikke at appen lager PDF. Sett feltet når fagsystemet skal hente PDF-en, og kontroller det med appens metadata (`applicationmetadata`) og en faktisk instans. En app med `false` på alle datatyper lager ingen PDF på noen instans. Trenger du annen oppførsel i en app du ikke eier, lag en egen kopi (punkt 7).
 
 ## 4. Kryss-sjekk før commit
 
@@ -77,7 +77,7 @@ Den sjekker det som kan avgjøres fra filene alene, og avslutter med exit 1 ved 
 
 Den validerer **ikke** komponentegenskaper mot Altinns JSON-skjemaer. Det gjør Studio når appen åpnes der. Si det, ikke påstå at appen er «validert».
 
-Skriptet er kjørt mot `ddlabs/uttalelse`, `parkeringstillatelse`, `ettersend-info`, `generisk-klageskjema` og `dihe-motorferdsel`, som alle kjører i tt02, uten én FEIL. Et funn betyr derfor noe.
+Skriptet gir ingen FEIL på apper som kjører i tt02. Et funn betyr derfor noe.
 
 ## 5. Metadata (kreves for publisering i en delt org)
 

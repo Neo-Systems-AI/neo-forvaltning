@@ -5,7 +5,7 @@ Bare lesing; personnummeret maskeres (de seks første sifrene og `*****`).
 
 | Skill | Hva |
 |---|---|
-| `krr:krr` | `person`: kontaktinformasjon, reservasjon og varslingsstatus for én eller flere personer |
+| `krr:api` | `person`: kontaktinformasjon, reservasjon og varslingsstatus for én eller flere personer |
 | `krr:env` | Config-fila slik pluginen leser den |
 
 `scripts/krr.mjs` har kommandoen, uten avhengigheter. Miljøene er `test` (test.kontaktregisteret.no) og
@@ -19,7 +19,7 @@ Bare lesing; personnummeret maskeres (de seks første sifrene og `*****`).
 
 **Klienten hentes fra `maskinporten`-delen** (`maskinporten.byEnv.<miljø>.klienter.<klient>`, standard `krr`), ikke
 fra egne nøkler her. Det er det enkleste: klienten, nøkkelen og scopet står ett sted, og
-`/maskinporten:maskinporten token krr` prøver nøyaktig den klienten KRR-oppslaget bruker. Står ingen scopes på
+Tokenet for klienten `krr` i Maskinporten-pluginen prøver nøyaktig den klienten KRR-oppslaget bruker. Står ingen scopes på
 klienten, brukes `krr:global/kontaktinformasjon.read`. Pluginen `maskinporten` trenger ikke være installert; bare
 delen i config-fila.
 

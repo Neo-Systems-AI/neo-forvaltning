@@ -7,14 +7,14 @@ bærer en hemmelighet eller kan stenge noen ute, over MCP, når Neo er koblet ti
 
 | Skill | Hva |
 |---|---|
-| `entra:sso-scim` | SSO, «Kun SSO», SCIM og grupper koblet til jobbroller og tilgangsgrupper, med en prøve på testbrukere |
-| `entra:felles-postboks` | En felles postboks koblet til innboksen, med app-tilgang avgrenset i Exchange |
+| `entra:set-up-sso` | SSO, «Kun SSO», SCIM og grupper koblet til jobbroller og tilgangsgrupper, med en prøve på testbrukere |
+| `entra:set-up-shared-mailbox` | En felles postboks koblet til innboksen, med app-tilgang avgrenset i Exchange |
 
 De to er uavhengige: en organisasjon kan ha den ene uten den andre, og de bruker hver sin app i Entra.
 
 ## Config
 
-Ingen. Pluginen leser ingenting fra `.claude/neo.config.json`, og har ingen egne skript. `entra:sso-scim` bruker
+Ingen. Pluginen leser ingenting fra `.claude/neo.config.json`, og har ingen egne skript. `entra:set-up-sso` bruker
 Neos MCP-server når den er koblet til for organisasjonen (eier eller administrator), og virker uten.
 
 ## Det kunden må ha selv

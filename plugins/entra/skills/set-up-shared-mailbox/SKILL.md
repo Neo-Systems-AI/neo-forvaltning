@@ -1,5 +1,5 @@
 ---
-name: felles-postboks
+name: set-up-shared-mailbox
 description: Kobler en felles postboks i Exchange Online (postmottak@ og lignende) til innboksen i Neo, med app-tilgang avgrenset til de felles postboksene. Dekker appen i Entra, rollene i Exchange, oppsettet i Neo, kontrollen av at e-post kommer inn, og feilkodene. Last når en felles postboks skal kobles til, prøves eller feilsøkes.
 ---
 
@@ -9,9 +9,8 @@ E-post til en felles postboks kommer inn i innboksen i Neo og synkroniseres auto
 ser henvendelsene. En felles postboks har ingen innlogging, så Neo leser den med appens egen tilgang, og den tilgangen
 avgrenses i Exchange til nettopp de felles postboksene.
 
-**Hva som er prøvd:** bare del 1 (appen i Entra) er kjørt, 2026-11-17. Del 2–4 er skrevet etter oppsettet Neo selv
-viser på Microsoft-integrasjonens side og er ikke kjørt: tenanten prøven ble gjort i, hadde ikke Exchange Online.
-Stemmer ikke et steg med det siden viser, er det siden som gjelder.
+**Det som ikke er prøvd mot en tenant:** del 2–4 følger oppsettet Neo viser på Microsoft-integrasjonens side. Stemmer
+ikke et steg med det siden viser, er det siden som gjelder.
 
 ## 0. Hvem gjør hva
 

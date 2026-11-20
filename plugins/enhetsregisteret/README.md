@@ -5,7 +5,7 @@ organisasjonsnumre. Bare lesing, gjennom det åpne API-et (`data.brreg.no/enhets
 
 | Skill | Hva |
 |---|---|
-| `enhetsregisteret:enhetsregisteret` | `enhet`, `underenhet` og `underenheter` for et organisasjonsnummer |
+| `enhetsregisteret:api` | `enhet`, `underenhet` og `underenheter` for et organisasjonsnummer |
 | `enhetsregisteret:env` | Config-fila slik pluginen leser den |
 
 `scripts/enhetsregisteret.mjs` har kommandoene, uten avhengigheter.

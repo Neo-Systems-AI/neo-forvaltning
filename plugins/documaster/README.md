@@ -1,7 +1,7 @@
 # documaster
 
 Rå lese-kall mot kundens Documaster-arkiv (Noark 5), til feilsøk. Den som feilsøker en flyt i Neo, skal kunne se hva
-arkivet selv sier, og sette det opp mot det Neo gjorde (`/helse:feilsok`): ble journalposten arkivert, i hvilken
+arkivet selv sier, og sette det opp mot det Neo gjorde: ble journalposten arkivert, i hvilken
 mappe, og med hvilke dokumenter.
 
 Bare lesing. Pluginen har ingen kall som oppretter, endrer eller sletter.
@@ -51,8 +51,8 @@ token med client credentials.
 
 | Kommando | Spørring | Bevist |
 |---|---|---|
-| `token` | token-kallet alene | i labben |
-| `arkivdeler` | `Arkivdel` | i labben |
+| `token` | token-kallet alene | test |
+| `arkivdeler` | `Arkivdel` | test |
 | `mappe <id>` / `--saksnummer` | `AbstraktMappe`, `id` / `mappeIdent` | formen produktet bruker |
 | `registrering <id>` / `--ident` | `AbstraktRegistrering`, `id` / `registreringsIdent` | formen produktet bruker |
 | `journalpost <id>` | `Journalpost`, `id` | formen produktet bruker |
