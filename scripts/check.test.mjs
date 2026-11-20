@@ -39,3 +39,21 @@ test("en intern vert stoppes med linja", () => {
   assert.equal(x.check, "public");
   assert.equal(x.line, 2);
 });
+
+test("en lenke eller en regel i docs/ som ikke finnes, stoppes", () => {
+  const root = repo();
+  mkdirSync(join(root, "docs/monstre"), { recursive: true });
+  mkdirSync(join(root, "docs/integrasjoner"), { recursive: true });
+  writeFileSync(join(root, "docs/integrasjoner/a.md"), "# A\n\n## Det som legges i hvelvet\n");
+  writeFileSync(join(root, "docs/monstre/01-sak.md"), "## en-regel Regelen\n\n```yaml\nid: en-regel\n```\n");
+  writeFileSync(join(root, "docs/monstre/02-status.md"), [
+    "krever: [01-sak.md#en-regel, 01-sak.md#borte]",
+    "Se [A](../integrasjoner/a.md#det-som-legges-i-hvelvet) og [B](../integrasjoner/b.md) og [C](../integrasjoner/a.md#mangler).",
+  ].join("\n"));
+  const msgs = run(root).filter((x) => x.check === "docs").map((x) => x.message);
+  assert.deepEqual(msgs.sort(), [
+    "Lenken peker på #mangler, som ikke er en overskrift i ../integrasjoner/a.md",
+    "Lenken peker på ../integrasjoner/b.md, som ikke finnes",
+    "Regelen 01-sak.md#borte finnes ikke",
+  ]);
+});
