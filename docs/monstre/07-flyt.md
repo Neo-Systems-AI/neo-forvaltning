@@ -129,6 +129,7 @@ klasse: felle
 gjelder: [workflow, AssignCase.assignedToId, EmailNotification.sender, SkrivHendelse.hendelsestype]
 krever: [14-tilgang.md#jobbroller-etter-jobben]
 opphav: praksis
+sjekkes: maskinelt
 ```
 
 - **Gjør:** Les gapene før du aktiverer, og løs dem i noden de peker på. La en person med rett til å endre saker

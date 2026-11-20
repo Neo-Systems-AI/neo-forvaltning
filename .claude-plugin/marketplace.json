@@ -32,7 +32,7 @@
       "name": "konfig",
       "source": "./plugins/konfig",
       "description": "Gjennomgang av oppsettet i Neo mot regler: sakstyper, felt, oppgavemaler og flyter som mangler noe, er dobbelt, eller ikke er publisert. Leser siste snapshot, med en prioritert liste over tiltak. Bare lesing.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "forvaltning"
     },
     {

@@ -203,6 +203,7 @@ klasse: valg
 gjelder: [caseType.name, caseType.slug, caseType.description, caseType.color]
 krever: [00-navn-pakking-og-versjoner.md#navn-er-nokkelen]
 opphav: forslag
+sjekkes: maskinelt
 ```
 
 - **Gjør:** Gi sakstypen et navn som sier hva én sak er, med kundens ord («Søknad om tilskudd»). Skriv i beskrivelsen hva

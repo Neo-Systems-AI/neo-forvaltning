@@ -50,6 +50,7 @@ klasse: felle
 gjelder: [caseType.name, workflow.name, stream.name, form.name, instruction.name, caseRunInstruction.name, documentTemplate.name, caseDataTemplate.name, flowEventType.name, taskTemplateSet.name, savedView.name, customFieldDefinition.name]
 krever: [07-flyt.md#flyt-identitet-er-id]
 opphav: skrevet
+sjekkes: maskinelt
 ```
 
 - **Gjør:** Bestem navnet på hvert objekt før det rulles ut eller promoteres fra sandboxen. Velg navn som ikke kolliderer

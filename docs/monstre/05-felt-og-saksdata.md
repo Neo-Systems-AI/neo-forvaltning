@@ -542,6 +542,7 @@ klasse: standard
 gjelder: [customFieldDefinition.aiSuggestions, customFieldDefinition.extractionCriterion, customFieldDefinition.helpText, caseType.customFields.aiSuggestions, caseType.customFields.extractionCriterion, caseType.customFields.helpText]
 krever: [05-felt-og-saksdata.md#felt-fodes-fra-saksdata]
 opphav: skrevet
+sjekkes: maskinelt
 ```
 
 - **Gjør:** La Neos standard stå (forslagene er av). Slå på `aiSuggestions` med vilje på saksfelt som skal leses ut av
