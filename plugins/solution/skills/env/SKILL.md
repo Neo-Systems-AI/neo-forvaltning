@@ -1,9 +1,9 @@
 ---
 name: env
-description: Viser hva konfig trenger i .claude/neo.config.json, hva som er satt, hvor verdien kom fra, og hva som mangler. Bare lesing. Kjør denne først når noe i konfig ikke gir det du venter.
+description: Viser hva solution trenger i .claude/neo.config.json, hva som er satt, hvor verdien kom fra, og hva som mangler. Bare lesing. Kjør denne først når noe i solution ikke gir det du venter.
 ---
 
-# Config for konfig
+# Config for solution
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/neo-config.mjs" --check

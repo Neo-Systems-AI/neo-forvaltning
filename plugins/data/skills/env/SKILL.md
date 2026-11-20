@@ -1,9 +1,9 @@
 ---
 name: env
-description: Viser hva helse trenger i .claude/neo.config.json, hva som er satt, hvor verdien kom fra, og hva som mangler. Bare lesing. Kjør denne først når noe i helse ikke gir det du venter.
+description: Viser hva data trenger i .claude/neo.config.json, hva som er satt, hvor verdien kom fra, og hva som mangler. Bare lesing. Kjør denne først når noe i data ikke gir det du venter.
 ---
 
-# Config for helse
+# Config for data
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/neo-config.mjs" --check

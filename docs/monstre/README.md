@@ -69,8 +69,8 @@ sjekkes: maskinelt                # bare når skriptet sjekker regelen
 ## Det som sjekkes maskinelt
 
 Noen regler kan sjekkes på konfigen slik den kjører, uten skjønn: et navn brukt to ganger, en beskrivelse som mangler,
-et KI-forslag uten kriterium, en flyt som ikke er aktivert. De har `sjekkes: maskinelt`, og skriptet `rules.mjs` i
-pluginen som går gjennom konfigen, sjekker dem med samme id, så et funn alltid viser til regelen her. Skriptet sjekker
+et KI-forslag uten kriterium, en flyt som ikke er aktivert. De har `sjekkes: maskinelt`, og skriptet
+[`rules.mjs`](../../plugins/solution/scripts/rules.mjs) i pluginen `solution` sjekker dem med samme id, så et funn alltid viser til regelen her. Skriptet sjekker
 bare den delen av regelen som kan avgjøres uten skjønn; resten leses. Testene i repoet stopper en sjekk uten regel, og
 en regel som sier at den sjekkes, uten sjekk.
 

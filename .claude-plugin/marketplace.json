@@ -11,7 +11,7 @@
       "name": "forvaltning",
       "source": "./plugins/forvaltning",
       "description": "Forvaltning av oppsettet i Neo gjennom MCP: oppstarten som skriver config-fila og skrur på pluginene, snapshot av det som kjører, plan mot repoet, gjennomføring i sandkassen, og hemmelighetene fra kundens hvelv (bare navn, aldri verdier). Brukes i et repo laget fra neo-forvaltning-mal.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "category": "forvaltning"
     },
     {
@@ -22,31 +22,17 @@
       "category": "forvaltning"
     },
     {
-      "name": "helse",
-      "source": "./plugins/helse",
+      "name": "monitoring",
+      "source": "./plugins/monitoring",
       "description": "Helsa til oppsettet i Neo: flytene og kjøringene i et tidsvindu, hva som har feilet og hvorfor, og feilsøk av én kjøring. Bare lesing, gjennom Neo sin MCP-server. Sier UKJENT når den ikke kan se, aldri OK.",
-      "version": "0.1.0",
-      "category": "forvaltning"
-    },
-    {
-      "name": "konfig",
-      "source": "./plugins/konfig",
-      "description": "Gjennomgang av oppsettet i Neo mot regler: sakstyper, felt, oppgavemaler og flyter som mangler noe, er dobbelt, eller ikke er publisert. Leser siste snapshot, med en prioritert liste over tiltak. Bare lesing.",
       "version": "0.2.0",
       "category": "forvaltning"
     },
     {
-      "name": "datalag",
-      "source": "./plugins/datalag",
+      "name": "data",
+      "source": "./plugins/data",
       "description": "Spørsmål om sakene i Neo uten å skrive spørringen: hvor mange, hvilke, hvor står saken, hvem er parter og oppgaver. Bare lesing, gjennom Neo sin MCP-server med personens egne rettigheter. Maskerer fødselsnummer, telefon og e-post i svaret.",
-      "version": "0.1.0",
-      "category": "forvaltning"
-    },
-    {
-      "name": "ki",
-      "source": "./plugins/ki",
-      "description": "KI-oppsettet i Neo per sakstype: modellen, verktøyene agenten har, og feltene KI-en foreslår eller henter ut. Leser siste snapshot og foreslår endringer som går gjennom /forvaltning:plan.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "forvaltning"
     },
     {

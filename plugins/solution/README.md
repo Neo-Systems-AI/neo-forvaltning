@@ -27,6 +27,7 @@ er å få konfigen inn i Neo og ut til bruk; til de finnes, gjøres det med verk
 |---|---|
 | `solution:review-config` | Konfigen i et miljø gjennomgått mot mønstrene, med tiltak. Før overleveringen, når et oppsett tas over, eller jevnlig |
 | `solution:hand-over-to-customer` | Den testede løsningen gitt til kunden i én PR kunden godkjenner |
+| `solution:env` | Config-fila slik pluginen leser den |
 
 ## Hvor det står
 

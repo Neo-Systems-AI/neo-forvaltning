@@ -1,9 +1,9 @@
 ---
 name: env
-description: Viser hva datalag trenger i .claude/neo.config.json, hva som er satt, hvor verdien kom fra, og hva som mangler. Bare lesing. Kjør denne først når noe i datalag ikke gir det du venter.
+description: Viser hva monitoring trenger i .claude/neo.config.json, hva som er satt, hvor verdien kom fra, og hva som mangler. Bare lesing. Kjør denne først når noe i monitoring ikke gir det du venter.
 ---
 
-# Config for datalag
+# Config for monitoring
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/neo-config.mjs" --check

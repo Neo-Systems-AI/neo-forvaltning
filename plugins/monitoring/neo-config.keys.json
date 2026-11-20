@@ -1,5 +1,5 @@
 {
-  "plugin": "helse",
+  "plugin": "monitoring",
   "neo": true,
   "keys": [
     {

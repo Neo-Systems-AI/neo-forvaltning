@@ -8,10 +8,9 @@ sitt i [Neo](https://neosystems.ai), og for den som lager Altinn-skjemaer.
 | Plugin | Hva |
 |---|---|
 | [`forvaltning`](./plugins/forvaltning) | Oppstarten, snapshot, plan og gjennomføring i sandkassen, og hemmelighetene fra kundens hvelv |
-| [`helse`](./plugins/helse) | Flytene og kjøringene i et tidsvindu, og feilsøk av én kjøring |
-| [`konfig`](./plugins/konfig) | Gjennomgang av oppsettet mot regler, med tiltak |
-| [`datalag`](./plugins/datalag) | Spørsmål om sakene, bare lesing, med personopplysninger maskert |
-| [`ki`](./plugins/ki) | KI-oppsettet per sakstype |
+| [`solution`](./plugins/solution) | Løpet fra en idé til en løsning som er testet i UI og gitt til kunden: research, krav, design, konfig med KI-oppsettet, testene og funnene, og gjennomgangen av konfigen mot mønstrene |
+| [`monitoring`](./plugins/monitoring) | Flytene og kjøringene i et tidsvindu, og feilsøk av én kjøring |
+| [`data`](./plugins/data) | Spørsmål om sakene, bare lesing, med personopplysninger maskert |
 
 **Mot de eksterne systemene**, rå lese-kall til feilsøk: hva sier systemet selv, mot hva Neo gjorde:
 
@@ -32,6 +31,9 @@ sitt i [Neo](https://neosystems.ai), og for den som lager Altinn-skjemaer.
 
 De som kaller Neo eller et eksternt system, leser én config-fil i repoet, `.claude/neo.config.json`: miljøene i Neo, og én del per plugin med systemets egne
 miljøer (test og produksjon). Hemmelighetene står der bare som referanse til kundens hvelv.
+
+**Dokumentasjonen** i [`docs/`](./docs), som skillene leser og kunder og partnere kan lese her:
+[mønstrene for god konfig](./docs/monstre) og [oppskriftene for integrasjonene](./docs/integrasjoner).
 
 ## Kom i gang
 
