@@ -1,6 +1,6 @@
 ---
 name: konfig
-description: Går gjennom oppsettet i Neo for ett miljø mot reglene i konfig - det som mangler beskrivelse eller hjelpetekst, navn som er brukt to ganger, flyter som ikke er publisert - og gir en prioritert liste over tiltak. Leser siste snapshot. Bare lesing.
+description: Går gjennom oppsettet i Neo for ett miljø mot reglene i mønstrene for god konfig som kan sjekkes maskinelt - navn som er brukt to ganger, sakstyper uten beskrivelse, KI-forslag uten kriterium, flyter som ikke er aktivert - og gir en prioritert liste over tiltak. Leser siste snapshot. Bare lesing.
 ---
 
 # Gjennomgangen

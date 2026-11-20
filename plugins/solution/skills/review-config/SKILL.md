@@ -1,6 +1,6 @@
 ---
 name: review-config
-description: Går gjennom konfigen i Neo for ett miljø mot mønstrene for god konfig - det som kan sjekkes maskinelt med reglene i skriptet (beskrivelser og hjelpetekster som mangler, navn brukt to ganger, KI-forslag uten kriterium, flyter som ikke er publisert, oppgaver uten frist), og resten ved å lese konfigen mot reglene per flate - med en prioritert liste over tiltak. Bare lesing. Bruk før en løsning gis til kunden, når et oppsett skal tas over, eller jevnlig.
+description: Går gjennom konfigen i Neo for ett miljø mot mønstrene for god konfig - det som kan sjekkes maskinelt med skriptet (navn brukt to ganger, sakstyper uten beskrivelse, KI-forslag uten kriterium, flyter som ikke er aktivert), og resten ved å lese konfigen mot reglene per flate - med en prioritert liste over tiltak. Bare lesing. Bruk før en løsning gis til kunden, når et oppsett skal tas over, eller jevnlig.
 ---
 
 # Gjennomgangen av konfigen
@@ -22,7 +22,8 @@ PR i repoet.
    ```
 
    «Ikke vurdert» betyr at fila regelen trenger, mangler i uttrekket. Si det; det er ikke grønt.
-3. **Les resten mot mønstrene.** Start med grunnreglene og beslutningstabellene, og se etter fellene (`klasse: felle`):
+3. **Les resten mot mønstrene,** også de delene av reglene skriptet ikke kan avgjøre. Start med grunnreglene og
+   beslutningstabellene, og se etter fellene (`klasse: felle`):
    en status som er arbeid, et felt ingen leser, et utfall som to statuser, det innsikten skal telle men ingen flyt
    skriver. Les én flate om gangen.
 4. **Svar** med rødt først, så gult, så info, med regel-id-en, objektet og ett tiltak per funn. Et tiltak er en endring
