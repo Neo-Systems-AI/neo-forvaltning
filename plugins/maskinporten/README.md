@@ -5,7 +5,7 @@ skrives aldri ut.
 
 | Skill | Hva |
 |---|---|
-| `maskinporten:maskinporten` | `well-known` for miljøet, og `token` for en klient: bedt om, innvilget, utløp og claims |
+| `maskinporten:api` | `well-known` for miljøet, og `token` for en klient: bedt om, innvilget, utløp og claims |
 | `maskinporten:env` | Config-fila slik pluginen leser den |
 
 `scripts/maskinporten.mjs` har kommandoene, uten avhengigheter. Miljøene er `test` (test.maskinporten.no) og

@@ -5,7 +5,7 @@
 //
 //   node scripts/check.mjs [--annotate] [--summary] [--root <dir>]
 import { appendFileSync, existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { dirname, join, relative } from "node:path";
 import { plan } from "./sync-shared.mjs";
 
 export const CHECKS = [
@@ -15,7 +15,42 @@ export const CHECKS = [
   { name: "hooks", about: "Hvert skript en hook nevner, finnes" },
   { name: "public", about: "Ingenting internt eller om en kunde: interne verter, repoer og stier" },
   { name: "config", about: "Hver plugin har neo-config.keys.json, og kopiene av de felles modulene er like shared/" },
+  { name: "docs", about: "Lenkene i docs/ peker på filer og overskrifter som finnes, og hver regel i mønstrene det vises til, finnes" },
 ];
+
+// Ankeret GitHub gir en overskrift: små bokstaver, tegnsetting ut, mellomrom blir bindestrek.
+export const anchor = (heading) => heading.trim().toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, "").replace(/\s/g, "-");
+
+// Lenkene i dokumentasjonen: markdown-lenker til filer og overskrifter, og henvisningene til en regel i mønstrene
+// (`NN-flate.md#id` i `krever` og i teksten), som skal treffe en regel med den id-en.
+export function checkDocs(root) {
+  const f = [];
+  const docs = join(root, "docs");
+  if (!existsSync(docs)) return f;
+  const files = walk(docs).filter((p) => p.endsWith(".md"));
+  const headings = new Map(files.map((p) => [p, new Set(readFileSync(p, "utf8").split("\n").filter((l) => /^#{1,6} /.test(l)).map((l) => anchor(l.replace(/^#+ /, ""))))]));
+  const ids = new Map(files.map((p) => [p, new Set([...readFileSync(p, "utf8").matchAll(/^id: (\S+)/gm)].map((m) => m[1]))]));
+  for (const file of files) {
+    const rel = relative(root, file);
+    readFileSync(file, "utf8").split("\n").forEach((line, i) => {
+      for (const [, target] of line.matchAll(/\]\(([^)\s]+)\)/g)) {
+        if (/^[a-z]+:/.test(target)) continue;
+        const [path, hash] = target.split("#");
+        const dest = path ? join(dirname(file), path) : file;
+        if (!existsSync(dest)) f.push({ check: "docs", file: rel, line: i + 1, message: `Lenken peker på ${path}, som ikke finnes` });
+        else if (hash && dest.endsWith(".md") && !headings.get(dest)?.has(hash)) f.push({ check: "docs", file: rel, line: i + 1, message: `Lenken peker på #${hash}, som ikke er en overskrift i ${path || "fila"}` });
+      }
+      if (!rel.startsWith("docs/monstre/")) return;
+      const refs = [...line.matchAll(/(\d\d-[a-z0-9-]+\.md)#([a-z0-9-]+)/g)].filter((m) => !line.includes(`](${m[0]}`) && !line.includes(`](./${m[0]}`));
+      for (const [, name, id] of refs) {
+        const dest = join(docs, "monstre", name);
+        if (!existsSync(dest)) f.push({ check: "docs", file: rel, line: i + 1, message: `Henvisningen peker på ${name}, som ikke finnes` });
+        else if (!ids.get(dest)?.has(id)) f.push({ check: "docs", file: rel, line: i + 1, message: `Regelen ${name}#${id} finnes ikke` });
+      }
+    });
+  }
+  return f;
+}
 
 // Det som aldri skal stå i et offentlig repo. Kundenavn holdes ute ved review; her står det som kan sjekkes.
 export const INTERNAL = [
@@ -98,6 +133,7 @@ export function run(root) {
   if (existsSync(join(root, "shared"))) {
     for (const i of plan(root).filter((x) => !x.same)) f.push({ check: "config", file: `plugins/${i.plugin}/scripts/lib/${i.mod.split("/")[1]}`, message: `Ikke lik shared/${i.mod}. Kjør node scripts/sync-shared.mjs` });
   }
+  f.push(...checkDocs(root));
   return f.map((x) => ({ level: "fail", ...x }));
 }
 

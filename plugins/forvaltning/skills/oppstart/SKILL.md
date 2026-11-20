@@ -16,7 +16,7 @@ Spør om det som mangler, ett tema om gangen, og vis hva du har før du skriver:
 2. **Miljøene:** vanligvis `sandkasse` og `produksjon`. Adressen til Neo.
 3. **Koblingen:** har org-admin laget en kobling for Claude Code i Neo (*API-klienter → Koble til Claude*, slaget
    «Claude Code»), én per miljø? Neo viser en kommando med klient-ID-en. Den er ikke en hemmelighet.
-4. **Pluginene:** hvilke skal på? `forvaltning` alltid. `helse`, `konfig` og `ki` er vanlige. `datalag` leser
+4. **Pluginene:** hvilke skal på? `forvaltning` alltid. `solution` og `monitoring` er vanlige. `data` leser
    saker med personopplysninger, så den skrus bare på når kunden vil det. `altinn` når kunden lager skjemaer.
 
 ## 2. Skriv det

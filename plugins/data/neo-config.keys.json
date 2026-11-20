@@ -1,0 +1,11 @@
+{
+  "plugin": "data",
+  "neo": true,
+  "keys": [
+    {
+      "path": "maxRows",
+      "fallback": 50,
+      "doc": "Flest rader pluginen viser i ett svar"
+    }
+  ]
+}

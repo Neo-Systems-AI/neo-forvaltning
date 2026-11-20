@@ -5,7 +5,7 @@ det Neo gjorde. Bare lesing. Hemmelighetene sladdes, og fødselsnummer maskeres.
 
 | Skill | Hva |
 |---|---|
-| `fiks:fiks` | Kallene: SvarUt (forsendelsestyper, mottakersystem, status, hendelser), SvarInn (nye forsendelser) og Folkeregisteret (person, hendelser) |
+| `fiks:api` | Kallene: SvarUt (forsendelsestyper, mottakersystem, status, hendelser), SvarInn (nye forsendelser) og Folkeregisteret (person, hendelser) |
 | `fiks:env` | Config-fila slik pluginen leser den |
 
 `scripts/fiks.mjs` er kallene, uten avhengigheter (Node 22). `scripts/fiks.test.mjs` prøver dem uten nettverk.

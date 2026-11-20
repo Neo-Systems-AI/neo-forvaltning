@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Rå lese-kall mot KS Fiks, slik vi gjør dem i labben når vi leter etter hvor en feil ligger: hva sier Fiks selv om
+// Rå lese-kall mot KS Fiks, slik vi gjør dem når vi leter etter hvor en feil ligger: hva sier Fiks selv om
 // en forsendelse, et mottakersystem eller en person, satt opp mot det Neo gjorde. Bare lesing: ingen kall som sender,
 // kvitterer eller endrer noe. Hemmelighetene sladdes, og fødselsnummer maskeres i alt som skrives ut.
 //

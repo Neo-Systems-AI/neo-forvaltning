@@ -3,15 +3,15 @@
 Bygg og publiser Altinn Studio-apper — skjemaene innbyggere og virksomheter sender inn i Altinn — fra Claude Code, og les hva Altinn 3 selv sier når noe skal feilsøkes. Pluginen har tre deler:
 
 - **Digdirs egne skills (vanilje).** De sju skillene bak KI-assistenten i Altinn Studio, kopiert byte-identisk fra [`Altinn/altinn-studio`](https://github.com/Altinn/altinn-studio/tree/main/src/AI/agents/agents/skills) (MIT, lisensen deres står i [`LICENSE-DIGDIR`](./LICENSE-DIGDIR)). De forklarer hvordan filene i en app skal se ut. Digdir skriver selv at de kan brukes fra Claude Code.
-- **Vår egen skill, `altinn-publisering`.** Den dekker hele løpet ut til publisert i tt02, med de to kontrollskriptene Claude Code mangler. Den er skrevet etter publiseringen av `ddlabs/uttalelse` (2026-09-29) og verifisert mot fem apper som kjører i tt02.
-- **Vår egen skill, `altinn-kall`.** Rå lese-kall mot Altinn 3 med kundens Maskinporten-klient, til feilsøk: instansen, prosessen, data-elementene, hendelsene og appens metadata, satt opp mot det Neo gjorde (`/helse:feilsok`). Se [Lese-kallene](#lese-kallene).
+- **Vår egen skill, `publish-app`.** Den dekker hele løpet ut til publisert i tt02, med de to kontrollskriptene Claude Code mangler.
+- **Vår egen skill, `api`.** Rå lese-kall mot Altinn 3 med kundens Maskinporten-klient, til feilsøk: instansen, prosessen, data-elementene, hendelsene og appens metadata, satt opp mot det Neo gjorde. Se [Lese-kallene](#lese-kallene).
 
 ## Skillene
 
 | Skill | Kilde | Last før du … |
 |---|---|---|
-| `altinn-publisering` | **egen** | lager, endrer eller publiserer en app. **Last denne først.** Den gir rekkefølgen, hva bare et menneske kan gjøre, og hvordan hvert steg kontrolleres |
-| `altinn-kall` | **egen** | feilsøker hva Altinn har for en instans eller en app: status, prosess, data-elementer, hendelser |
+| `publish-app` | **egen** | lager, endrer eller publiserer en app. **Last denne først.** Den gir rekkefølgen, hva bare et menneske kan gjøre, og hvordan hvert steg kontrolleres |
+| `api` | **egen** | feilsøker hva Altinn har for en instans eller en app: status, prosess, data-elementer, hendelser |
 | `env` | **egen** | lurer på hva som er satt i `.claude/neo.config.json` |
 | `altinn-planning` | Digdir | gjør en endring som rører flere filer. Hvilke filer per endringstype, rekkefølge, og at en ny side trenger **både** en plass i `pages.order` og en `NavigationButtons` |
 | `altinn-datamodel` | Digdir | rører `App/models/`. `model.schema.json`, `model.xsd` og `model.cs` er ett synkront sett |
@@ -25,14 +25,14 @@ Hvilken versjon av Digdirs skills som er kopiert, står i [`UPSTREAM.json`](./UP
 
 ## Kontrollskriptene
 
-Begge ligger i `skills/altinn-publisering/scripts/`, er avhengighetsfrie (Node 18+) og endrer ingenting.
+Begge ligger i `skills/publish-app/scripts/`, er avhengighetsfrie (Node 18+) og endrer ingenting.
 
 | Skript | Svarer på | Exit |
 |---|---|---|
 | `check-app.mjs [app-rot]` | Henger filene sammen? Sjekker app-id mot repoet, metadata, at de tre modellfilene har de samme feltene, sidelisten, `NavigationButtons`, bindinger og uttrykk mot modellen, tekstnøkler og tekstvariabler, vedleggsdatatyper, kodelister og åpenbare hemmeligheter. Erstatter det `verify_changes` og `altinn_datamodel_sync` gjør i Digdirs løkke, så langt filene alene kan avgjøre det | 0 OK · 1 FEIL · 2 ikke en app-rot |
 | `check-deployed.mjs [app-rot] [--env tt02\|prod] [--wait s]` | Kjører klonen i miljøet? Med `--wait` prøver den på nytt til alt stemmer, fordi en publisering ruller ut gradvis. Sammenligner app-id, datatyper, tittel, sider, komponent-id-er per side og datamodell via endepunktene appen eksponerer uten innlogging. Studio henger etter, så dette er kontrollen, ikke Studios grønne status | 0 matcher · 1 avvik eller svarer ikke · 2 feil bruk |
 
-Verifisert: `check-app.mjs` finner ingen FEIL i `ddlabs/uttalelse`, `parkeringstillatelse`, `ettersend-info`, `generisk-klageskjema` eller `dihe-motorferdsel`, og fanger alle åtte feiltypene som ble plantet i en kopi. `check-deployed.mjs` gir OK for alle fem mot tt02, og en forklarende FEIL for en app på en personlig konto.
+`check-app.mjs` gir ingen FEIL på apper som kjører i tt02, og fanger feiltypene over når de plantes i en kopi. `check-deployed.mjs` gir OK for en app som kjører, og en forklarende FEIL for en app på en personlig konto.
 
 ## Det som ikke oversettes til Claude Code
 
@@ -72,7 +72,7 @@ Oppsett for en ny utvikler:
 
 ## Arbeidsflyt og publisering
 
-Står i [`skills/altinn-publisering/SKILL.md`](./skills/altinn-publisering/SKILL.md), som er den ene kilden for løpet, så agenten og mennesket leser det samme. Kort fortalt:
+Står i [`skills/publish-app/SKILL.md`](./skills/publish-app/SKILL.md), som er den ene kilden for løpet, så agenten og mennesket leser det samme. Kort fortalt:
 
 1. Tom app i Studio, helst direkte med org-en som eier.
 2. Klon og bygg etter en app som kjører.
@@ -86,21 +86,21 @@ Står i [`skills/altinn-publisering/SKILL.md`](./skills/altinn-publisering/SKILL
 
 ## Lese-kallene
 
-`scripts/altinn.mjs`, uten avhengigheter (Node 22), brukt av skillen [`altinn-kall`](./skills/altinn-kall/SKILL.md). Bare lesing: ingen kall som oppretter, sender, flytter prosessen, kvitterer eller sletter.
+`scripts/altinn.mjs`, uten avhengigheter (Node 22), brukt av skillen [`api`](./skills/api/SKILL.md). Bare lesing: ingen kall som oppretter, sender, flytter prosessen, kvitterer eller sletter.
 
 **Tokenet.** Et Maskinporten-token for kundens klient (JWT-grant) veksles til et Altinn-token med `GET /authentication/api/v1/exchange/maskinporten` på plattform-verten. Altinn-tokenet brukes mot Storage, app-API-et og Events.
 
-| Kommando | Endepunkt | Bevist |
+| Kommando | Endepunkt | Prøvd |
 |---|---|---|
-| `token` | Maskinporten, så vekslingen | i labben (tt02) |
-| `instanser [--app \| --org] [--part] [--ko] [--antall]` | `GET <plattform>/storage/api/v1/instances?appId=…` | i labben (tt02) |
-| `instans <part>/<guid>` | `GET <plattform>/storage/api/v1/instances/{part}/{guid}` | i labben (tt02) |
-| `data <part>/<guid>` | instansdokumentets `data`, bare metadata | i labben (tt02) |
-| `data <part>/<guid> <dataGuid> --innhold` | `GET <plattform>/storage/api/v1/instances/{part}/{guid}/data/{dataGuid}` | i labben (tt02) |
-| `prosess <part>/<guid> [--historikk]` | `GET https://<org>.apps.<miljø>/<org>/<app>/instances/{part}/{guid}/process[/history]` | i labben (tt02) |
-| `hendelser [--alle]` | `GET <plattform>/events/api/v1/events?resource=urn:altinn:resource:app_<org>_<app>&after=…` | i labben (tt02) |
-| `hendelser --tjenesteeier` | `GET <plattform>/events/api/v1/app/{org}/{app}` | i labben (tt02) |
-| `appmeta` | `GET https://<org>.apps.<miljø>/<org>/<app>/api/v1/applicationmetadata` | i labben (tt02) |
+| `token` | Maskinporten, så vekslingen | tt02 |
+| `instanser [--app \| --org] [--part] [--ko] [--antall]` | `GET <plattform>/storage/api/v1/instances?appId=…` | tt02 |
+| `instans <part>/<guid>` | `GET <plattform>/storage/api/v1/instances/{part}/{guid}` | tt02 |
+| `data <part>/<guid>` | instansdokumentets `data`, bare metadata | tt02 |
+| `data <part>/<guid> <dataGuid> --innhold` | `GET <plattform>/storage/api/v1/instances/{part}/{guid}/data/{dataGuid}` | tt02 |
+| `prosess <part>/<guid> [--historikk]` | `GET https://<org>.apps.<miljø>/<org>/<app>/instances/{part}/{guid}/process[/history]` | tt02 |
+| `hendelser [--alle]` | `GET <plattform>/events/api/v1/events?resource=urn:altinn:resource:app_<org>_<app>&after=…` | tt02 |
+| `hendelser --tjenesteeier` | `GET <plattform>/events/api/v1/app/{org}/{app}` | tt02 |
+| `appmeta` | `GET https://<org>.apps.<miljø>/<org>/<app>/api/v1/applicationmetadata` | tt02 |
 
 Plattform-verten er `platform.tt02.altinn.no` i tt02 og `platform.altinn.no` i produksjon. Produksjon er ikke prøvd.
 
