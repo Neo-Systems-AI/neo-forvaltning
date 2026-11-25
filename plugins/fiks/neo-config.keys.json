@@ -17,7 +17,7 @@
     {
       "path": "maskinporten.nokkel",
       "perEnv": true,
-      "doc": "HEMMELIG. Den private nøkkelen til klienten, som referanse med \"fil\": true, for eksempel { \"$env\": \"FIKS_MASKINPORTEN_NOKKEL\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\", \"fil\": true }"
+      "doc": "HEMMELIG. Den private nøkkelen til klienten, som navnet på variabelen, for eksempel { \"$env\": \"FIKS_MASKINPORTEN_NOKKEL\" }, med referansen til hvelvet i integrasjoner/<system>/hemmeligheter.yaml"
     },
     {
       "path": "integrasjon.id",
@@ -27,7 +27,7 @@
     {
       "path": "integrasjon.passord",
       "perEnv": true,
-      "doc": "HEMMELIG. Integrasjonens servicepassord (headeren IntegrasjonPassord), som referanse: { \"$env\": \"FIKS_INTEGRASJON_PASSORD\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\" }"
+      "doc": "HEMMELIG. Integrasjonens servicepassord (headeren IntegrasjonPassord), som referanse: { \"$env\": \"FIKS_INTEGRASJON_PASSORD\" }, med referansen til hvelvet i integrasjoner/<system>/hemmeligheter.yaml"
     },
     {
       "path": "svarut.kontoId",
@@ -42,7 +42,7 @@
     {
       "path": "svarinn.passord",
       "perEnv": true,
-      "doc": "HEMMELIG. Service-passordet til mottakersystemet, som referanse: { \"$env\": \"FIKS_SVARINN_PASSORD\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\" }"
+      "doc": "HEMMELIG. Service-passordet til mottakersystemet, som referanse: { \"$env\": \"FIKS_SVARINN_PASSORD\" }, med referansen til hvelvet i integrasjoner/<system>/hemmeligheter.yaml"
     },
     {
       "path": "folkeregister.rolleId",

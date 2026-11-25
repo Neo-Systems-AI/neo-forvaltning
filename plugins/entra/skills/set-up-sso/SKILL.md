@@ -8,6 +8,10 @@ description: Setter opp innlogging med Microsoft Entra ID (SSO) og automatisk br
 Løpet kobler organisasjonens Entra-tenant til Neo: medlemmene logger inn med Microsoft-kontoen sin, Entra oppretter
 og deaktiverer dem i Neo, og gruppene i Entra gir jobbroller og tilgangsgrupper.
 
+**Oppskriften står i `${CLAUDE_PLUGIN_ROOT}/docs/entra.md`:** hva kunden gjør og i hvilken rekkefølge, hva som legges i
+hvelvet, hva forvalteren gjør i Neo, kontrollrunden, hvordan det er i drift, og feilene som pleier å komme. Les den
+først. Her står hvordan stegene gjøres med `az` og over MCP, og hvem som gjør hva; oppskriften gjentas ikke.
+
 **Det som ikke er prøvd mot en Entra-tenant:** portal-stegene i del 5, å gjenopprette en deaktivert bruker, og
 stegene agenten gjør i Neo over MCP (merket **Agenten** under). Resten er kjørt med `az`-kommandoene slik de står.
 Feilene under «Feil som pleier å komme» er de som kommer underveis, pluss de Neo selv melder.
@@ -400,40 +404,23 @@ groups»: de sender alle gruppene brukeren er i. Med SCIM på leses ikke claimet
 
 ## 7. Kontroll
 
-Prøv hvert av disse, og se etter resultatet i medlemslista i Neo. **Agenten** kan bekrefte to ting over MCP:
-tilgangsgruppene (`list_access_groups` viser medlemmene, med `fromEntra` for dem Entra har gitt) og antallet
-provisjonerte brukere (`get_scim_status`). Jobbrollene til et medlem ser bare mennesket, i medlemslista.
+Kjør kontrollrunden i oppskriften (handlingene i Entra og det som skal skje i Neo), og se etter resultatet i
+medlemslista i Neo. **Agenten** kan bekrefte to ting over MCP: tilgangsgruppene (`list_access_groups` viser
+medlemmene, med `fromEntra` for dem Entra har gitt) og antallet provisjonerte brukere (`get_scim_status`). Jobbrollene
+til et medlem ser bare mennesket, i medlemslista.
 
-| Handling i Entra | Forventet i Neo |
-|---|---|
-| En ny bruker legges i en tildelt gruppe | Brukeren blir medlem, med jobbrollene og tilgangsgruppene gruppen gir |
-| En bruker flyttes fra én gruppe til en annen | Rollene og tilgangsgruppene fra den første fjernes, de fra den andre gis |
-| En bruker tas ut av alle tildelte grupper | Medlemskapet revokeres |
-| En bruker deaktiveres | Medlemskapet revokeres, og øktene avsluttes |
-| Brukeren aktiveres igjen | Medlemskapet gjenopprettes |
+## Feil i verktøyene
 
-En rolle eller tilgangsgruppe gitt for hånd i Neo står, også når gruppen som ga den samme, tas bort.
-
-## Feil som pleier å komme
+Feilene i innloggingen, domenet og provisjoneringen står i oppskriften, med årsaken og rettingen. Her står de som
+kommer når agenten gjør stegene over MCP:
 
 | Feil | Årsak | Rettes med |
 |---|---|---|
-| `AADSTS50105` ved innlogging | Appen har «Assignment required», og brukeren er ikke tildelt | Tildel gruppen til appen (del 2). Det kan ta et minutt før det slår inn |
-| «… trenger tillatelse … som bare en administrator kan godkjenne» | Tenanten krever administratorsamtykke | Samtykket for `openid` og `profile` (del 2) |
-| `AADSTS50011` | Redirect-URI-en i Entra er ikke lik den Neo sender | Kopier den på nytt fra SSO-siden |
-| «Identitetsleverandøren sendte ikke brukernavnet (UPN)» | Claimet `upn` mangler på ID-tokenet | `--optional-claims` i del 2 |
-| «Microsoft-brukernavnet ditt (UPN) hører ikke til domenet …» | Brukerens UPN ligger utenfor det verifiserte domenet | Endre UPN-en, eller verifiser riktig domene |
-| «Du er ikke tildelt Neo i organisasjonens katalog» | SCIM er på, og brukeren er ikke provisjonert | Legg brukeren i en tildelt gruppe og vent på neste syklus |
-| «Fant ikke TXT-posten med riktig verdi» | DNS er ikke oppdatert ennå, eller posten har feil navn | Vent noen minutter. Navnet skal ha med underdomenet |
-| «Sett opp SSO og verifiser domenet før du slår på SCIM» | Domenet er ikke verifisert | Del 3 |
-| Kortet for roller viser «Krever Kun SSO», og koblingene kan ikke endres. Fra MCP: `SSO_ONLY_REQUIRED` | «Kun SSO» er av for organisasjonen | Del 4: slå det på med bryteren på SSO-siden, og last siden på nytt |
 | Verktøyene finnes ikke i Claude Code | Tilkoblingen er eldre enn verktøyene, eller gjelder en annen organisasjon | Lag en ny tilkobling under API-klienter i Neo, for organisasjonen SSO settes opp i |
 | Verktøyene svarer med avslag (403) | Personen er ikke eier eller administrator | Få tilgangsnivået av en administrator, eller la en administrator gjøre steget |
+| `SSO_ONLY_REQUIRED` fra et verktøy | «Kun SSO» er av for organisasjonen | Del 4: slå det på med bryteren på SSO-siden |
 | `GROUP_EXISTS` fra `create_entra_group_mapping` | Gruppen er alt koblet | Vis mennesket den eksisterende koblingen (`list_entra_group_mappings`). Oppdater først når hen har sagt hva som skal stå: `update_entra_group_mapping` erstatter begge settene |
 | Verktøyene sluttet å virke da «Kun SSO» ble slått på | Tilkoblingen ble godkjent fra en passord-økt | Logg inn på nytt med `/mcp`, med Entra |
-| Brukerne er i Neo, men ingen har fått roller fra gruppene | Jobben er ikke startet, så gruppene er ikke sendt | «Start jobben» i del 5 |
-| Brukeren finnes to ganger i Neo | SCIM-e-posten er en annen enn UPN-en | Mappingen i del 5, steg 4 |
-| Medlemmene i en gruppe får ikke rollen | Gruppen er nestet, eller ikke en sikkerhetsgruppe | Legg brukerne inn som direkte medlemmer av en sikkerhetsgruppe |
 
 ## Rydde etter en prøve
 

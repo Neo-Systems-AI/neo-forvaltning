@@ -20,7 +20,7 @@
       "path": "nokkel",
       "perEnv": true,
       "required": false,
-      "doc": "Den private nøkkelen, aldri med verdi: { \"$env\": \"MASKINPORTEN_KEY_FILE\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\", \"fil\": true }. Med «fil» er variabelen stien til en PEM-fil, ellers selve PEM-en"
+      "doc": "Den private nøkkelen, aldri med verdi: { \"$env\": \"MASKINPORTEN_KEY_FILE\" }, med referansen til hvelvet i integrasjoner/<system>/hemmeligheter.yaml. Med «fil» er variabelen stien til en PEM-fil, ellers selve PEM-en"
     },
     {
       "path": "scopes",

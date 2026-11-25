@@ -5,6 +5,7 @@
 // Bare lesing.
 //
 //   node check-setup.mjs [--json]
+//   node check-setup.mjs --sti <plugin>     mappa en annen plugin fra markedsplassen er installert i
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve as resolvePath } from "node:path";
@@ -66,6 +67,16 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const { found, data, errors } = load();
   const root = found?.root ?? process.cwd();
+  if (args.includes("--sti")) {
+    const name = args[args.indexOf("--sti") + 1];
+    const hit = keysFor(name, { root });
+    if (!hit) {
+      console.error(`${name} er ikke installert. Kjør /plugin install ${name}@${MARKET}.`);
+      process.exit(1);
+    }
+    console.log(hit.from);
+    process.exit(0);
+  }
   if (!data) console.log(`❌ ${errors.join("\n")}\n`);
   else console.log(`Config: ${found.path}${errors.length ? `\n${errors.map((e) => `❌ ${e}`).join("\n")}` : ""}\n`);
   let names = enabled(root);
@@ -76,8 +87,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const result = report(data, root, names);
   if (args.includes("--json")) console.log(JSON.stringify(result, null, 2));
   else {
+    let sharedShown = false;
     for (const p of result) {
       console.log(`## ${p.plugin}${p.version ? ` ${p.version}` : ""}\n`);
+      // Den felles delen (neo.*) vises én gang, under den første pluginen som leser den.
+      if (sharedShown) p.rows = p.rows.filter((r) => !r.path.startsWith("neo."));
+      else if (p.rows.some((r) => r.path.startsWith("neo."))) sharedShown = true;
       if (p.missing) {
         console.log(`❌ Er på i settings.json, men er ikke installert. Kjør /plugin install ${p.plugin}@${MARKET}.\n`);
         continue;

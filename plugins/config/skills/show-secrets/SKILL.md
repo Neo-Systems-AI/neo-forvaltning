@@ -1,18 +1,13 @@
 ---
-name: hemmeligheter
-description: Viser hvilke hemmeligheter kallene mot de eksterne systemene trenger (Maskinporten-nøkler, passord til SvarInn og andre), hvor hver av dem ligger i kundens hvelv, og om de er satt lokalt. Bare navn, aldri verdier. Sier hvordan et menneske henter dem.
+name: show-secrets
+description: Viser hvilke hemmeligheter repoet trenger (nøklene og passordene til integrasjonene og testidentitetene til personaene), hvor referansen til hver står, hvor verdien ligger i hvelvet, og om den er satt lokalt. Bare navn, aldri verdier. Sier hvordan et menneske henter dem.
 ---
 
 # Hemmelighetene
 
-Kunden eier hemmelighetene: Maskinporten-klientene, nøklene, virksomhetssertifikatet og passordene til systemene. De
-ligger i kundens hvelv. Config-fila sier bare hvor hver av dem ligger, aldri verdien:
-
-```json
-"passord": { "$env": "FIKS_SVARINN_PASSORD", "kilde": "azure-keyvault:<hvelv>/<navn>" }
-```
-
-`"fil": true` betyr at verdien er en nøkkelfil; den hentes til `.keys/`.
+Verdien ligger i hvelvet til den som eier den. Repoet har bare referansen, der den brukes: i
+`integrasjoner/<system>/hemmeligheter.yaml` og under `hemmeligheter` i personaene i `test/personaer/`. Formen på en
+referanse, kildene og navnene i hvelvet står i `${CLAUDE_PLUGIN_ROOT}/docs/hvelvet.md`; les den når noe er uklart.
 
 ## Se hva som er satt
 
@@ -20,21 +15,24 @@ ligger i kundens hvelv. Config-fila sier bare hvor hver av dem ligger, aldri ver
 node "${CLAUDE_PLUGIN_ROOT}/scripts/hent-hemmeligheter.mjs" --sjekk
 ```
 
-Tabellen viser navnet, hvor i config-fila det står, kilden, og om det er satt. Aldri verdien.
+Tabellen viser navnet på variabelen, hvor referansen står, kilden, og om den er satt. Aldri verdien. En linje med ✗
+er en referanse som ikke kan brukes: en verdi der en referanse skulle stått, eller samme navn med to kilder. Rett den i
+fila den står i.
 
 ## Hente dem
 
-Hentingen gjøres av **et menneske**, med sin egen innlogging mot kundens hvelv (`az login`). Agenten kjører den aldri,
-og leser aldri `.env.local` eller `.keys/`; vakten i pluginen stopper det. Be personen kjøre:
+Hentingen gjøres av **et menneske**, med sin egen innlogging mot hvelvet (`az login`). Agenten kjører den aldri, og
+leser aldri `.env`, `.env.*` eller `.keys/`; vakten i pluginen stopper det. Be personen kjøre:
 
 ```bash
-node <plugin-mappa>/scripts/hent-hemmeligheter.mjs --hent
+node "<mappa til pluginen config>/scripts/hent-hemmeligheter.mjs" --hent
 ```
 
-Verdiene skrives til `.env.local` og `.keys/` med tilgang bare for eieren (600). Begge står i `.gitignore`, og `check`
-i kunderepoet stopper dem om de likevel blir lagt til.
+Verdiene skrives til `.env.local` og `.keys/`, med tilgang bare for eieren. Begge står i `.gitignore`, og `check` i
+repoet stopper dem om de likevel blir lagt til.
 
-## Når vi forvalter for kunden
+## Regler
 
-Vi bruker kundens hvelv med en personlig tilgang kunden har gitt og kan trekke tilbake. Ingenting kopieres til oss.
-Testorganisasjonene vi bruker når vi bygger, hører ikke hjemme i kundens repo.
+- **Bare Key Vault og `manuell`.** En annen kilde er en feil i referansen.
+- **Kundens verdier ligger i kundens hvelv,** med en personlig tilgang kunden har gitt og kan trekke tilbake. Ingenting
+  kopieres til oss. Testorganisasjonene og testidentitetene vi bygger med, ligger i vårt hvelv.

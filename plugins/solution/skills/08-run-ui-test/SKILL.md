@@ -8,17 +8,18 @@ description: Kjører en testrunde for en løsning i Neo, i UI, med personen som 
 En runde er bare verdt noe hvis den kan sammenlignes med neste, og hvis det som ikke ble sett, er sagt. Personen ser
 på og noterer sine egne funn; det hen ser og sier, teller like mye som det skjermen viser.
 
-**Inn:** testplanen, testcasene og personaene. **Ut:** en ny runde i `6-test/` med resultatene og funnene. En runde
+**Inn:** testplanen, testcasene og personaene i `test/personaer/`. **Ut:** en ny runde i `6-test/` med resultatene og funnene. En runde
 som er kjørt, endres ikke; neste runde er en ny.
 
 ## 1. Gjør klar
 
-- **Konfigen:** miljøet runden kjører i, og at konfigen der er lik repoet på commiten testplanen er skrevet mot. Er den
-  ikke lik, er det et funn før runden starter.
+- **Konfigen:** miljøet runden kjører i, og at konfigen der er lik repoet på commiten testplanen er skrevet mot: hent
+  konfigen fra sandkassen inn i repoet (`export_config`), og se at `git diff` er tom for løsningens filer. Er den ikke
+  lik, er det et funn før runden starter.
 - **Neo:** versjonen miljøet viser, så runden kan sammenlignes med neste.
 - **Testcasene:** lagt inn og slik testplanen sier, sjekket i Neo, ikke i en logg.
-- **Personaene:** innlogget, hver i sin egen nettleserkontekst, med rollen testplanen sier. Agenten oppretter ingen
-  kontoer og ber aldri om et passord; det gjør personen.
+- **Personaene:** innlogget, hver i sin egen nettleserkontekst, med rollen testplanen sier og identitetene i fila
+  deres. Agenten oppretter ingen kontoer og ber aldri om et passord; det gjør personen.
 - **Integrasjonene** runden går gjennom, svarer: prøv hver av dem før start.
 - **Det som overvåkes:** kjøringene av flytene og agentene i Neo, og konsollen og nettverket i nettleseren. Det som ikke
   kan sees fra der runden kjører, sies før start og regnes aldri som grønt.

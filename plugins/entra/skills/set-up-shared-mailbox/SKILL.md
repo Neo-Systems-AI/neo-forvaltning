@@ -9,6 +9,10 @@ E-post til en felles postboks kommer inn i innboksen i Neo og synkroniseres auto
 ser henvendelsene. En felles postboks har ingen innlogging, så Neo leser den med appens egen tilgang, og den tilgangen
 avgrenses i Exchange til nettopp de felles postboksene.
 
+**Oppskriften står i `${CLAUDE_PLUGIN_ROOT}/docs/exchange.md`:** hva kunden gjør og i hvilken rekkefølge, hva som
+legges i hvelvet, hva forvalteren gjør i Neo, hvordan det er i drift, og feilkodene Neo gir. Les den først. Her står
+hvordan stegene gjøres med `az` og Exchange Online PowerShell; oppskriften gjentas ikke.
+
 **Det som ikke er prøvd mot en tenant:** del 2–4 følger oppsettet Neo viser på Microsoft-integrasjonens side. Stemmer
 ikke et steg med det siden viser, er det siden som gjelder.
 
@@ -142,17 +146,12 @@ avgrensningen i Exchange virker.
 
 ## Feilkodene
 
+Feilkodene fra Neo står i oppskriften, med årsaken og rettingen. Her står de som kommer fra kommandoene:
+
 | Kode | Årsak | Rettes med |
 |---|---|---|
 | `UnAuthorized` fra `Connect-ExchangeOnline` | Kontoen mangler rollen i Exchange, eller tenanten har ikke Exchange Online | Sjekken under «Det du trenger» |
 | `command not found: Connect-ExchangeOnline` | Kommandoen ble kjørt i zsh eller bash | Start `pwsh` først |
-| `MICROSOFT_TENANT_REQUIRED` | Integrasjonen står uten tenant-ID | Sett tenant-ID-en på integrasjonen (del 3) |
-| `MICROSOFT_APP_TOKEN_REJECTED` | Entra avviste appen: feil eller utløpt client secret, eller feil tenant | Lag ny client secret og lagre den i Neo |
-| `MAILBOX_NOT_FOUND` | Adressen finnes ikke i Microsoft 365 | Sjekk adressen |
-| `MAILBOX_ACCESS_DENIED` | Appen har ikke «Application Mail.Read» for postboksen | Rollen og omfanget i del 2. Vent til rollene har slått inn |
-| `MAILBOX_PURPOSE_FORBIDDEN` | Appen har ikke «Application MailboxSettings.Read» i samme omfang | Den fjerde linja i del 2 |
-| `MAILBOX_NOT_SHARED` | Adressen er en brukers egen postboks | Bruk en felles postboks |
-| `MAILBOX_ON_OTHER_INTEGRATION` | Adressen er koblet til gjennom en annen Microsoft-integrasjon i organisasjonen | Fjern den der først |
 
 En postboks som mister tilgangen etter at den er koblet til, går til feil i Neo og tar seg inn igjen av seg selv når
 rollene er rettet. Den trenger ingen ny tilkobling.

@@ -21,9 +21,8 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/maskinporten.mjs" token [<klient>] [--miljo 
 - `--consumer-org` ber om et delegert token på vegne av en annen organisasjon.
 - Avslaget kommer fram som Maskinporten ga det: status, `error` og `error_description`.
 
-Klientene står i `.claude/neo.config.json` under `maskinporten.byEnv.<miljø>`; se `/maskinporten:env`. Mangler
-nøkkelen, sier skriptet navnet på variabelen og hvor den ligger: et menneske henter den fra
-kundens hvelv, aldri agenten.
+Klientene står i `.claude/neo.config.json` under `maskinporten.byEnv.<miljø>`. Mangler nøkkelen, sier skriptet navnet
+på variabelen: et menneske henter den fra kundens hvelv, aldri agenten.
 
 ## Reglene
 

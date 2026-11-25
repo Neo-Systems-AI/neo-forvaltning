@@ -169,6 +169,7 @@ tilgangsreglene for dem, og deaktiverer dem når prosjektet er ferdig.
 | «Microsoft-brukernavnet ditt (UPN) hører ikke til domenet …» | UPN-en ligger utenfor det verifiserte domenet | Endre UPN-en, eller verifiser riktig domene |
 | «Du er ikke tildelt Neo i organisasjonens katalog» | Brukeren er ikke provisjonert | Legg brukeren i en tildelt gruppe, og vent på neste syklus |
 | «Fant ikke TXT-posten med riktig verdi» | DNS er ikke oppdatert, eller posten har feil navn | Vent noen minutter. Navnet skal ha med underdomenet |
+| «Sett opp SSO og verifiser domenet før du slår på SCIM» | Domenet er ikke verifisert | [Legg inn TXT-posten](#legg-inn-redirect-adressen-og-txt-posten), og la forvalteren verifisere domenet |
 | Brukerne er i Neo, men ingen har fått roller | Provisjoneringen er ikke startet, så gruppene er ikke sendt | [Start provisjoneringen](#prøv-én-bruker-og-start-provisjoneringen) |
 | Brukeren finnes to ganger i Neo | E-posten i provisjoneringen er en annen enn UPN-en | [Mappingene](#slå-på-provisjoneringen) |
 | Medlemmene i en gruppe får ikke rollen | Gruppen er nestet, eller ikke en sikkerhetsgruppe | Legg brukerne inn som direkte medlemmer av en sikkerhetsgruppe |

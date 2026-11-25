@@ -6,14 +6,13 @@ det Neo gjorde. Bare lesing. Hemmelighetene sladdes, og fødselsnummer maskeres.
 | Skill | Hva |
 |---|---|
 | `fiks:api` | Kallene: SvarUt (forsendelsestyper, mottakersystem, status, hendelser), SvarInn (nye forsendelser) og Folkeregisteret (person, hendelser) |
-| `fiks:env` | Config-fila slik pluginen leser den |
 
 `scripts/fiks.mjs` er kallene, uten avhengigheter (Node 22). `scripts/fiks.test.mjs` prøver dem uten nettverk.
 
 ## Config
 
 I `.claude/neo.config.json`, under `fiks`. Miljøene heter `test` og `produksjon`. En hemmelighet står aldri med verdi,
-bare som referanse til kundens hvelv:
+bare med navnet på variabelen:
 
 ```json
 {
@@ -25,16 +24,16 @@ bare som referanse til kundens hvelv:
         "maskinporten": {
           "klientId": "<klient-id>",
           "kid": "<kid, valgfri>",
-          "nokkel": { "$env": "FIKS_MASKINPORTEN_NOKKEL", "kilde": "azure-keyvault:<hvelv>/<navn>", "fil": true }
+          "nokkel": { "$env": "FIKS_MASKINPORTEN_NOKKEL" }
         },
         "integrasjon": {
           "id": "<integrasjonens id i Fiks forvaltning>",
-          "passord": { "$env": "FIKS_INTEGRASJON_PASSORD", "kilde": "azure-keyvault:<hvelv>/<navn>" }
+          "passord": { "$env": "FIKS_INTEGRASJON_PASSORD" }
         },
         "svarut": { "kontoId": "<avsenderkontoen>" },
         "svarinn": {
           "mottakersystemId": "<mottakersystemets id>",
-          "passord": { "$env": "FIKS_SVARINN_PASSORD", "kilde": "azure-keyvault:<hvelv>/<navn>" }
+          "passord": { "$env": "FIKS_SVARINN_PASSORD" }
         },
         "folkeregister": { "rolleId": "<rollen i Fiks register>" }
       }
@@ -46,6 +45,8 @@ bare som referanse til kundens hvelv:
 Hemmelige er Maskinporten-nøkkelen, integrasjonens passord og SvarInn-passordet. Id-ene er ikke hemmelige.
 
 ## Det kunden må ha selv
+
+Oppsettet hos kunden, steg for steg, står i [`docs/fiks.md`](./docs/fiks.md).
 
 Kunden eier avtalene, tilgangene og hemmelighetene; vi eier koden.
 

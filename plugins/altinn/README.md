@@ -12,7 +12,6 @@ Bygg og publiser Altinn Studio-apper — skjemaene innbyggere og virksomheter se
 |---|---|---|
 | `publish-app` | **egen** | lager, endrer eller publiserer en app. **Last denne først.** Den gir rekkefølgen, hva bare et menneske kan gjøre, og hvordan hvert steg kontrolleres |
 | `api` | **egen** | feilsøker hva Altinn har for en instans eller en app: status, prosess, data-elementer, hendelser |
-| `env` | **egen** | lurer på hva som er satt i `.claude/neo.config.json` |
 | `altinn-planning` | Digdir | gjør en endring som rører flere filer. Hvilke filer per endringstype, rekkefølge, og at en ny side trenger **både** en plass i `pages.order` og en `NavigationButtons` |
 | `altinn-datamodel` | Digdir | rører `App/models/`. `model.schema.json`, `model.xsd` og `model.cs` er ett synkront sett |
 | `altinn-policy` | Digdir | rører `App/config/authorization/policy.xml` |
@@ -106,11 +105,11 @@ Plattform-verten er `platform.tt02.altinn.no` i tt02 og `platform.altinn.no` i p
 
 Hver kjøring skriver miljøet, `GET <adresse> → <status> (<ms>)` og svaret, med tokenene og hemmelighetene sladdet. **Fødselsnumre er skjult** (`personNumber`, `/person/…`) med mindre `--vis-person` er sagt, og innholdet i et data-element hentes bare med `--innhold`. Exit 0 ved 2xx, 1 ved feil eller ikke-2xx, 2 ved feil bruk.
 
-**Det kunden må ha selv.** Kunden eier klienten og nøkkelen; vi eier koden.
+**Det kunden må ha selv.** Hele oppsettet hos kunden står i [`docs/altinn.md`](./docs/altinn.md). Kunden eier klienten og nøkkelen; vi eier koden.
 
 - **En Maskinporten-klient per miljø** (test-Maskinporten for tt02, Maskinporten for produksjon), registrert på kundens organisasjonsnummer, med tjenesteeier-scopes for Altinn. For lesing: `altinn:serviceowner/instances.read`, og for hendelsene `altinn:serviceowner/events` og `altinn:events.subscribe`. Maskinporten avviser hele kallet om klienten mangler ett scope, så `scopes` settes til dem klienten har.
 - **Kunden er tjenesteeier i Altinn** (akronymet i `org`), ellers får tokenet ikke `urn:altinn:org`, og Storage svarer 400.
-- **Nøkkelen i kundens nøkkelhvelv.** Config-fila sier bare hvor den ligger; et menneske henter den til `.keys/` med `/forvaltning:hemmeligheter`.
+- **Nøkkelen i kundens nøkkelhvelv.** Referansen står i `integrasjoner/altinn/hemmeligheter.yaml` i kunderepoet; et menneske henter den til `.keys/` med `/config:show-secrets`.
 
 I `.claude/neo.config.json`:
 
@@ -125,7 +124,7 @@ I `.claude/neo.config.json`:
       "tt02": {
         "maskinporten": {
           "clientId": "<klient-id>",
-          "nokkel": { "$env": "ALTINN_TT02_MASKINPORTEN_NOKKEL", "kilde": "azure-keyvault:<hvelv>/<navn>", "fil": true },
+          "nokkel": { "$env": "ALTINN_TT02_MASKINPORTEN_NOKKEL" },
           "scopes": ["altinn:serviceowner/instances.read", "altinn:serviceowner/events", "altinn:events.subscribe"]
         }
       }
@@ -134,7 +133,7 @@ I `.claude/neo.config.json`:
 }
 ```
 
-`kid` er valgfri (uten den brukes thumbprinten til nøkkelen), og `subscriptionKey` settes bare om kunden har fått en. Miljøene og Maskinporten-nøklene trengs bare til lese-kallene, ikke til publiseringen. Sjekk oppsettet med `/altinn:env`.
+`kid` er valgfri (uten den brukes thumbprinten til nøkkelen), og `subscriptionKey` settes bare om kunden har fått en. Miljøene og Maskinporten-nøklene trengs bare til lese-kallene, ikke til publiseringen. Hemmelighetene står bare med navnet på variabelen (`{ "$env": … }`). Hvor verdien ligger i hvelvet, står i `integrasjoner/<system>/hemmeligheter.yaml` i kunderepoet, og et menneske henter den lokalt med `/config:show-secrets`. Sjekk oppsettet med `/config:check-setup`.
 
 ```bash
 node --test plugins/altinn/scripts/*.test.mjs

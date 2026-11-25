@@ -1,24 +1,54 @@
-# forvaltning
+# config
 
-Oppsettet i Neo som filer i et repo, endret med PR og godkjent av kunden. Brukes i et repo laget fra
+Repoet og konfigen inn og ut av Neo. Konfigen står som filer i Neos eget format i repoet, endres med PR, og skrives
+til sandkassen når godkjenneren har sagt ja. Brukes i et repo laget fra
 [`neo-forvaltning-mal`](https://github.com/Neo-Systems-AI/neo-forvaltning-mal).
 
 | Skill | Hva | Endrer Neo |
 |---|---|---|
-| `forvaltning:oppstart` | Setter opp repoet, eller skrur på en plugin til | nei |
-| `forvaltning:snapshot` | Henter det som kjører, til filer | nei |
-| `forvaltning:plan` | Viser forskjellen mellom repoet og det som kjører, til PR-en | nei |
-| `forvaltning:gjennomfor` | Gjør en godkjent plan i sandkassen, én endring om gangen | ja, i sandkassen |
-| `forvaltning:hemmeligheter` | Hvilke hemmeligheter som trengs, hvor de ligger, og om de er satt (bare navn) | nei |
-| `forvaltning:env` | Viser config-fila slik pluginen leser den | nei |
+| `config:set-up-repo` | Lager og setter opp repoet, eller skrur på en plugin til | nei |
+| `config:fetch-config` | Henter konfigen fra en org som filer inn i repoet | nei |
+| `config:plan-change` | Formen, mønstrene og planen per fil mot sandkassen, i klartekst i PR-en | nei |
+| `config:apply-change` | Skriver en godkjent plan til sandkassen, fil for fil | ja, i sandkassen |
+| `config:show-secrets` | Hvilke hemmeligheter repoet trenger, hvor de ligger, og om de er satt (bare navn) | nei |
+| `config:check-setup` | Hva hver plugin som er på, trenger i config-fila, og MCP-serveren per miljø | nei |
 
-Alt går gjennom Neo sin MCP-server, med personens egen innlogging. Skriptene i `scripts/` er deterministiske og
-har ingen avhengigheter:
+## Veien inn og ut
 
-- `normalize.mjs` fjerner id-er og tidsstempler, skriver referanser med nøkkel og sorterer, så sandkasse og
-  produksjon kan sammenlignes. Id-ene står i låsefila per miljø.
-- `diff.mjs` lager planen: nytt, endret og fjernet, matchet på nøkkel.
+Filene er Neos format, uendret: én fil per objekt, i mappa for typen, navngitt etter nøkkelen
+(`case-types/hc-parkering.yaml`), under en løsnings `5-oppsett/` eller `organisasjon/5-oppsett/`. Stien Neo får, er
+stien under `5-oppsett/`. Formatet og skjemaet er Neos, på `GET <adressen>/api/config/schema` (åpent).
 
-- `hent-hemmeligheter.mjs` henter hemmelighetene fra kundens hvelv (Azure Key Vault, 1Password, eller manuelt) til
-  `.env.local` og `.keys/`. Et menneske kjører hentingen.
-- `vakt.mjs` er en hook som stopper agenten fra å lese `.env.local` og `.keys/`, og fra å kjøre hentingen.
+1. **Formen:** `check` i repoet validerer hver fil mot skjemaet, og `konfigfiler.mjs` stiene og nøklene.
+2. **Kvaliteten:** mønstrene for god konfig (`rules.mjs` i `solution`).
+3. **Virkningen:** `plan_config` per fil i rekkefølgen Neo gir, og `config_not_in_files` for det som er i Neo uten fil.
+   Planen står i PR-en.
+4. **Skrivingen:** `apply_config` per fil med `planHash`, bare mot en sandkasse. Promoteringen gjør et menneske i Neo.
+
+Alt går gjennom Neos MCP-server, med personens egen innlogging. Miljøet er `development`, med en org som har en
+sandkasse.
+
+## Skriptene
+
+Deterministiske, uten avhengigheter:
+
+| Skript | Hva |
+|---|---|
+| `scripts/lib/konfigfiler.mjs` | Konfigfilene i repoet med stien Neo skal ha, i rekkefølgen for apply; stopper når samme nøkkel står to steder |
+| `scripts/lib/mcp-server.mjs` | MCP-serveren, adressen og org-en for et miljø, og om serveren er lagt til i repoet |
+| `scripts/lib/yaml.mjs` | YAML-leseren skriptene bruker |
+| `scripts/check-setup.mjs` | Hva hver plugin som er på, leser fra `.claude/neo.config.json`, og hva som mangler |
+| `scripts/hent-hemmeligheter.mjs` | Hemmelighetene fra hvelvet til `.env.local` og `.keys/`. Et menneske kjører hentingen |
+| `scripts/vakt.mjs` | Hooken som stopper agenten fra å lese `.env`, `.env.*` og `.keys/`, og fra å kjøre hentingen |
+
+## Dokumentasjonen
+
+| Fil | Hva |
+|---|---|
+| [`docs/hvelvet.md`](docs/hvelvet.md) | Hvelvet: oppgavene, navnene, og formen på referansene i repoet |
+| [`docs/esignering.md`](docs/esignering.md) | eSignering hos Digdir |
+
+## Config
+
+`config` leser bare den felles delen av `.claude/neo.config.json`: miljøene, og MCP-serveren, adressen og org-en per
+miljø. Ingen hemmeligheter.

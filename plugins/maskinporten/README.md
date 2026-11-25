@@ -6,7 +6,6 @@ skrives aldri ut.
 | Skill | Hva |
 |---|---|
 | `maskinporten:api` | `well-known` for miljøet, og `token` for en klient: bedt om, innvilget, utløp og claims |
-| `maskinporten:env` | Config-fila slik pluginen leser den |
 
 `scripts/maskinporten.mjs` har kommandoene, uten avhengigheter. Miljøene er `test` (test.maskinporten.no) og
 `produksjon` (maskinporten.no).
@@ -24,20 +23,23 @@ plugins (`krr`, `fiks` …) peker på klienten med navnet. Nøkkelen står bare 
     "test": {
       "clientId": "<klient-ID fra selvbetjeningen>",
       "kid": "<valgfri>",
-      "nokkel": { "$env": "MASKINPORTEN_KEY_FILE", "kilde": "azure-keyvault:<hvelv>/<navn>", "fil": true },
+      "nokkel": { "$env": "MASKINPORTEN_KEY_FILE" },
       "klienter": {
         "krr": { "scopes": ["krr:global/kontaktinformasjon.read"] },
-        "fiks": { "clientId": "<en annen klient>", "nokkel": { "$env": "MASKINPORTEN_FIKS_KEY_FILE", "kilde": "azure-keyvault:<hvelv>/<navn>", "fil": true }, "scopes": ["ks:fiks"] }
+        "fiks": { "clientId": "<en annen klient>", "nokkel": { "$env": "MASKINPORTEN_FIKS_KEY_FILE" }, "scopes": ["ks:fiks"] }
       }
     }
   }
 }
 ```
 
-Med `"fil": true` er variabelen stien til en PEM-fil (`.keys/…`), slik `/forvaltning:hemmeligheter` henter den;
-ellers er den selve PEM-en. Uten `kid` brukes thumbprinten av nøkkelen (RFC 7638).
+Nøkkelen står bare med navnet på variabelen. Referansen til hvelvet står i
+`integrasjoner/maskinporten/hemmeligheter.yaml` i kunderepoet, og med `fil: true` der henter `/config:show-secrets` nøkkelen
+til en PEM-fil i `.keys/`, og variabelen er stien til den; ellers er den selve PEM-en. Sjekk oppsettet med `/config:check-setup`. Uten `kid` brukes thumbprinten av nøkkelen (RFC 7638).
 
 ## Det kunden må ha selv
+
+Oppsettet hos kunden, steg for steg, står i [`docs/maskinporten.md`](./docs/maskinporten.md).
 
 - **En egen Maskinporten-klient** per miljø, registrert i Digdirs selvbetjening, med scopene tjenestene krever.
 - **Et eget virksomhetssertifikat** eller en egen nøkkel registrert på klienten, i kundens hvelv.

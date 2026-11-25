@@ -9,7 +9,7 @@ Testen er første gang løsningen møter et menneske. Den viser at kravene holde
 og den leter etter stedene der det blir kronglete. Testplanen skrives så en annen kan kjøre runden uten å spørre.
 
 **Inn:** kravene, designet, konfigen og forrige runde når den finnes. **Ut:** testcasene, testplanen og personaene, i
-`6-test/` i løsningen og personaene i `organisasjon/team-og-roller/`. Formen står i repoets regler (`.claude/rules/`).
+`6-test/` i løsningen og personaene i `test/personaer/`. Formen står i repoets regler (`.claude/rules/`).
 
 ## Testcasene
 
@@ -24,9 +24,11 @@ fødselsnumre og organisasjonsnumre er oppdiktede eller fra testmiljøene (Tenor
 
 ## Personaene
 
-Testbrukerne, med rolle og team i Neo og de eksterne identitetene de trenger: testbrukere i Altinn og ID-porten,
-testorganisasjoner, og testkontoer i arkivet og Entra. Passord og nøkler står bare som referanser til hvelvet. Samme
-persona brukes i alle løsningene; lag en ny bare når en rolle mangler.
+Testbrukerne, én fil per persona i `test/personaer/`, med rolle og team i Neo og de eksterne identitetene de trenger:
+testbrukere i Altinn (tt02) og ID-porten (Tenor), test-organisasjonsnumre, og testkontoer i arkivet og Entra. Passord og
+nøkler står bare som referanser til hvelvet, under `hemmeligheter`. Personaene er testdata, ikke konfig. Samme persona
+brukes i alle løsningene; lag en ny bare når en rolle mangler. Et team eller en rolle personaen trenger, og som ikke
+finnes i Neo, setter et menneske opp der.
 
 ## Testplanen
 

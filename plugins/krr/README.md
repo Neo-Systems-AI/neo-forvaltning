@@ -6,7 +6,6 @@ Bare lesing; personnummeret maskeres (de seks første sifrene og `*****`).
 | Skill | Hva |
 |---|---|
 | `krr:api` | `person`: kontaktinformasjon, reservasjon og varslingsstatus for én eller flere personer |
-| `krr:env` | Config-fila slik pluginen leser den |
 
 `scripts/krr.mjs` har kommandoen, uten avhengigheter. Miljøene er `test` (test.kontaktregisteret.no) og
 `produksjon` (kontaktregisteret.no). Oppslaget går mot `POST /rest/v1/personer` (eller v2 med `--v2`).
@@ -24,6 +23,8 @@ klienten, brukes `krr:global/kontaktinformasjon.read`. Pluginen `maskinporten` t
 delen i config-fila.
 
 ## Det kunden må ha selv
+
+Oppsettet hos kunden, steg for steg, står i [`docs/krr.md`](./docs/krr.md).
 
 - **En egen Maskinporten-klient** med scopet `krr:global/kontaktinformasjon.read`, i hvert miljø.
 - **Et eget virksomhetssertifikat** eller en egen nøkkel på klienten, i kundens hvelv.

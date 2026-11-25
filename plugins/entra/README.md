@@ -12,6 +12,9 @@ bærer en hemmelighet eller kan stenge noen ute, over MCP, når Neo er koblet ti
 
 De to er uavhengige: en organisasjon kan ha den ene uten den andre, og de bruker hver sin app i Entra.
 
+Oppskriftene for kunden står i [`docs/entra.md`](./docs/entra.md) (innlogging og brukere) og
+[`docs/exchange.md`](./docs/exchange.md) (felles postbokser). Skillene leser dem, og gjentar dem ikke.
+
 ## Config
 
 Ingen. Pluginen leser ingenting fra `.claude/neo.config.json`, og har ingen egne skript. `entra:set-up-sso` bruker

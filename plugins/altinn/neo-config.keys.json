@@ -31,7 +31,7 @@
     {
       "path": "maskinporten.nokkel",
       "perEnv": true,
-      "doc": "Den private nøkkelen (PEM), bare som referanse: { \"$env\": \"ALTINN_TT02_MASKINPORTEN_NOKKEL\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\", \"fil\": true } (trengs bare til lese-kallene)"
+      "doc": "Den private nøkkelen (PEM), bare som referanse: { \"$env\": \"ALTINN_TT02_MASKINPORTEN_NOKKEL\" }, med referansen til hvelvet i integrasjoner/<system>/hemmeligheter.yaml (trengs bare til lese-kallene)"
     },
     {
       "path": "maskinporten.scopes",
@@ -46,7 +46,7 @@
     {
       "path": "subscriptionKey",
       "perEnv": true,
-      "doc": "Ocp-Apim-Subscription-Key, bare om kunden har fått en. Som referanse: { \"$env\": …, \"kilde\": … }"
+      "doc": "Ocp-Apim-Subscription-Key, bare om kunden har fått en. Som navnet på variabelen: { \"$env\": … }, med referansen til hvelvet i integrasjoner/altinn/hemmeligheter.yaml"
     }
   ]
 }

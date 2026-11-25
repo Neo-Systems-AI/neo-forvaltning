@@ -14,7 +14,7 @@ Kunden eier instansen, klienten og hemmeligheten. Vi eier koden.
 - **En klient med client credentials** mot instansen: klient-ID, hemmelighet, token-adresse og scope. Documaster setter
   den opp, enten i sin egen IdP (scope `openid`) eller i kundens Entra ID (scope `api://<app-id>/.default`).
   Klienten trenger bare lesetilgang til arkivdelene feilsøket gjelder.
-- **Hemmeligheten i kundens nøkkelhvelv.** Config-fila sier bare hvor den ligger.
+- **Hemmeligheten i kundens nøkkelhvelv.** Referansen står i `integrasjoner/documaster/hemmeligheter.yaml` i kunderepoet. Hele oppsettet hos kunden står i [`docs/documaster.md`](./docs/documaster.md).
 
 ## Oppsett
 
@@ -31,7 +31,7 @@ I `.claude/neo.config.json` i kundens repo:
         "apiUrl": "https://<instans>:8083",
         "tokenUrl": "https://<idp>/token",
         "clientId": "<klient-id>",
-        "clientSecret": { "$env": "DOCUMASTER_TEST_CLIENT_SECRET", "kilde": "azure-keyvault:<hvelv>/<navn>" },
+        "clientSecret": { "$env": "DOCUMASTER_TEST_CLIENT_SECRET" },
         "scope": "openid"
       }
     }
@@ -41,8 +41,8 @@ I `.claude/neo.config.json` i kundens repo:
 
 - **`apiUrl` er API-et, ikke nettsiden.** API-et svarer på port 8083; nettsiden på `/v2/` svarer 200 med HTML på alle
   stier, så en feil adresse ser ut som et vellykket kall. Skriptet stopper på et HTML-svar.
-- **Hemmeligheten** hentes til `.env.local` av et menneske: `/forvaltning:hemmeligheter`. Den committes aldri.
-- **Sjekk oppsettet** med `/documaster:env`.
+- **Hemmeligheten** står bare med navnet på variabelen. Et menneske henter den til `.env.local` med `/config:show-secrets`; den committes aldri.
+- **Sjekk oppsettet** med `/config:check-setup`.
 
 ## Kallene
 

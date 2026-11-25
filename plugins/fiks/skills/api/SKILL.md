@@ -47,6 +47,6 @@ Utskriften er metoden, adressen, status og tid, så svaret. Exit 1 når Fiks ikk
   den bare når kunden har bedt om det.
 - **Personopplysninger:** fødselsnummer maskeres i utskriften (seks første sifre og `*****`). Navn og adresse fra
   Folkeregisteret kommer ut som de er: gjengi bare det feilsøket trenger, og skriv det aldri i en fil i repoet.
-- **Hemmelighetene** sladdes fra alt som skrives ut. Mangler en, sier skriptet navnet og hvor den ligger; et menneske
+- **Hemmelighetene** sladdes fra alt som skrives ut. Mangler en, sier skriptet navnet på variabelen; et menneske
   henter den fra kundens hvelv, aldri agenten.
-- **Config:** mangler noe, kjør `/fiks:env`.
+- **Config:** mangler en nøkkel, sier skriptet hvilken; den settes under `fiks` i `.claude/neo.config.json`.

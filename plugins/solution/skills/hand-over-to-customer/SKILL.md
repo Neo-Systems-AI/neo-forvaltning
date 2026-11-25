@@ -10,7 +10,7 @@ den, og den som godkjenner endringer, skal vite hva de godkjenner. Overleveringe
 prosesseieren, ikke for den som bygget.
 
 **Inn:** løsningen (formålet i `losning.yaml`, kravene, designet, konfigen), siste testrunde med funnene og pakkene, og
-integrasjonene. **Ut:** en PR med overleveringen, godkjent av den som står som godkjenner i `kunde.yaml`.
+integrasjonene. **Ut:** en PR med overleveringen, godkjent av den som står som godkjenner i `repo.yaml`.
 
 ## Det som skal med
 
@@ -30,10 +30,12 @@ integrasjonene. **Ut:** en PR med overleveringen, godkjent av den som står som 
 
 1. Sjekk at det som skal overleveres, er ferdig: hvert krav har et bestått punkt eller et avvik personen har godtatt,
    og repoets sjekk er grønn.
-2. Sett statusen i `losning.yaml` slik repoets regel sier for en løsning som er klar til bruk.
+2. Sett statusen i `losning.yaml` til `i-bruk` i overleveringen. Statusene er `utkast` (mens den researches og
+   designes), `i-test` (konfigen er i sandkassen og testes), `i-bruk` (kunden har tatt den i bruk) og `avviklet`. En
+   løsning går ikke fra `utkast` rett til `i-bruk`.
 3. Skriv PR-beskrivelsen etter punktene over, kort og uten interne ord. Spør personen om hva kunden allerede vet, så
    overleveringen ikke gjentar det.
-4. Be godkjenneren i `kunde.yaml` om review.
+4. Be godkjenneren i `repo.yaml` om review.
 
 ## Personen avgjør
 

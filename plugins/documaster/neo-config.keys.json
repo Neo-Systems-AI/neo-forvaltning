@@ -29,7 +29,7 @@
       "path": "clientSecret",
       "perEnv": true,
       "required": true,
-      "doc": "Hemmeligheten til klienten, bare som referanse: { \"$env\": \"DOCUMASTER_CLIENT_SECRET\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\" }"
+      "doc": "Hemmeligheten til klienten, bare som referanse: { \"$env\": \"DOCUMASTER_CLIENT_SECRET\" }, med referansen til hvelvet i integrasjoner/<system>/hemmeligheter.yaml"
     },
     {
       "path": "scope",

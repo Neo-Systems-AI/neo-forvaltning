@@ -47,6 +47,6 @@ node "$D" sok --type <Noark-type> --query "felt = @p" --param @p=verdi
   ingen skal legges til her.
 - **Svarene er arkivinnhold.** Titler og parter kan være personopplysninger. Vis det som trengs for feilsøket, og
   skriv det aldri inn i repoet.
-- **Hemmeligheten er kundens.** Står den ikke i `.env.local`, sier skriptet navnet og hvor den ligger. Et menneske
+- **Hemmeligheten er kundens.** Står den ikke i `.env.local`, sier skriptet navnet på variabelen. Et menneske
   henter den fra kundens hvelv; agenten gjør det aldri.
 - **Spørrespråket:** bare `felt = @param` er brukt her, det produktet bruker. Om `&&` og `||` virker, er ikke prøvd.

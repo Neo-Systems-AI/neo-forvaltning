@@ -9,8 +9,9 @@ Det som gjelder hele kunden, researches én gang og brukes av alle løsningene: 
 hvordan kunden skriver, hvem kunden har med å gjøre, systemene rundt, og sakene på tvers. En løsning som bygges uten
 dette, gjetter.
 
-**Inn:** `kunde.yaml` (hvem kunden er). **Ut:** kildene og forståelsen i `virksomheten/`. Formen på begge står i
-repoets regler for mappene (`.claude/rules/`).
+**Inn:** `repo.yaml` (hvem kunden er, og hvem som eier, godkjenner og forvalter). **Ut:** kildene og forståelsen i
+`virksomheten/`. Formen på begge står i repoets regler for mappene (`.claude/rules/`). Et repo for standardløsninger
+(`type: standard` i `repo.yaml`) har ingen kunde og ingen `virksomheten/`; da gjelder ikke denne.
 
 ## De fem dimensjonene
 

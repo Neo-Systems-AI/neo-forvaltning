@@ -78,6 +78,6 @@ i stedet for som et eget innslag:
   bare når feilsøket krever det.
 - **Innholdet i et data-element** kan ha personopplysninger. Hent det med `--innhold` bare når metadata ikke er nok,
   vis bare det som trengs, og skriv det aldri inn i repoet.
-- **Nøkkelen er kundens.** Står den ikke i `.env.local`, sier skriptet navnet og hvor den ligger. Et menneske henter
+- **Nøkkelen er kundens.** Står den ikke i `.env.local`, sier skriptet navnet på variabelen. Et menneske henter
   den fra kundens hvelv; agenten gjør det aldri.
 - **Produksjon** er et annet miljø med en annen klient. Si `--miljo produksjon` bare når kunden har bedt om det.
