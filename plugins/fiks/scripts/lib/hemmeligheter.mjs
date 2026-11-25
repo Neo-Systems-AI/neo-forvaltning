@@ -1,7 +1,8 @@
-// Hemmelighetene til kallene mot de eksterne systemene. En hemmelighet står aldri med verdi i config-fila, bare som
-// en referanse: { "$env": "SVARINN_PASSORD", "kilde": "azure-keyvault:kv-kunde/svarinn-passord" }. Verdien ligger i
-// kundens hvelv og hentes lokalt av et menneske (`hent-hemmeligheter.mjs --hent`) til `.env.local` og `.keys/`, som
-// aldri committes. Skriptene leser derfra uten å skrive verdien ut. Kunden eier hemmelighetene; vi eier koden.
+// Hemmelighetene til kallene mot de eksterne systemene. En hemmelighet står aldri med verdi i config-fila, bare med
+// navnet på variabelen den leses fra: { "$env": "SVARINN_PASSORD" }. Hvor verdien ligger, står i kunderepoet der den
+// brukes (`integrasjoner/<system>/hemmeligheter.yaml`), og et menneske henter den lokalt (`hent-hemmeligheter.mjs
+// --hent` i pluginen config) til `.env.local` og `.keys/`, som aldri committes. Skriptene leser derfra uten å skrive
+// verdien ut. Kunden eier hemmelighetene; vi eier koden.
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -23,7 +24,7 @@ export function loadEnvLocal(root = process.cwd()) {
 
 export class MissingSecret extends Error {
   constructor(ref) {
-    super(`Hemmeligheten ${ref.$env} er ikke satt.${ref.kilde ? ` Den ligger i ${ref.kilde};` : ""} hent den med /forvaltning:hemmeligheter (et menneske kjører hentingen, aldri agenten)`);
+    super(`Hemmeligheten ${ref.$env} er ikke satt.${ref.kilde ? ` Den ligger i ${ref.kilde};` : ""} se /config:show-secrets (et menneske kjører hentingen, aldri agenten)`);
     this.ref = ref;
   }
 }
@@ -49,7 +50,7 @@ export function secretValues(section) {
   return out;
 }
 
-// Alle referansene i config-fila: hvor hver hemmelighet står, navnet og kilden. Bare navn, aldri verdier.
+// Alle referansene i en struktur: hvor hver hemmelighet står, navnet og kilden. Bare navn, aldri verdier.
 export function refs(data) {
   const out = [];
   const walk = (x, path) => {

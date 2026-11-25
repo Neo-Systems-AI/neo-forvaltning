@@ -40,20 +40,34 @@ test("en intern vert stoppes med linja", () => {
   assert.equal(x.line, 2);
 });
 
-test("en lenke eller en regel i docs/ som ikke finnes, stoppes", () => {
+test("en lenke eller en regel i dokumentasjonen til en plugin som ikke finnes, stoppes", () => {
   const root = repo();
-  mkdirSync(join(root, "docs/monstre"), { recursive: true });
-  mkdirSync(join(root, "docs/integrasjoner"), { recursive: true });
-  writeFileSync(join(root, "docs/integrasjoner/a.md"), "# A\n\n## Det som legges i hvelvet\n");
-  writeFileSync(join(root, "docs/monstre/01-sak.md"), "## en-regel Regelen\n\n```yaml\nid: en-regel\n```\n");
-  writeFileSync(join(root, "docs/monstre/02-status.md"), [
+  mkdirSync(join(root, "plugins/solution/docs/monstre"), { recursive: true });
+  mkdirSync(join(root, "plugins/p/docs"), { recursive: true });
+  mkdirSync(join(root, "docs"), { recursive: true });
+  writeFileSync(join(root, "plugins/p/docs/a.md"), "# A\n\n## Det som legges i hvelvet\n");
+  writeFileSync(join(root, "docs/README.md"), "[A](../plugins/p/docs/a.md) og [X](../plugins/x/docs/x.md)\n");
+  writeFileSync(join(root, "plugins/solution/docs/monstre/01-sak.md"), "## en-regel Regelen\n\n```yaml\nid: en-regel\n```\n");
+  writeFileSync(join(root, "plugins/solution/docs/monstre/02-status.md"), [
     "krever: [01-sak.md#en-regel, 01-sak.md#borte]",
-    "Se [A](../integrasjoner/a.md#det-som-legges-i-hvelvet) og [B](../integrasjoner/b.md) og [C](../integrasjoner/a.md#mangler).",
+    "Se [A](../../../p/docs/a.md#det-som-legges-i-hvelvet) og [B](../../../p/docs/b.md) og [C](../../../p/docs/a.md#mangler).",
   ].join("\n"));
   const msgs = run(root).filter((x) => x.check === "docs").map((x) => x.message);
   assert.deepEqual(msgs.sort(), [
-    "Lenken peker på #mangler, som ikke er en overskrift i ../integrasjoner/a.md",
-    "Lenken peker på ../integrasjoner/b.md, som ikke finnes",
+    "Lenken peker på #mangler, som ikke er en overskrift i ../../../p/docs/a.md",
+    "Lenken peker på ../../../p/docs/b.md, som ikke finnes",
+    "Lenken peker på ../plugins/x/docs/x.md, som ikke finnes",
     "Regelen 01-sak.md#borte finnes ikke",
   ]);
+});
+
+test("en skill som viser til en annen skill, eller har en dato, stoppes", () => {
+  const root = repo();
+  mkdirSync(join(root, "plugins/p/skills/a"), { recursive: true });
+  mkdirSync(join(root, "plugins/p/skills/b"), { recursive: true });
+  writeFileSync(join(root, "plugins/p/skills/a/SKILL.md"), "Kjør /p:b etterpå.\nSe p:a og x:b, og mcp__neo:verktoy.\nAvgjort 2026-11-25.\n");
+  const msgs = run(root).filter((x) => x.check === "skills").map((x) => `${x.line}: ${x.message}`);
+  assert.equal(msgs.length, 2);
+  assert.match(msgs[0], /^1: Viser til \/p:b/);
+  assert.match(msgs[1], /^3: En dato/);
 });

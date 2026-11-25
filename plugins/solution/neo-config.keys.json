@@ -1,6 +1,7 @@
 {
   "plugin": "solution",
   "neo": true,
+  "filer": true,
   "keys": [
     {
       "path": "off",

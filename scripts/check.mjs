@@ -15,19 +15,27 @@ export const CHECKS = [
   { name: "hooks", about: "Hvert skript en hook nevner, finnes" },
   { name: "public", about: "Ingenting internt eller om en kunde: interne verter, repoer og stier" },
   { name: "config", about: "Hver plugin har neo-config.keys.json, og kopiene av de felles modulene er like shared/" },
-  { name: "docs", about: "Lenkene i docs/ peker på filer og overskrifter som finnes, og hver regel i mønstrene det vises til, finnes" },
+  { name: "docs", about: "Lenkene i docs/ og i pluginenes docs/ peker på filer og overskrifter som finnes, og hver regel i mønstrene det vises til, finnes" },
+  { name: "skills", about: "En skill viser ikke til en annen skill og har ingen datoer: løpet står i README-en til pluginen" },
 ];
 
 // Ankeret GitHub gir en overskrift: små bokstaver, tegnsetting ut, mellomrom blir bindestrek.
 export const anchor = (heading) => heading.trim().toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, "").replace(/\s/g, "-");
 
+// Mønstrene for god konfig, der reglene står med id.
+export const MONSTRE = "plugins/solution/docs/monstre";
+
+// Mappene med dokumentasjon: inngangen i roten, og `docs/` i hver plugin.
+const docDirs = (root) => [
+  join(root, "docs"),
+  ...(existsSync(join(root, "plugins")) ? readdirSync(join(root, "plugins")).map((p) => join(root, "plugins", p, "docs")) : []),
+].filter((d) => existsSync(d));
+
 // Lenkene i dokumentasjonen: markdown-lenker til filer og overskrifter, og henvisningene til en regel i mønstrene
 // (`NN-flate.md#id` i `krever` og i teksten), som skal treffe en regel med den id-en.
 export function checkDocs(root) {
   const f = [];
-  const docs = join(root, "docs");
-  if (!existsSync(docs)) return f;
-  const files = walk(docs).filter((p) => p.endsWith(".md"));
+  const files = docDirs(root).flatMap((d) => walk(d)).filter((p) => p.endsWith(".md"));
   const headings = new Map(files.map((p) => [p, new Set(readFileSync(p, "utf8").split("\n").filter((l) => /^#{1,6} /.test(l)).map((l) => anchor(l.replace(/^#+ /, ""))))]));
   const ids = new Map(files.map((p) => [p, new Set([...readFileSync(p, "utf8").matchAll(/^id: (\S+)/gm)].map((m) => m[1]))]));
   for (const file of files) {
@@ -40,14 +48,38 @@ export function checkDocs(root) {
         if (!existsSync(dest)) f.push({ check: "docs", file: rel, line: i + 1, message: `Lenken peker på ${path}, som ikke finnes` });
         else if (hash && dest.endsWith(".md") && !headings.get(dest)?.has(hash)) f.push({ check: "docs", file: rel, line: i + 1, message: `Lenken peker på #${hash}, som ikke er en overskrift i ${path || "fila"}` });
       }
-      if (!rel.startsWith("docs/monstre/")) return;
+      if (!rel.startsWith(`${MONSTRE}/`)) return;
       const refs = [...line.matchAll(/(\d\d-[a-z0-9-]+\.md)#([a-z0-9-]+)/g)].filter((m) => !line.includes(`](${m[0]}`) && !line.includes(`](./${m[0]}`));
       for (const [, name, id] of refs) {
-        const dest = join(docs, "monstre", name);
+        const dest = join(root, MONSTRE, name);
         if (!existsSync(dest)) f.push({ check: "docs", file: rel, line: i + 1, message: `Henvisningen peker på ${name}, som ikke finnes` });
         else if (!ids.get(dest)?.has(id)) f.push({ check: "docs", file: rel, line: i + 1, message: `Regelen ${name}#${id} finnes ikke` });
       }
     });
+  }
+  return f;
+}
+
+// En skill sier hva, ikke hvor: den viser ikke til en annen skill (`plugin:skill`), og har ingen datoer. Digdirs skills
+// i `altinn` er kopiert uendret og sjekkes ikke.
+export function checkSkills(root, plugins) {
+  const f = [];
+  const names = new Set(plugins);
+  for (const p of plugins) {
+    const dir = join(root, "plugins", p, "skills");
+    if (!existsSync(dir)) continue;
+    for (const s of readdirSync(dir)) {
+      if (p === "altinn" && s.startsWith("altinn-")) continue;
+      const file = join(dir, s, "SKILL.md");
+      if (!existsSync(file)) continue;
+      const rel = relative(root, file);
+      readFileSync(file, "utf8").split("\n").forEach((line, i) => {
+        for (const [ref, plugin, skill] of line.matchAll(/\/?\b([a-z][a-z0-9-]*):([a-z0-9][a-z0-9-]*)\b/g)) {
+          if (names.has(plugin) && !(plugin === p && skill === s) && existsSync(join(root, "plugins", plugin, "skills", skill))) f.push({ check: "skills", file: rel, line: i + 1, message: `Viser til ${ref}. En skill vet ikke om de andre; løpet står i README-en til pluginen` });
+        }
+        if (/\b20\d\d-\d\d-\d\d\b/.test(line)) f.push({ check: "skills", file: rel, line: i + 1, message: "En dato. En skill har ingen historikk; den står i PR-en" });
+      });
+    }
   }
   return f;
 }
@@ -134,6 +166,7 @@ export function run(root) {
     for (const i of plan(root).filter((x) => !x.same)) f.push({ check: "config", file: `plugins/${i.plugin}/scripts/lib/${i.mod.split("/")[1]}`, message: `Ikke lik shared/${i.mod}. Kjør node scripts/sync-shared.mjs` });
   }
   f.push(...checkDocs(root));
+  f.push(...checkSkills(root, plugins));
   return f.map((x) => ({ level: "fail", ...x }));
 }
 

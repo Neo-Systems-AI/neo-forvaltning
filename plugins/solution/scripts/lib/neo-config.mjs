@@ -10,7 +10,7 @@
 //
 //   node neo-config.mjs --check                 hva pluginen trenger, hva som er satt, og hva som mangler
 //   node neo-config.mjs --get <nøkkel> [--miljo <miljø>]
-//   node neo-config.mjs --miljo [<miljø>]       MCP-serveren og adressen for miljøet (standard: neo.defaultEnv)
+//   node neo-config.mjs --miljo [<miljø>]       MCP-serveren, adressen og org-en for miljøet (standard: neo.defaultEnv)
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -19,12 +19,13 @@ import { execFileSync } from "node:child_process";
 export const CONFIG_NAME = "neo.config.json";
 export const VERSION = 1;
 
-// Den felles delen, som alle pluginene som snakker med Neo, leser.
+// Den felles delen, som alle pluginene som snakker med Neo, leser. Ingen hemmeligheter: innloggingen er personens egen.
 export const SHARED = [
-  { path: "neo.environments", doc: "Miljøene i Neo, for eksempel sandkasse og produksjon" },
-  { path: "neo.defaultEnv", fallback: "sandkasse", doc: "Miljøet som brukes når ingen er sagt" },
+  { path: "neo.environments", doc: "Miljøene i Neo, for eksempel development" },
+  { path: "neo.defaultEnv", fallback: "development", doc: "Miljøet som brukes når ingen er sagt" },
   { path: "mcpServer", perEnv: true, doc: "Navnet på MCP-serveren for miljøet i .mcp.json" },
-  { path: "url", perEnv: true, doc: "Adressen til Neo for miljøet (bare til visning)" },
+  { path: "url", perEnv: true, doc: "Adressen til Neo for miljøet. Skjemaet for konfigfilene hentes derfra" },
+  { path: "organisasjon", perEnv: true, doc: "Org-en i Neo for miljøet: den med sandkassen konfigen skrives til" },
 ];
 
 // Nøkkelfila til pluginen som kjører: ../../neo-config.keys.json fra scripts/lib/.
@@ -62,7 +63,7 @@ const blank = (v) => v === undefined || v === null || (typeof v === "string" && 
 
 export function load(cwd = process.cwd()) {
   const found = findConfig(cwd);
-  if (!found) return { found: null, data: null, errors: [`Fant ikke .claude/${CONFIG_NAME}. Kjør /forvaltning:oppstart, eller se neo-forvaltning-mal`] };
+  if (!found) return { found: null, data: null, errors: [`Fant ikke .claude/${CONFIG_NAME}. Kjør /config:set-up-repo, eller se neo-forvaltning-mal`] };
   if (found.missing) return { found, data: null, errors: [`NEO_CONFIG peker på ${found.path}, som ikke finnes`] };
   try {
     const data = JSON.parse(readFileSync(found.path, "utf8"));
@@ -85,7 +86,7 @@ export function validate(data) {
   return errors;
 }
 
-export const environment = (data, wanted) => wanted ?? get(data, "neo.defaultEnv") ?? "sandkasse";
+export const environment = (data, wanted) => wanted ?? get(data, "neo.defaultEnv") ?? "development";
 
 // Miljøene en nøkkel varierer over: Neo sine, eller pluginens egne for et eksternt system.
 const envsFor = (data, keys, shared) => (shared || !keys?.environments ? get(data, "neo.environments") : get(data, `${keys.plugin}.environments`)) ?? [];
@@ -113,7 +114,7 @@ export function check(data, keys = pluginKeys()) {
     for (const k of SHARED) {
       for (const env of k.perEnv ? get(data, "neo.environments") ?? [] : [undefined]) {
         const r = resolve(data, k.path, { keys, env });
-        const required = k.path !== "url" && k.fallback === undefined;
+        const required = !["url", "organisasjon"].includes(k.path) && k.fallback === undefined;
         rows.push({ ...r, required, ok: !required || r.source !== "usatt", doc: k.doc });
       }
     }
@@ -156,7 +157,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       console.error(`«${env}» er ikke et miljø. Miljøene: ${envs.join(", ") || "ingen"}`);
       process.exit(1);
     }
-    console.log(JSON.stringify({ miljo: env, mcpServer: resolve(data, "mcpServer", { keys, env }).value ?? null, url: resolve(data, "url", { keys, env }).value ?? null }));
+    console.log(JSON.stringify({ miljo: env, mcpServer: resolve(data, "mcpServer", { keys, env }).value ?? null, url: resolve(data, "url", { keys, env }).value ?? null, organisasjon: resolve(data, "organisasjon", { keys, env }).value ?? null }));
   } else {
     console.error("Bruk: neo-config.mjs --check | --get <nøkkel> [--miljo <miljø>] | --miljo [<miljø>]");
     process.exit(2);

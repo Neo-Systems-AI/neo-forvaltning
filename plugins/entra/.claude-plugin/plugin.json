@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "entra",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Oppsettet i kundens egen Microsoft-tenant for Neo: innlogging med Entra ID (SSO) og automatisk brukerprovisjonering (SCIM) med grupper koblet til jobbroller og tilgangsgrupper (set-up-sso), og en felles postboks i Exchange Online inn i innboksen (set-up-shared-mailbox). Kommandoene i rekkefølgen Neo krever, kontrollen etter hvert steg og feilene som pleier å komme. Kommandoene mot Microsoft kjøres av et menneske med sin egen innlogging, og agenten gjør det som er trygt i Neo over MCP; client secret og SCIM-token går aldri gjennom agenten.",
   "author": {
     "name": "Neo Systems AS",

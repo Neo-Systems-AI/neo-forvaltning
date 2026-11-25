@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "maskinporten",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Maskinporten slik den selv svarer: well-known for miljøet, og et token for kundens egen klient med scopet og utløpet som faktisk ble innvilget. Bare lesing; tokenet skrives aldri ut.",
   "author": {
     "name": "Neo Systems AS",

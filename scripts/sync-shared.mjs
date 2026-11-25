@@ -7,10 +7,14 @@
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-// Hvilke moduler hver plugin får: config-modulen alle, kall-modulene bare de som snakker med et eksternt system.
+// Hvilke moduler hver plugin får: config-modulen alle, oppslaget av MCP-serveren de som snakker med Neo, kall-modulene
+// de som snakker med et eksternt system, og YAML-leseren og konfigfilene de som leser filene i Neos format.
 export const MODULES = {
   "neo-config/neo-config.mjs": () => true,
-  "neo-kall/hemmeligheter.mjs": (keys) => keys?.environments || keys?.plugin === "forvaltning",
+  "neo-config/mcp-server.mjs": (keys) => keys?.neo,
+  "konfigfiler/yaml.mjs": (keys) => keys?.filer,
+  "konfigfiler/konfigfiler.mjs": (keys) => keys?.filer,
+  "neo-kall/hemmeligheter.mjs": (keys) => keys?.environments || keys?.plugin === "config",
   "neo-kall/http.mjs": (keys) => keys?.environments,
   "neo-kall/maskinporten.mjs": (keys) => keys?.maskinporten,
 };
