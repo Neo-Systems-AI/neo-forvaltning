@@ -68,7 +68,8 @@ rett, legg inn, ta bort, eller kommandoen som gjør det). Den som bare ser PR-en
 
 Versjonen står i `check/package.json` (`node sjekk.mjs --versjon`). Når en ny versjon er merget, får merge-commiten
 taggen `sjekk-v<versjon>`, og malen bytter til den i en PR med
-`node scripts/las-malen.mjs <malen> sjekk-v<versjon>`, som skriver taggen og sha256 i begge filene og prøver dem. Malen henter sjekken fra taggen og kontrollerer sha256, så
+`node scripts/las-malen.mjs <malen> sjekk-v<versjon>`, som skriver taggen og sha256 i begge filene og prøver dem.
+Malen henter sjekken fra taggen og kontrollerer sha256, så
 en tag som flyttes, stopper i stedet for å gi en annen sjekk. Det er slik fordi kunderepoene ligger på GitHub
 Enterprise og dette repoet på github.com, og et kall på tvers ikke kan bruke en action fra dette repoet:
 
