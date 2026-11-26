@@ -11,22 +11,22 @@ lenger ut.
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/maskinporten.mjs" well-known [--miljo test|produksjon]
-node "${CLAUDE_PLUGIN_ROOT}/scripts/maskinporten.mjs" token [<klient>] [--miljo <miljø>] [--scope "<scope> …"] [--consumer-org <orgnr>]
+node "${CLAUDE_PLUGIN_ROOT}/scripts/maskinporten.mjs" token <klient> [--scope "<scope> …"] [--consumer-org <orgnr>]
 ```
 
-- `well-known`: issuer og token-endepunkt for miljøet. Går uten config-fil når `--miljo` er sagt.
-- `token`: henter et token for standardklienten, eller en navngitt klient (`krr`, `fiks` …), og viser hva som ble
-  bedt om, hva som ble innvilget, utløpet og claimene (client_id, consumer). Et scope som ikke ble innvilget, sies.
+- `well-known`: issuer og token-endepunkt for miljøet (`maskinporten.miljo`, eller `--miljo`). Går uten config-fil når
+  `--miljo` er sagt.
+- `token`: henter et token for en klient med navn (`krr`, `fiks` …) og viser hva som ble bedt om, hva som ble
+  innvilget, utløpet og claimene (client_id, consumer). Et scope som ikke ble innvilget, sies.
 - `--scope` prøver et annet scope enn det klienten har i config-fila; svaret (`invalid_scope` eller et token) er målingen.
 - `--consumer-org` ber om et delegert token på vegne av en annen organisasjon.
 - Avslaget kommer fram som Maskinporten ga det: status, `error` og `error_description`.
 
-Klientene står i `.claude/neo.config.json` under `maskinporten.byEnv.<miljø>`; se `/maskinporten:env`. Mangler
-nøkkelen, sier skriptet navnet på variabelen og hvor den ligger: et menneske henter den fra
-kundens hvelv, aldri agenten.
+Klientene står i `.claude/neo.config.json` under `maskinporten.klienter`. Nøkkelen hentes fra hvelvet for kallet;
+får skriptet den ikke, sier det referansen, og personen logger inn med `az login` eller ber om tilgang.
 
 ## Reglene
 
-- **Bare lesing.** Et token endrer ingenting. Skriv aldri tokenet ut, og les aldri `.env.local` eller `.keys/`.
+- **Bare lesing.** Et token endrer ingenting. Skriv aldri tokenet eller nøkkelen ut.
 - **Si alltid miljøet** svaret kom fra. Test og produksjon har ulike klienter.
 - **Kunden eier klienten og nøkkelen.** Endres noe i klienten, gjør kunden det i Digdirs selvbetjening.

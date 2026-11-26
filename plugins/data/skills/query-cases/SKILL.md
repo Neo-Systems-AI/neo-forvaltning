@@ -7,14 +7,12 @@ description: Svarer på spørsmål om sakene i Neo - hvor mange, hvilke, hvor st
 
 ## Før du starter
 
-1. Miljøet (standard `neo.defaultEnv`). Spørsmål om ekte saker gjelder ofte produksjonen: spør hvis det ikke er sagt.
-2. Slå opp MCP-serveren for miljøet før du kaller et verktøy:
-   
+1. Slå opp MCP-serveren for miljøet før du kaller et verktøy, og bruk verktøyene den gir. Uten et miljø i spørsmålet
+   er det standardmiljøet. Gjelder spørsmålet et miljø config-fila ikke har, si det og stopp:
+
    ```bash
-   node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/neo-config.mjs" --miljo <miljø>
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/neo-config.mjs" --miljo [<miljø>]
    ```
-   
-   Svaret gir `mcpServer`; verktøyene heter `mcp__<mcpServer>__<verktøy>`. Si alltid hvilket miljø svaret kom fra.
 
 ## Verktøyene
 

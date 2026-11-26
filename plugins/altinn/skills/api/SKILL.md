@@ -21,7 +21,8 @@ node "$A" hendelser --tjenesteeier [--fra <utc>]  # tjenesteeier-endepunktet
 node "$A" appmeta [--app <org>/<app>]             # applicationmetadata: datatyper, prosess
 ```
 
-`--miljo tt02|produksjon` (standard `altinn.miljo`, tt02). `--app` trengs ikke når `altinn.apps` har én app.
+Miljøet er `altinn.miljo` (tt02 eller produksjon), med klienten `altinn.klient`. `--app` trengs ikke når `altinn.apps`
+har én app.
 Instans-id-en er `<part>/<guid>`, slik Altinn og Neo skriver den.
 
 ## Slik feilsøker du
@@ -78,6 +79,6 @@ i stedet for som et eget innslag:
   bare når feilsøket krever det.
 - **Innholdet i et data-element** kan ha personopplysninger. Hent det med `--innhold` bare når metadata ikke er nok,
   vis bare det som trengs, og skriv det aldri inn i repoet.
-- **Nøkkelen er kundens.** Står den ikke i `.env.local`, sier skriptet navnet og hvor den ligger. Et menneske henter
-  den fra kundens hvelv; agenten gjør det aldri.
-- **Produksjon** er et annet miljø med en annen klient. Si `--miljo produksjon` bare når kunden har bedt om det.
+- **Nøkkelen er kundens.** Skriptet henter den fra kundens hvelv for kallet, og skriver den aldri ut.
+- **Produksjon** er et annet miljø med en annen klient, og et annet oppsett i config-fila. Bruk det bare når kunden har
+  bedt om det.

@@ -1,52 +1,29 @@
 {
   "plugin": "altinn",
-  "neo": false,
-  "environments": true,
-  "maskinporten": true,
   "keys": [
+    {
+      "path": "miljo",
+      "doc": "Miljøet lese-kallene går mot: tt02 eller produksjon. Trengs bare til api, ikke til publiseringen"
+    },
+    {
+      "path": "klient",
+      "klient": true,
+      "doc": "Maskinporten-klienten med tjenesteeier-scopes (et navn under maskinporten.klienter). Trengs bare til api"
+    },
     {
       "path": "org",
       "doc": "Tjenesteeieren i Altinn Studio (akronymet), når kunden har en"
     },
     {
       "path": "apps",
-      "fallback": [],
       "doc": "Appene kunden har i Altinn, som <org>/<app>. Med én app trengs ikke --app i lese-kallene"
-    },
+    }
+  ],
+  "hemmeligheter": [
     {
-      "path": "miljo",
-      "fallback": "tt02",
-      "doc": "Miljøet appene publiseres til før produksjon, og miljøet lese-kallene bruker når --miljo ikke er sagt"
-    },
-    {
-      "path": "maskinporten.clientId",
-      "perEnv": true,
-      "doc": "Klient-ID-en til kundens Maskinporten-klient med tjenesteeier-scopes (trengs bare til lese-kallene, ikke til publiseringen)"
-    },
-    {
-      "path": "maskinporten.kid",
-      "perEnv": true,
-      "doc": "kid til nøkkelen. Uten den brukes thumbprinten, slik selvbetjeningen gjør"
-    },
-    {
-      "path": "maskinporten.nokkel",
-      "perEnv": true,
-      "doc": "Den private nøkkelen (PEM), bare som referanse: { \"$env\": \"ALTINN_TT02_MASKINPORTEN_NOKKEL\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\", \"fil\": true } (trengs bare til lese-kallene)"
-    },
-    {
-      "path": "maskinporten.scopes",
-      "perEnv": true,
-      "fallback": [
-        "altinn:serviceowner/instances.read",
-        "altinn:serviceowner/events",
-        "altinn:events.subscribe"
-      ],
-      "doc": "Scopene tokenet bes om. Maskinporten avviser hele kallet om klienten mangler ett, så sett bare dem klienten har"
-    },
-    {
-      "path": "subscriptionKey",
-      "perEnv": true,
-      "doc": "Ocp-Apim-Subscription-Key, bare om kunden har fått en. Som referanse: { \"$env\": …, \"kilde\": … }"
+      "path": "altinn.hemmeligheter.subscription-key",
+      "valgfri": true,
+      "doc": "Ocp-Apim-Subscription-Key, bare når kunden har fått en"
     }
   ]
 }

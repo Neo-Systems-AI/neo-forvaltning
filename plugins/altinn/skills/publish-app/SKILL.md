@@ -7,7 +7,7 @@ description: Hele løpet for en Altinn Studio-app, fra tom app til publisert i t
 
 Digdirs skills (`altinn-planning`, `altinn-datamodel`, `altinn-resources`, `altinn-expressions`, `altinn-policy`, `altinn-prefill`, `altinn-docs`) forklarer *hvordan filene skal se ut*. Denne skillen forklarer *rekkefølgen, hva som bare et menneske kan gjøre, og hvordan hvert steg kontrolleres* i Claude Code.
 
-Skriptene nevnt under ligger i `scripts/` ved siden av denne fila. Kjør dem med full sti fra skillens mappe.
+Skriptene nevnt under ligger i `${CLAUDE_PLUGIN_ROOT}/scripts/`.
 
 ## 0. Hvem gjør hva
 
@@ -44,7 +44,7 @@ Følg Digdirs skills i denne rekkefølgen: `altinn-planning` → `altinn-datamod
 Det skillene forutsetter at et verktøy gjør, gjør du selv:
 
 - **Datamodellen** (`altinn_datamodel_sync` finnes ikke): skriv `model.schema.json`, `model.xsd` og `model.cs` for hånd, med de samme feltene i samme rekkefølge. Digdirs egne apper holder alt valgfritt i modellen (`minOccurs="0"`) og styrer påkrevde felt med `required` i sidene. Oppramsinger er `enum` i skjemaet, en `xs:simpleType`-restriksjon i XSD-en og `string` i C#.
-- **Validering** (`verify_changes` finnes ikke): kjør `scripts/check-app.mjs <app-rot>` etter hver endring (se punkt 4).
+- **Validering** (`verify_changes` finnes ikke): kjør `check-app.mjs <app-rot>` etter hver endring (se punkt 4).
 - **Komponentegenskaper** (`altinn_layout_props` finnes ikke): kopier fra malen, og hold deg til `$schema` i fila.
 
 ### Når et fagsystem (for eksempel Neo) oppretter og leser instansene
@@ -60,7 +60,7 @@ Det skillene forutsetter at et verktøy gjør, gjør du selv:
 ## 4. Kryss-sjekk før commit
 
 ```bash
-node <skill-mappe>/scripts/check-app.mjs <app-rot>
+node "${CLAUDE_PLUGIN_ROOT}/scripts/check-app.mjs" <app-rot>
 ```
 
 Den sjekker det som kan avgjøres fra filene alene, og avslutter med exit 1 ved FEIL:
@@ -118,7 +118,7 @@ På <https://altinn.studio/dashboard>: menyen (⋮) helt til høyre på appens r
 Studio henger etter: appen svarte i tt02 flere minutter før Studio sa at den var publisert, og en grønn status sier ikke *hvilken* commit som kjører.
 
 ```bash
-node <skill-mappe>/scripts/check-deployed.mjs <app-rot> --wait 300
+node "${CLAUDE_PLUGIN_ROOT}/scripts/check-deployed.mjs" <app-rot> --wait 300
 ```
 
 Skriptet leser endepunktene appen eksponerer uten innlogging, i miljøet (default `tt02`, `--env prod` for produksjon), og sammenligner med klonen:

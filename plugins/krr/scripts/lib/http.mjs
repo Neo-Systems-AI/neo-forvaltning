@@ -1,10 +1,10 @@
-// Rå kall mot et eksternt system, slik vi gjør dem i labben når vi leter etter hvor en feil ligger: status, svar og
-// tid, med hemmelighetene sladdet fra alt som skrives ut. Uten avhengigheter.
+// Rå kall mot et eksternt system, for feilsøk: status, svar og tid, med hemmelighetene sladdet fra alt som skrives
+// ut. Uten avhengigheter.
 export const TIMEOUT_MS = 20_000;
 
 export function redact(text, secrets = []) {
   let out = String(text);
-  for (const s of secrets) if (s) out = out.split(s).join("[sladdet]");
+  for (const s of secrets) if (s && String(s).length >= 4) out = out.split(String(s)).join("[sladdet]");
   return out.replace(/(Bearer|Basic)\s+[A-Za-z0-9._~+/=-]{8,}/g, "$1 [sladdet]");
 }
 

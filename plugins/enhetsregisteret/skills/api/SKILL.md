@@ -9,9 +9,9 @@ Det rå svaret fra Enhetsregisteret, så det kan settes opp mot det Neo gjorde: 
 er det en enhet eller en underenhet, er den slettet, konkurs eller under avvikling, og hvilken enhet hører den til?
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/enhetsregisteret.mjs" enhet [<orgnr>] [--miljo <miljø>]
-node "${CLAUDE_PLUGIN_ROOT}/scripts/enhetsregisteret.mjs" underenhet <orgnr> [--miljo <miljø>]
-node "${CLAUDE_PLUGIN_ROOT}/scripts/enhetsregisteret.mjs" underenheter [<orgnr>] [--side <n>] [--antall <n>] [--miljo <miljø>]
+node "${CLAUDE_PLUGIN_ROOT}/scripts/enhetsregisteret.mjs" enhet [<orgnr>] [--miljo produksjon|test]
+node "${CLAUDE_PLUGIN_ROOT}/scripts/enhetsregisteret.mjs" underenhet <orgnr> [--miljo produksjon|test]
+node "${CLAUDE_PLUGIN_ROOT}/scripts/enhetsregisteret.mjs" underenheter [<orgnr>] [--side <n>] [--antall <n>] [--miljo produksjon|test]
 ```
 
 - Svaret skrives ut som registeret ga det, og så én linje per enhet: nummer, navn, organisasjonsform, kommune,
@@ -19,9 +19,8 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/enhetsregisteret.mjs" underenheter [<orgnr>]
 - Uten orgnr brukes `enhetsregisteret.orgnr` fra config-fila (for eksempel kommunens eget).
 - 404 betyr at nummeret ikke finnes som det du spurte etter: en underenhet slås opp med `underenhet`, ikke `enhet`.
 - Et nummer med feil kontrollsiffer sies (`MERK: …`) og sendes likevel, så du ser hva registeret svarer.
-- **Miljøet** er `produksjon` (data.brreg.no), også uten config-fil. Enhetsregisteret er åpne data, så det finnes ikke
-  et eget testmiljø å ha nøkler til. Brønnøysundregistrene har et testmiljø med oppdiktede data (data.ppe.brreg.no),
-  som `test` når det står i `enhetsregisteret.environments`.
+- **Miljøet** er `--miljo`, ellers `enhetsregisteret.miljo`; uten noen av dem stopper skriptet og sier det.
+  `produksjon` (data.brreg.no) er åpne data og det som gjelder; `test` (data.ppe.brreg.no) har oppdiktede data.
 
 ## Reglene
 

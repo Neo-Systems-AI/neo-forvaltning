@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "enhetsregisteret",
-  "version": "0.2.0",
+  "version": "0.5.0",
   "description": "Oppslag av enheter og underenheter i Enhetsregisteret, slik Brønnøysundregistrene selv svarer, gjennom det åpne API-et. Bare lesing, uten innlogging.",
   "author": {
     "name": "Neo Systems AS",

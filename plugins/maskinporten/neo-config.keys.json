@@ -1,38 +1,22 @@
 {
   "plugin": "maskinporten",
-  "neo": false,
-  "environments": true,
-  "maskinporten": true,
   "keys": [
     {
-      "path": "clientId",
-      "perEnv": true,
-      "required": false,
-      "doc": "Klient-ID-en til standardklienten i Maskinporten for miljøet (kundens egen klient)"
-    },
-    {
-      "path": "kid",
-      "perEnv": true,
-      "required": false,
-      "doc": "kid for nøkkelen, når klienten har en. Uten kid brukes thumbprinten (RFC 7638), slik selvbetjeningen gjør"
-    },
-    {
-      "path": "nokkel",
-      "perEnv": true,
-      "required": false,
-      "doc": "Den private nøkkelen, aldri med verdi: { \"$env\": \"MASKINPORTEN_KEY_FILE\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\", \"fil\": true }. Med «fil» er variabelen stien til en PEM-fil, ellers selve PEM-en"
-    },
-    {
-      "path": "scopes",
-      "perEnv": true,
-      "required": false,
-      "doc": "Scopene standardklienten ber om, for eksempel [\"krr:global/kontaktinformasjon.read\"]"
+      "path": "miljo",
+      "required": true,
+      "doc": "Miljøet klientene er registrert i: test eller produksjon"
     },
     {
       "path": "klienter",
-      "perEnv": true,
-      "required": false,
-      "doc": "Navngitte klienter (krr, fiks …) med de samme feltene. Et felt som ikke står i klienten, arves fra standardklienten. Andre plugins peker på klienten med navnet"
+      "required": true,
+      "doc": "Klientene med navn: { <navn>: { clientId, kid, scopes } }. Altinn, Fiks og KRR viser til en klient med navnet. Uten kid brukes thumbprinten av nøkkelen"
+    }
+  ],
+  "hemmeligheter": [
+    {
+      "path": "maskinporten.hemmeligheter.<klient>-nokkel",
+      "perKlient": true,
+      "doc": "Den private nøkkelen (PEM) til hver klient, med fil: true"
     }
   ]
 }
