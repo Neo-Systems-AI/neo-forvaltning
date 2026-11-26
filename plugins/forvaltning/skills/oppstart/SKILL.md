@@ -44,10 +44,23 @@ Spør om det som mangler, ett tema om gangen, og vis hva du har før du skriver:
 4. **Hvelvet:** navnet på Key Vault-hvelvet nøklene skal ligge i: kundens for kundens systemer (oppgavene står i
    `${CLAUDE_PLUGIN_ROOT}/docs/hvelvet.md`), og personen som legger dem inn, har tilgang til det.
 5. **Maskinklienten:** har org-admin laget en maskinklient i **sandkassen** (*API-klienter → Ny API-klient*, slaget
-   «Maskin»)? Den trenger scopene for konfig: lese, endre og opprette for familiene i konfig-fila (sakstyper og flyter,
-   felt, statussett, oppgavemal-sett, veivisere, relasjonsvisninger, behandlingsregler, maler, saksdatainstrukser og
-   -maler, hendelsestyper). Neo viser klient-ID-en og hemmeligheten én gang. Klient-ID-en er ikke en hemmelighet.
-   Hemmeligheten legges i hvelvet som `neo--sandkasse-klient` når repoet sjekkes, og står aldri i repoet eller i samtalen.
+   «Maskin»)? Den trenger `read`, `create` og `update` på scopene for konfig, slik Neo kaller dem:
+
+   | Scope | Det som står i konfig-fila |
+   |---|---|
+   | `workflow` | sakstypene, statusene og statussettene, oppgavemal-settene, flytene og innboks-taggene |
+   | `custom_field` | feltene |
+   | `template` | malene |
+   | `instruction` | behandlingsreglene |
+   | `case_run_instruction` | saksdatainstruksene og relasjonsinstruksene |
+   | `case_data_template` | saksdatamalene |
+   | `case_wizard` | veiviserne |
+   | `relation_view` | relasjonsvisningene |
+   | `flow_event_type` | hendelsestypene |
+
+   Ikke mer: saker, kontakter, innboksen og kjøringene trenger den ikke. Tokenet viser scopene klienten fikk
+   (`konfig.mjs token`); en 403 i snapshot eller plan sier hvilket som mangler. Neo viser klient-ID-en og hemmeligheten
+   én gang. Klient-ID-en er ikke en hemmelighet. Hemmeligheten legges i hvelvet som `neo--sandkasse-klient` når repoet sjekkes, og står aldri i repoet eller i samtalen.
    - Klienten er bundet til sandkassen, og plan og apply virker bare der, så den kan aldri skrive i produksjonen.
    - Revisjonen i Neo viser maskinklienten. Godkjenningen av en endring er PR-en.
 6. **Pluginene:** `forvaltning` og `solution` alltid. `monitoring` og `data` leser kjøringer og saker gjennom MCP med
