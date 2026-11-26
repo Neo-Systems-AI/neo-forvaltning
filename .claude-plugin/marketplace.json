@@ -10,7 +10,7 @@
     {
       "name": "forvaltning",
       "source": "./plugins/forvaltning",
-      "version": "0.4.1",
+      "version": "0.4.2",
       "category": "forvaltning"
     },
     {

@@ -32,7 +32,7 @@ export const SHARED = [
   { path: "neo.environments", doc: "Miljøene i Neo: sandkasse og produksjon" },
   { path: "neo.defaultEnv", fallback: "sandkasse", doc: "Miljøet som brukes når ingen er sagt" },
   { path: "mcpServer", perEnv: true, doc: "Navnet på MCP-serveren for miljøet i .mcp.json" },
-  { path: "url", perEnv: true, doc: "Adressen til Neo for miljøet" },
+  { path: "url", perEnv: true, doc: "Adressen til API-et i Neo for miljøet (api-serveren, ikke nettsiden)" },
 ];
 
 export const get = (o, path) => path.split(".").reduce((x, k) => (x && typeof x === "object" ? x[k] : undefined), o);
