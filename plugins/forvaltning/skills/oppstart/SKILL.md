@@ -39,7 +39,8 @@ Spør om det som mangler, ett tema om gangen, og vis hva du har før du skriver:
    organisasjonsnummeret. For standardløsninger: partneren eller Neo, som eier dem.
 2. **Hvem:** den som godkjenner endringer (navn og GitHub-bruker eller -team), og den som forvalter (kunden selv, Neo
    Systems, eller en partner med egen avtale).
-3. **Miljøene:** `sandkasse` og `produksjon`, og adressen til Neo for hvert.
+3. **Miljøene:** `sandkasse` og `produksjon`, og adressen til API-et i Neo for hvert: api-serveren, ikke nettsiden
+   (i development `https://api-server-development.<…>.azurecontainerapps.io`). Nettsiden svarer ikke på `/api/config`.
 4. **Hvelvet:** navnet på Key Vault-hvelvet nøklene skal ligge i: kundens for kundens systemer (oppgavene står i
    `${CLAUDE_PLUGIN_ROOT}/docs/hvelvet.md`), og personen som legger dem inn, har tilgang til det.
 5. **Maskinklienten:** har org-admin laget en maskinklient i **sandkassen** (*API-klienter → Ny API-klient*, slaget
