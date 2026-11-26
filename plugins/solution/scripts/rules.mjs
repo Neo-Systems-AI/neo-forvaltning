@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Reglene i mønstrene for god konfig som kan sjekkes maskinelt, kjørt på konfigen slik den kjører i et miljø
-// (normalisert). Hver sjekk har regelens id, nivå og hvorfor, og sier «ikke vurdert» når fila den trenger, mangler, i
+// (svarene fra list_case_types, list_custom_fields og list_workflows). Hver sjekk har regelens id, nivå og hvorfor, og sier «ikke vurdert» når fila den trenger, mangler, i
 // stedet for å si at alt er i orden. En regel kunden ikke vil ha, slås av i `.claude/neo.config.json` med id-en.
 //
 //   node rules.mjs <snapshot-mappe> [--off regel,regel] [--json]

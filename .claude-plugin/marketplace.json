@@ -11,14 +11,14 @@
       "name": "forvaltning",
       "source": "./plugins/forvaltning",
       "description": "Forvaltning av oppsettet i Neo gjennom MCP: oppstarten som skriver config-fila og skrur på pluginene, snapshot av det som kjører, plan mot repoet, gjennomføring i sandkassen, og hemmelighetene fra kundens hvelv (bare navn, aldri verdier). Brukes i et repo laget fra neo-forvaltning-mal.",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "category": "forvaltning"
     },
     {
       "name": "solution",
       "source": "./plugins/solution",
       "description": "Å designe og bygge en løsning i Neo, fra en idé eller en kunngjøring til konfig som er testet i UI og gitt til kunden. Løpet er nummerert: research på kunden og på prosessen fra kilder som lagres uendret, kravene, designvalgene, konfigen bygget fra kravene med mønstrene for god konfig (med KI-oppsettet per sakstype), testene, runden i UI med personen som observatør, og sorteringen av funnene i konfig og ønsker til Neo. Ved siden av: gjennomgangen av konfigen i et miljø mot mønstrene, og overleveringen til kunden.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "category": "forvaltning"
     },
     {

@@ -5,17 +5,12 @@
     {
       "path": "oppsettDir",
       "fallback": "oppsett",
-      "doc": "Det ønskede oppsettet"
+      "doc": "Det ønskede oppsettet, som filer i Neo sitt format"
     },
     {
       "path": "snapshotDir",
       "fallback": "snapshots",
       "doc": "Snapshotene per miljø"
-    },
-    {
-      "path": "stateDir",
-      "fallback": "state",
-      "doc": "Låsefilene per miljø"
     },
     {
       "path": "reportsDir",

@@ -8,14 +8,17 @@ description: Går gjennom konfigen i Neo for ett miljø mot mønstrene for god k
 Mønstrene er ett regelsett. Det som kan sjekkes maskinelt, sjekker skriptet; resten leses mot reglene. Begge gir funn
 med samme regel-id, så et funn alltid viser til regelen som sier hvorfor.
 
-**Inn:** konfigen slik den kjører i miljøet, hentet og normalisert av repoet, og mønstrene (stien gir
+**Inn:** konfigen slik den kjører i miljøet, hentet fra Neo i steg 1, og mønstrene (stien gir
 `node "${CLAUDE_PLUGIN_ROOT}/scripts/docs.mjs" monstre`). **Ut:** funnene og tiltakene, i svaret. Endringene går som en
 PR i repoet.
 
 ## Slik gjør du det
 
-1. **Hent konfigen** slik den kjører nå i miljøet. Er uttrekket eldre enn i dag, hent det på nytt.
-2. **Kjør reglene** på det normaliserte uttrekket:
+1. **Hent konfigen** slik den kjører nå i miljøet: kall `list_case_types`, `list_custom_fields` og `list_workflows`
+   gjennom MCP-serveren for miljøet, og lagre hvert svar uendret i en mappe som ikke committes, som
+   `<verktøy>.json`. Reglene trenger svarene fra Neo slik de kjører, også det som ikke er konfig (om en flyt er
+   aktivert), så de leser ikke snapshotet til `forvaltning`. Er uttrekket eldre enn i dag, hent det på nytt.
+2. **Kjør reglene** på uttrekket:
 
    ```bash
    node "${CLAUDE_PLUGIN_ROOT}/scripts/rules.mjs" <mappa med uttrekket>
