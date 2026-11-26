@@ -10,8 +10,10 @@ import { join } from "node:path";
 // Hvilke moduler hver plugin får: config-modulen alle, kall-modulene bare de som snakker med et eksternt system.
 export const MODULES = {
   "neo-config/neo-config.mjs": () => true,
-  "neo-kall/hemmeligheter.mjs": (keys) => keys?.environments || keys?.plugin === "forvaltning",
-  "neo-kall/http.mjs": (keys) => keys?.environments,
+  "neo-kall/hemmeligheter.mjs": (keys) => keys?.environments || keys?.neoApi || keys?.plugin === "forvaltning",
+  "neo-kall/http.mjs": (keys) => keys?.environments || keys?.neoApi,
+  // Kall mot Neo sitt API med en maskinklient: pluginene der skript gjør snapshot, plan og gjennomføring.
+  "neo-kall/neo-api.mjs": (keys) => keys?.neoApi,
   "neo-kall/maskinporten.mjs": (keys) => keys?.maskinporten,
 };
 

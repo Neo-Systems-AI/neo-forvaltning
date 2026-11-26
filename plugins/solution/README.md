@@ -44,6 +44,7 @@ Mønstrene for god konfig og oppskriftene for integrasjonene står i [`docs/`](.
 | Skript | Hva |
 |---|---|
 | `scripts/rules.mjs` | Reglene i mønstrene som kan sjekkes maskinelt, kjørt på konfigen slik den kjører i et miljø. Hver regel har samme id som i mønstrene |
+| `scripts/uttrekk.mjs` | Henter det reglene leser (sakstypene, feltene og flytene) rett fra Neo sitt API med maskinklienten i `neo.byEnv.<miljø>.apiClient` |
 | `scripts/docs.mjs` | Stien til `docs/monstre` eller `docs/integrasjoner` |
 
 ## Config

@@ -1,48 +1,43 @@
 ---
 name: snapshot
-description: Henter oppsettet som kjører i Neo (sakstyper, statusløp, felt, oppgavemaler og flyter) gjennom MCP og lagrer det som filer i repoet, normalisert så det kan sammenlignes over tid og mellom sandkasse og produksjon. Bare lesing. Kjør før og etter hver endring, og når du skal se hva som har endret seg utenom repoet.
+description: Henter oppsettet som kjører i Neo sin sandkasse som filer i repoet, slik Neo selv skriver dem, med et skript som kaller Neo sitt API med maskinklienten, og viser hva som er endret siden forrige snapshot. Bare lesing. Kjør før og etter hver endring, og når du skal se hva som har endret seg utenom repoet.
 ---
 
 # Snapshot av oppsettet
 
-Et snapshot er backup, grunnlag for planen og historikk: git-historikken til snapshotene er historikken til oppsettet.
-Det endrer ingenting i Neo.
+Et snapshot er backup, grunnlag for oppsettet i repoet og historikk: git-historikken til snapshotene er historikken
+til oppsettet. Det endrer ingenting i Neo.
 
-## Før du starter
-
-1. Spør hvilket miljø, om det ikke er sagt. Standard er `neo.defaultEnv` i config-fila.
-2. Slå opp MCP-serveren for miljøet før du kaller et verktøy:
-   
-   ```bash
-   node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/neo-config.mjs" --miljo <miljø>
-   ```
-   
-   Svaret gir `mcpServer`; verktøyene heter `mcp__<mcpServer>__<verktøy>`. Si alltid hvilket miljø svaret kom fra.
-3. Mappene: `node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/neo-config.mjs" --get snapshotDir` (og `stateDir`).
+Neo skriver filene selv (`GET /api/config/export`). Formen, nøklene og pekerne er Neo sine, så filene kan legges rett i
+`oppsett/`, og plan og gjennomføring forstår dem uten at noe oversettes her. Skriptet henter dem med maskinklienten
+(`neo.byEnv.<miljø>.apiClient`) og skriver dem selv, så svaret går ikke gjennom modellen, uansett hvor stort det er.
 
 ## Slik gjør du det
 
-1. Kall disse verktøyene og lagre hvert svar uendret som JSON i `<snapshotDir>/<miljø>/raw/<verktøy>.json`:
-   - `list_case_types`
-   - `get_case_status_pipeline`
-   - `list_custom_fields`
-   - `list_task_template_sets`, og `get_task_template_set` for hvert sett (`get_task_template_set--<nøkkel>.json`)
-   - `list_workflows`, og `get_workflow` for hver flyt (`get_workflow--<nøkkel>.json`)
-
-   `<nøkkel>` er objektets navn i små bokstaver med bindestrek, aldri id-en: filnavnet skal være likt i sandkassen
-   og i produksjonen. Finnes ikke et verktøy for tokenet ditt, skriv det i oppsummeringen og fortsett med resten.
-2. Normaliser og oppdater låsefila:
+1. Ta snapshotet (miljøet er `neo.defaultEnv`, sandkassen, med mindre det er sagt):
 
    ```bash
-   node "${CLAUDE_PLUGIN_ROOT}/scripts/normalize.mjs" <snapshotDir>/<miljø>/raw <snapshotDir>/<miljø>/oppsett --lock <stateDir>/<miljø>.lock.json
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/konfig.mjs" export [--miljo <miljø>]
    ```
-3. `raw/` committes ikke (den står i `.gitignore`). Det normaliserte og låsefila committes, med meldingen
-   `snapshot: <miljø> <dato>`.
+
+   Skriptet skriver hver fil på stien Neo ga i `<snapshotDir>/<miljø>/`, fjerner filene Neo ikke lenger har, og
+   skriver `ikke-med.md`: det som finnes i Neo, men ikke er med i filene ennå, med grunnen. Det sier hvilket miljø og
+   hvilken adresse det hentet fra.
+2. Feiler det:
+   - **Neo kan ikke skrive oppsettet som filer** (to oppgavemal-sett med samme navn, en peker uten nøkkel): ingenting
+     skrives. Vis problemene til personen; de rettes i Neo, og så tas snapshotet på nytt.
+   - **Maskinklienten mangler eller avvises:** se `/forvaltning:env` og `node … konfig.mjs token`.
+3. Filene og `ikke-med.md` committes, med meldingen `snapshot: <miljø> <dato>`.
 4. Si kort hva som er endret siden forrige snapshot (`git diff --stat`). En endring ingen har gjort gjennom repoet, er
    et avvik: skriv det i `beslutninger.md` som «avvik funnet», så kunden kan avgjøre om det skal tas inn i oppsettet
    eller rulles tilbake.
 
+## Sandkassen og produksjonen
+
+Snapshotet tas av sandkassen. Hva som skiller den fra produksjonen, viser forhåndsvisningen av promoteringen i Neo.
+
 ## Det som ikke er med ennå
 
-Maler, instrukser, tagger, arkivoppsettet og tilgangsgruppene har ikke MCP-verktøy ennå. De står i `oppsett/manuelt/`
-som tekst og kontrolleres for hånd.
+`ikke-med.md` sier hva, per objekt. Det Neo ikke skriver som fil ennå (for eksempel skjemaer, lagrede visninger,
+saksnummeret, Innsikt og flyter som tildeler til et bestemt medlem), styres i Neo og beskrives for hånd i
+`oppsett/manuelt/`. Når Neo tar det med, kommer det med i neste snapshot av seg selv.

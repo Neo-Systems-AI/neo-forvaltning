@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "solution",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Å designe og bygge en løsning i Neo, fra en idé eller en kunngjøring til konfig som er testet i UI og gitt til kunden. Løpet er nummerert: research på kunden og på prosessen fra kilder som lagres uendret, kravene, designvalgene, konfigen bygget fra kravene med mønstrene for god konfig (med KI-oppsettet per sakstype), testene, runden i UI med personen som observatør, og sorteringen av funnene i konfig og ønsker til Neo. Ved siden av: gjennomgangen av konfigen i et miljø mot mønstrene, og overleveringen til kunden.",
   "author": {
     "name": "Neo Systems AS",

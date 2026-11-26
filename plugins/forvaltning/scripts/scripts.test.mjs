@@ -1,62 +1,73 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { collectIds, normalize, run, unwrap } from "./normalize.mjs";
-import { diffValue, markdown, plan } from "./diff.mjs";
+import { checkPath, write } from "./skriv-eksport.mjs";
+import { differences, markdown, summary } from "./planrapport.mjs";
 
-const caseTypes = [
-  { id: "u2", slug: "skjenking", name: "Skjenkebevilling", organizationId: "o1", updatedAt: "2026-11-01", statusGroupId: "g1" },
-  { id: "u1", slug: "byggesak", name: "Byggesak", organizationId: "o1", updatedAt: "2026-11-01", statusGroupId: "g1" },
+const tmp = () => mkdtempSync(join(tmpdir(), "forvaltning-"));
+const TYPE = "apiVersion: neo-config/v1\nkind: caseType\nspec:\n  name: Byggesak\n  slug: byggesak\n";
+
+const svar = (files, notExported = []) => ({ ok: true, files, notExported });
+
+test("eksporten skrives som Neo ga den, og ikke-med står med grunnen", () => {
+  const dir = tmp();
+  const r = write(svar([{ path: "case-types/byggesak.yaml", text: TYPE }], [{ rootType: "instruction", name: "Regel", reason: "bølge 2" }]), dir);
+  assert.deepEqual(r.nye, ["case-types/byggesak.yaml"]);
+  assert.equal(readFileSync(join(dir, "case-types/byggesak.yaml"), "utf8"), TYPE);
+  assert.match(readFileSync(join(dir, "ikke-med.md"), "utf8"), /\| instruction \| Regel \| bølge 2 \|/);
+});
+
+test("en fil Neo ikke lenger har, fjernes; en lik fil røres ikke", () => {
+  const dir = tmp();
+  mkdirSync(join(dir, "workflows"), { recursive: true });
+  writeFileSync(join(dir, "workflows/gammel.yaml"), "x");
+  mkdirSync(join(dir, "case-types"), { recursive: true });
+  writeFileSync(join(dir, "case-types/byggesak.yaml"), TYPE);
+  const r = write(svar([{ path: "case-types/byggesak.yaml", text: TYPE }]), dir);
+  assert.deepEqual(r.uendret, ["case-types/byggesak.yaml"]);
+  assert.deepEqual(r.fjernet, ["workflows/gammel.yaml"]);
+  assert.equal(existsSync(join(dir, "workflows/gammel.yaml")), false);
+});
+
+test("ok:false skriver ingenting og sier hva som må rettes i Neo", () => {
+  const dir = tmp();
+  assert.throws(
+    () => write({ ok: false, problems: [{ kind: "taskTemplateSet", name: "Standard", problems: ["to sett heter det samme"] }], layoutProblems: [], notExported: [] }, dir),
+    /taskTemplateSet «Standard»: to sett heter det samme/,
+  );
+  assert.equal(existsSync(join(dir, "ikke-med.md")), false);
+});
+
+test("en sti ut av mappa avvises", () => {
+  assert.ok(checkPath("../x.yaml"));
+  assert.ok(checkPath("/etc/x.yaml"));
+  assert.ok(checkPath("case-types/x.json"));
+  assert.equal(checkPath("case-types/byggesak.yaml"), null);
+  assert.throws(() => write(svar([{ path: "../ut.yaml", text: "x" }]), tmp()), /ikke en relativ sti/);
+});
+
+const plans = [
+  { action: "update", kind: "caseType", key: "byggesak", path: "case-types/byggesak.yaml", changes: [{ path: "name", before: "Bygg", after: "Byggesak" }], notRemoved: ["Statusen «Ny / Mottatt»"], deferredSteps: false, planHash: "a" },
+  { action: "rejected", kind: "workflow", key: null, path: "workflows/x.yaml", reasons: ["Pekeren finnes ikke"] },
+  { action: "unchanged", kind: "taskStatusGroup", key: "Ny", path: "task-status-groups/ny.yaml", changes: [], notRemoved: [], deferredSteps: false, planHash: "b" },
 ];
-const groups = [{ id: "g1", key: "standard", name: "Standard" }];
 
-test("id-er og tidsstempler fjernes, referanser blir nøkler, lister sorteres", () => {
-  const ids = collectIds([caseTypes, groups]);
-  const out = normalize(caseTypes, ids);
-  assert.deepEqual(out, [
-    { name: "Byggesak", slug: "byggesak", statusGroupId: "ref:standard" },
-    { name: "Skjenkebevilling", slug: "skjenking", statusGroupId: "ref:standard" },
-  ]);
+test("rapporten viser Neo sine svar: endringer, det som blir stående, avvist og ikke styrt", () => {
+  const md = markdown({ plans, notInFiles: { objects: [{ kind: "workflow", key: "Gammel", path: "workflows/gammel.yaml" }], problems: [] } });
+  assert.match(md, /0 nye, 1 endret, 1 uendret, 1 avvist/);
+  assert.match(md, /\| `name` \| "Bygg" \| "Byggesak" \|/);
+  assert.match(md, /blir stående i Neo: Statusen «Ny \/ Mottatt»/);
+  assert.match(md, /`workflows\/x\.yaml`: Pekeren finnes ikke/);
+  assert.match(md, /workflow «Gammel»/);
 });
 
-test("MCP-svaret pakkes ut av content", () => {
-  assert.deepEqual(unwrap({ content: [{ type: "text", text: JSON.stringify({ a: 1 }) }] }), { a: 1 });
-  assert.deepEqual(unwrap({ a: 2 }), { a: 2 });
-});
-
-test("sandkasse og produksjon med ulike id-er gir samme fil", () => {
-  const prod = normalize(caseTypes, collectIds(caseTypes));
-  const sandbox = caseTypes.map((c) => ({ ...c, id: c.id + "-sb", organizationId: "sb" }));
-  assert.deepEqual(normalize(sandbox, collectIds(sandbox)), prod);
-});
-
-test("diffen matcher på nøkkel, ikke på plass", () => {
-  const have = [{ slug: "a", name: "A" }, { slug: "b", name: "B" }];
-  const want = [{ slug: "b", name: "B2" }, { slug: "c", name: "C" }];
-  assert.deepEqual(diffValue(want, have), [
-    { kind: "endret", key: "b", fields: ["name"] },
-    { kind: "ny", key: "c" },
-    { kind: "fjernet", key: "a" },
-  ]);
-});
-
-test("planen over to mapper, med fil som ikke er styrt", () => {
-  const root = mkdtempSync(join(tmpdir(), "forvaltning-"));
-  const raw = join(root, "raw");
-  mkdirSync(raw);
-  writeFileSync(join(raw, "list_case_types.json"), JSON.stringify({ content: [{ type: "text", text: JSON.stringify(caseTypes) }] }));
-  writeFileSync(join(raw, "list_workflows.json"), JSON.stringify([{ id: "w1", name: "Varsel" }]));
-  run(raw, join(root, "snap"));
-  const snap = JSON.parse(readFileSync(join(root, "snap", "list_case_types.json"), "utf8"));
-  const want = join(root, "want");
-  mkdirSync(want);
-  writeFileSync(join(want, "list_case_types.json"), JSON.stringify([...snap, { slug: "ny", name: "Ny" }]));
-  const result = plan(want, join(root, "snap"));
-  assert.deepEqual(result, [
-    { file: "list_case_types.json", changes: [{ kind: "ny", key: "ny" }] },
-    { file: "list_workflows.json", changes: [{ kind: "ikke-styrt", key: "(fila)" }] },
-  ]);
-  assert.match(markdown(result), /\| `list_case_types.json` \| ny \| ny \|/);
+test("sjekken mot godkjent plan: samme endringer går, ny planHash teller ikke", () => {
+  const approved = summary(plans);
+  const again = plans.map((p) => ({ ...p, planHash: "ny" }));
+  assert.deepEqual(differences(approved, again), []);
+  const changed = plans.map((p) => (p.path === "case-types/byggesak.yaml" ? { ...p, changes: [] } : p));
+  assert.deepEqual(differences(approved, changed), ["case-types/byggesak.yaml: endringene er ikke de samme som ble godkjent"]);
+  assert.deepEqual(differences(approved, [...plans, { action: "create", path: "workflows/ny.yaml", changes: [] }]), ["workflows/ny.yaml: var ikke med i planen som ble godkjent"]);
 });

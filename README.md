@@ -3,7 +3,8 @@
 Neo Systems sine offentlige plugins til Claude Code: for kommuner, virksomheter og partnere som forvalter oppsettet
 sitt i [Neo](https://neosystems.ai), og for den som lager Altinn-skjemaer.
 
-**Mot Neo**, gjennom Neo sin MCP-server med personens egen innlogging:
+**Mot Neo**: `forvaltning` og `solution` med skript mot Neo sitt API og en maskinklient i sandkassen, `monitoring` og
+`data` gjennom Neo sin MCP-server med personens egen innlogging:
 
 | Plugin | Hva |
 |---|---|
