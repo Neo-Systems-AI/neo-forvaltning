@@ -47,5 +47,8 @@ test("hver nøkkel med kilden, MCP-serveren eller maskinklienten, klienten en pl
   const r = report(root, { data, plugins: ["solution"] });
   assert.deepEqual(r.problems, []);
   assert.deepEqual(r.miljoer.map((m) => [m.miljo, m.mcpServer, m.iRepoet]), [["sandkasse", "neo-sandkasse", true], ["produksjon", "neo-produksjon", true]]);
-  assert.equal(report(root, { data: { version: 1, neo: { environments: ["sandkasse"], byEnv: { sandkasse: { mcpServer: "annen" } } } }, plugins: [] }).problems.length, 2);
+  const annen = { version: 1, neo: { environments: ["sandkasse"], byEnv: { sandkasse: { mcpServer: "annen" } } } };
+  assert.equal(report(root, { data: annen, plugins: [] }).problems.length, 1, "ingen plugins er på");
+  assert.deepEqual(report(root, { data: annen, plugins: ["forvaltning", "solution"] }).problems, [], "forvaltning og solution trenger ikke MCP-serveren");
+  assert.match(report(root, { data: annen, plugins: ["monitoring"] }).problems[0], /MCP-serveren annen \(sandkasse\) står ikke i .mcp.json/);
 });

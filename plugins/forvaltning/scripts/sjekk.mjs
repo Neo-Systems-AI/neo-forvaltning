@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Sjekken 2.0.0 for et repo laget fra neo-forvaltning-mal. GENERERT fra check/ i neo-forvaltning med
+// Sjekken 2.1.0 for et repo laget fra neo-forvaltning-mal. GENERERT fra check/ i neo-forvaltning med
 // `node check/build.mjs`: endres der, ikke her. Én fil uten avhengigheter (yaml 2.9.1 er bygget inn).
 import { createRequire as __createRequire } from "node:module";
 const require = __createRequire(import.meta.url);
@@ -8143,7 +8143,7 @@ function render(root) {
 
 // sjekk.mjs
 function version() {
-  if (true) return "2.0.0";
+  if (true) return "2.1.0";
   return JSON.parse(readFileSync8(join8(dirname2(fileURLToPath2(import.meta.url)), "package.json"), "utf8")).version;
 }
 var CHECKS6 = [...CHECKS, ...CHECKS2, ...CHECKS3, ...CHECKS4, ...CHECKS5];

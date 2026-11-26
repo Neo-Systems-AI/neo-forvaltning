@@ -109,7 +109,10 @@ export function report(root, { data, plugins = enabled(root) } = {}) {
   const problems = [];
   if (!plugins.length) problems.push(`Ingen plugins fra ${MARKET} er på i .claude/settings.json (enabledPlugins)`);
   const miljoer = environments(data).map((env) => neo(data, root, env));
-  for (const n of miljoer) if (n.mcpServer && !n.iRepoet) problems.push(`MCP-serveren ${n.mcpServer} (${n.miljo}) står ikke i .mcp.json. Legg den til med kommandoen Neo viser under API-klienter → Koble til Claude, og logg inn med /mcp`);
+  // MCP-serveren trengs bare når en plugin som er på, går gjennom MCP (monitoring, data); forvaltning og solution kaller
+  // Neo med maskinklienten.
+  const mcp = plugins.some((p) => KEYS[p]?.neo && !KEYS[p]?.neoApi);
+  for (const n of miljoer) if (mcp && n.mcpServer && !n.iRepoet) problems.push(`MCP-serveren ${n.mcpServer} (${n.miljo}) står ikke i .mcp.json. Legg den til med kommandoen Neo viser under API-klienter → Koble til Claude, og logg inn med /mcp`);
   return { miljoer, problems, plugins: plugins.map((p) => ({ plugin: p, rows: rows(data, p) })) };
 }
 
