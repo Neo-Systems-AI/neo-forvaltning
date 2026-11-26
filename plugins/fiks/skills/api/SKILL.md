@@ -10,7 +10,7 @@ samme. Finn kjøringen i Neo først, ta id-en derfra (forsendelses-id,
 organisasjonsnummer, fødselsnummer), og spør Fiks.
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/fiks.mjs" [--miljo <miljø>] <kommando>
+node "${CLAUDE_PLUGIN_ROOT}/scripts/fiks.mjs" <kommando>
 ```
 
 | Kommando | Kallet | Svarer på |
@@ -42,11 +42,10 @@ Utskriften er metoden, adressen, status og tid, så svaret. Exit 1 når Fiks ikk
 
 - **Bare lesing.** Ingen kall som sender, kvitterer eller endrer noe. SvarInn-kvittering er en endring og er ikke med;
   `svarut status` er et søk med POST, ikke en endring.
-- **Si alltid miljøet.** Første linje i utskriften er `Miljø: <miljø>`; ta den med i svaret. Standard er
-  `fiks.defaultEnv`, ellers det første i `fiks.environments`. Produksjon er ekte forsendelser og ekte personer: bruk
-  den bare når kunden har bedt om det.
+- **Si alltid miljøet.** Første linje i utskriften er `Miljø: <miljø>` (`fiks.miljo`); ta den med i svaret.
+  Produksjon er ekte forsendelser og ekte personer: bruk den bare når kunden har bedt om det.
 - **Personopplysninger:** fødselsnummer maskeres i utskriften (seks første sifre og `*****`). Navn og adresse fra
   Folkeregisteret kommer ut som de er: gjengi bare det feilsøket trenger, og skriv det aldri i en fil i repoet.
-- **Hemmelighetene** sladdes fra alt som skrives ut. Mangler en, sier skriptet navnet på variabelen; et menneske
-  henter den fra kundens hvelv, aldri agenten.
+- **Hemmelighetene** hentes fra kundens hvelv for kallet og sladdes fra alt som skrives ut. Får skriptet en ikke, sier
+  det referansen.
 - **Config:** mangler en nøkkel, sier skriptet hvilken; den settes under `fiks` i `.claude/neo.config.json`.

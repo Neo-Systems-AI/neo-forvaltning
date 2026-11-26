@@ -1,18 +1,18 @@
 ---
 name: check-health
-description: Helsa til oppsettet i Neo for ett miljø og et tidsvindu - flytene, kjøringene, hva som har feilet og det som stikker seg ut. Svarer med en kort oversikt og teller opp resten, så du kan spørre etter detaljene uten at alt hentes på nytt («detaljer» gir alt med én gang). Bare lesing.
+description: Helsa til oppsettet i Neo for et tidsvindu - flytene, kjøringene, hva som har feilet og det som stikker seg ut. Svarer med en kort oversikt og teller opp resten, så du kan spørre etter detaljene uten at alt hentes på nytt («detaljer» gir alt med én gang). Bare lesing.
 ---
 
 # Helsa
 
 ## Før du starter
 
-1. Miljøet (standard `neo.defaultEnv`) og vinduet (det som er sagt: døgn = 24h, uke = 7d, måned = 30d; ellers
-   `node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/neo-config.mjs" --get window`).
-2. Slå opp MCP-serveren for miljøet før du kaller et verktøy, og bruk verktøyene den gir:
+1. Vinduet: det som er sagt (døgn = 24h, uke = 7d, måned = 30d); ellers
+   `node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/config.mjs" monitoring.window`.
+2. Slå opp Neo før du kaller et verktøy, og bruk verktøyene den gir:
 
    ```bash
-   node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/mcp-server.mjs" <miljø>
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/config.mjs"
    ```
 
 ## Slik gjør du det
@@ -29,7 +29,7 @@ description: Helsa til oppsettet i Neo for ett miljø og et tidsvindu - flytene,
 
 ## Svaret
 
-- **Verdikt først:** grønt, gult, rødt eller UKJENT, og miljøet og vinduet det gjelder.
+- **Verdikt først:** grønt, gult, rødt eller UKJENT, og org-en og vinduet det gjelder.
 - **Én linje per flyt med noe å se på**, så det som krever handling, med forslag: feilsøk den siste feilede kjøringen.
 - **Tell opp resten** («12 flyter uten feil, 3 uten kjøringer i vinduet»).
 

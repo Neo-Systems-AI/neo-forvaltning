@@ -12,12 +12,12 @@ organisasjonsnumre. Bare lesing, gjennom det åpne API-et (`data.brreg.no/enhets
 ## Config
 
 ```json
-"enhetsregisteret": { "environments": ["produksjon"], "orgnr": "<kommunens eget, valgfritt>" }
+"enhetsregisteret": { "miljo": "produksjon", "orgnr": "<kommunens eget, valgfritt>" }
 ```
 
-Ingen hemmeligheter, og pluginen går også uten config-fil (da i produksjon). Enhetsregisteret er åpne data, så det er
-ikke noe eget testmiljø å sette opp nøkler til: `produksjon` er det som gjelder. Brønnøysundregistrene har et
-testmiljø med oppdiktede data (`data.ppe.brreg.no`); det brukes som `test` når det står i `environments`.
+Ingen hemmeligheter. Enhetsregisteret er åpne data, så `produksjon` (data.brreg.no) er det som gjelder.
+Brønnøysundregistrene har et testmiljø med oppdiktede data (`test`, data.ppe.brreg.no). Uten `miljo` i config-fila må
+`--miljo` sies; skriptet velger aldri et miljø selv.
 
 ## Det kunden må ha selv
 

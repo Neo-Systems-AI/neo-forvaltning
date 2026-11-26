@@ -8,8 +8,8 @@ description: Kjører en testrunde for en løsning i Neo, i UI, med personen som 
 En runde er bare verdt noe hvis den kan sammenlignes med neste, og hvis det som ikke ble sett, er sagt. Personen ser
 på og noterer sine egne funn; det hen ser og sier, teller like mye som det skjermen viser.
 
-**Inn:** testplanen, testcasene og personaene i `test/personaer/`. **Ut:** en ny runde i `6-test/` med resultatene og funnene. En runde
-som er kjørt, endres ikke; neste runde er en ny.
+**Inn:** testplanen, testcasene og personaene i `test/personaer/`. **Ut:** en ny runde i `test/runder/` i løsningen,
+med resultatene og funnene. En runde som er kjørt, endres ikke; neste runde er en ny.
 
 ## 1. Gjør klar
 

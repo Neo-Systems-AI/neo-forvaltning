@@ -4,7 +4,7 @@ Spørsmål om sakene i Neo, gjennom Neo sin MCP-server med personens egne rettig
 
 | Skill | Hva |
 |---|---|
-| `data:query-cases` | Svar på et spørsmål om sakene, maskert, med miljøet |
+| `data:query-cases` | Svar på et spørsmål om sakene, maskert, med org-en |
 
 `scripts/mask.mjs` maskerer fødselsnummer (med kontrollsiffer), telefonnummer og e-post. Skru på pluginen bare når
 kunden vil det: den leser saker med personopplysninger.

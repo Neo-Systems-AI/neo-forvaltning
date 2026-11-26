@@ -1,13 +1,13 @@
 {
   "plugin": "enhetsregisteret",
-  "neo": false,
-  "environments": true,
-  "maskinporten": false,
   "keys": [
     {
-      "path": "orgnr",
-      "required": false,
-      "doc": "Organisasjonsnummeret som slås opp når ingen er sagt, for eksempel kommunens eget. Ikke hemmelig: Enhetsregisteret er åpent"
+      "path": "enhetsregisteret.miljo",
+      "doc": "produksjon eller test. Uten den må --miljo sies"
+    },
+    {
+      "path": "enhetsregisteret.orgnr",
+      "doc": "Organisasjonsnummeret som slås opp når ingen er sagt, for eksempel kommunens eget. Ikke hemmelig"
     }
   ]
 }

@@ -24,7 +24,7 @@ Hvilken versjon av Digdirs skills som er kopiert, står i [`UPSTREAM.json`](./UP
 
 ## Kontrollskriptene
 
-Begge ligger i `skills/publish-app/scripts/`, er avhengighetsfrie (Node 18+) og endrer ingenting.
+Begge ligger i `scripts/`, er avhengighetsfrie (Node 18+) og endrer ingenting.
 
 | Skript | Svarer på | Exit |
 |---|---|---|
@@ -107,33 +107,17 @@ Hver kjøring skriver miljøet, `GET <adresse> → <status> (<ms>)` og svaret, m
 
 **Det kunden må ha selv.** Hele oppsettet hos kunden står i [`docs/altinn.md`](./docs/altinn.md). Kunden eier klienten og nøkkelen; vi eier koden.
 
-- **En Maskinporten-klient per miljø** (test-Maskinporten for tt02, Maskinporten for produksjon), registrert på kundens organisasjonsnummer, med tjenesteeier-scopes for Altinn. For lesing: `altinn:serviceowner/instances.read`, og for hendelsene `altinn:serviceowner/events` og `altinn:events.subscribe`. Maskinporten avviser hele kallet om klienten mangler ett scope, så `scopes` settes til dem klienten har.
+- **En Maskinporten-klient** i miljøet lese-kallene går mot (test-Maskinporten for tt02, Maskinporten for produksjon), registrert på kundens organisasjonsnummer, med tjenesteeier-scopes for Altinn. For lesing: `altinn:serviceowner/instances.read`, og for hendelsene `altinn:serviceowner/events` og `altinn:events.subscribe`. Maskinporten avviser hele kallet om klienten mangler ett scope, så `scopes` på klienten settes til dem den har.
 - **Kunden er tjenesteeier i Altinn** (akronymet i `org`), ellers får tokenet ikke `urn:altinn:org`, og Storage svarer 400.
-- **Nøkkelen i kundens nøkkelhvelv.** Referansen står i `integrasjoner/altinn/hemmeligheter.yaml` i kunderepoet; et menneske henter den til `.keys/` med `/config:show-secrets`.
+- **Nøkkelen i kundens nøkkelhvelv.** Referansen står i `integrasjoner/maskinporten/hemmeligheter.yaml` i kunderepoet (`<klient>-nokkel`), og skriptet henter den for kallet.
 
-I `.claude/neo.config.json`:
+I `.claude/neo.config.json`, med klienten beskrevet under `maskinporten.klienter` (se pluginen `maskinporten`):
 
 ```json
-{
-  "version": 1,
-  "altinn": {
-    "org": "ttd",
-    "apps": ["ttd/<app>"],
-    "environments": ["tt02", "produksjon"],
-    "byEnv": {
-      "tt02": {
-        "maskinporten": {
-          "clientId": "<klient-id>",
-          "nokkel": { "$env": "ALTINN_TT02_MASKINPORTEN_NOKKEL" },
-          "scopes": ["altinn:serviceowner/instances.read", "altinn:serviceowner/events", "altinn:events.subscribe"]
-        }
-      }
-    }
-  }
-}
+"altinn": { "miljo": "tt02", "klient": "altinn", "org": "ttd", "apps": ["ttd/<app>"] }
 ```
 
-`kid` er valgfri (uten den brukes thumbprinten til nøkkelen), og `subscriptionKey` settes bare om kunden har fått en. Miljøene og Maskinporten-nøklene trengs bare til lese-kallene, ikke til publiseringen. Hemmelighetene står bare med navnet på variabelen (`{ "$env": … }`). Hvor verdien ligger i hvelvet, står i `integrasjoner/<system>/hemmeligheter.yaml` i kunderepoet, og et menneske henter den lokalt med `/config:show-secrets`. Sjekk oppsettet med `/config:check-setup`.
+Miljøet og klienten trengs bare til lese-kallene, ikke til publiseringen. Har kunden fått en Ocp-Apim-Subscription-Key, står den som `subscription-key` i `integrasjoner/altinn/hemmeligheter.yaml`, og brukes da i hvert kall.
 
 ```bash
 node --test plugins/altinn/scripts/*.test.mjs

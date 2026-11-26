@@ -18,31 +18,26 @@ Kunden eier instansen, klienten og hemmeligheten. Vi eier koden.
 
 ## Oppsett
 
-I `.claude/neo.config.json` i kundens repo:
+I `.claude/neo.config.json` i kundens repo, for instansen repoet arbeider mot:
 
 ```json
-{
-  "version": 1,
-  "documaster": {
-    "environments": ["test", "produksjon"],
-    "defaultEnv": "test",
-    "byEnv": {
-      "test": {
-        "apiUrl": "https://<instans>:8083",
-        "tokenUrl": "https://<idp>/token",
-        "clientId": "<klient-id>",
-        "clientSecret": { "$env": "DOCUMASTER_TEST_CLIENT_SECRET" },
-        "scope": "openid"
-      }
-    }
-  }
+"documaster": {
+  "apiUrl": "https://<instans>:8083",
+  "tokenUrl": "https://<idp>/token",
+  "clientId": "<klient-id>",
+  "scope": "openid"
 }
+```
+
+Og hemmeligheten i `integrasjoner/documaster/hemmeligheter.yaml`:
+
+```yaml
+client-secret: { kilde: azure-keyvault:<hvelv>/documaster-client-secret }
 ```
 
 - **`apiUrl` er API-et, ikke nettsiden.** API-et svarer på port 8083; nettsiden på `/v2/` svarer 200 med HTML på alle
   stier, så en feil adresse ser ut som et vellykket kall. Skriptet stopper på et HTML-svar.
-- **Hemmeligheten** står bare med navnet på variabelen. Et menneske henter den til `.env.local` med `/config:show-secrets`; den committes aldri.
-- **Sjekk oppsettet** med `/config:check-setup`.
+- **Hemmeligheten** hentes fra hvelvet for kallet, med personens egen innlogging, og ligger aldri på disk.
 
 ## Kallene
 

@@ -9,14 +9,14 @@ import { dirname, join, relative } from "node:path";
 import { plan } from "./sync-shared.mjs";
 
 export const CHECKS = [
-  { name: "manifests", about: "Markedsplassen og hver plugin har et gyldig manifest med beskrivelse og lisens" },
+  { name: "manifests", about: "Markedsplassen og hver plugin har et gyldig manifest med lisens, og beskrivelsen står ett sted: i plugin.json" },
   { name: "listed", about: "Hver plugin-mappe står i markedsplassen, og hver oppføring har mappa si" },
   { name: "versions", about: "Versjonen er lik i plugin.json og marketplace.json" },
   { name: "hooks", about: "Hvert skript en hook nevner, finnes" },
   { name: "public", about: "Ingenting internt eller om en kunde: interne verter, repoer og stier" },
-  { name: "config", about: "Hver plugin har neo-config.keys.json, og kopiene av de felles modulene er like shared/" },
+  { name: "config", about: "Hver plugin har neo-config.keys.json med nøklene den leser, og kopiene fra shared/ er de importene krever, like shared/" },
   { name: "docs", about: "Lenkene i docs/ og i pluginenes docs/ peker på filer og overskrifter som finnes, og hver regel i mønstrene det vises til, finnes" },
-  { name: "skills", about: "En skill viser ikke til en annen skill og har ingen datoer: løpet står i README-en til pluginen" },
+  { name: "skills", about: "En skill viser ikke til en annen skill og har ingen datoer, og hver henvisning til en skill (/plugin:skill) i en fil viser til en som finnes" },
 ];
 
 // Ankeret GitHub gir en overskrift: små bokstaver, tegnsetting ut, mellomrom blir bindestrek.
@@ -84,6 +84,41 @@ export function checkSkills(root, plugins) {
   return f;
 }
 
+// En henvisning til en skill i en fil, også i skriptene: «/plugin:skill», og «`plugin:skill`» i en README (der står
+// skillene i tabeller). Pluginen må være en av våre og skillen må finnes; en henvisning til en skill som er tatt bort,
+// sender personen til noe som ikke er der. Et scope som `altinn:serviceowner` i en oppskrift er ikke en skill.
+export function checkSkillRefs(root, plugins, files) {
+  const f = [];
+  const names = new Set(plugins);
+  for (const file of files) {
+    const rel = relative(root, file);
+    if (!/\.(md|mjs|json)$/.test(rel) || /\/skills\/altinn-[^/]+\//.test(rel) || rel.startsWith("plugins/solution/scripts/sjekk.mjs")) continue;
+    readFileSync(file, "utf8").split("\n").forEach((line, i) => {
+      for (const m of line.matchAll(/(?:(?<=^|[\s(«"'])\/|`)([a-z][a-z0-9-]*):([a-z0-9][a-z0-9-]*)(?=`|\b)/g)) {
+        const [ref, plugin, skill] = m;
+        if (!names.has(plugin)) continue;
+        if (ref.startsWith("`") && (line[m.index + ref.length] !== "`" || !rel.endsWith("README.md"))) continue;
+        if (!existsSync(join(root, "plugins", plugin, "skills", skill, "SKILL.md"))) f.push({ check: "skills", file: rel, line: i + 1, message: `Viser til ${plugin}:${skill}, som ikke er en skill i ${plugin}` });
+      }
+    });
+  }
+  return f;
+}
+
+// Nøkkelfila sier hva pluginen leser fra .claude/neo.config.json, og hvilke referanser den trenger i
+// integrasjoner/<system>/hemmeligheter.yaml. Bare nøkler: hva som kopieres inn i pluginen, avledes av importene.
+export function checkKeys(root, p, keys) {
+  const f = [];
+  const kf = `plugins/${p}/neo-config.keys.json`;
+  if (keys.plugin !== p) f.push({ check: "config", file: kf, message: `plugin er «${keys.plugin}», mappa er «${p}»` });
+  const extra = Object.keys(keys).filter((k) => !["plugin", "keys", "hemmeligheter"].includes(k));
+  if (extra.length) f.push({ check: "config", file: kf, message: `Nøkkelfila beskriver bare nøkler (keys, hemmeligheter), ikke ${extra.join(", ")}` });
+  if (!Array.isArray(keys.keys)) f.push({ check: "config", file: kf, message: "keys mangler (en tom liste når pluginen ikke leser noe)" });
+  for (const k of keys.keys ?? []) if (!k.path || !k.doc) f.push({ check: "config", file: kf, message: `Hver nøkkel har path og doc: ${JSON.stringify(k)}` });
+  for (const h of keys.hemmeligheter ?? []) if (!h.system || !h.navn || !h.doc) f.push({ check: "config", file: kf, message: `Hver hemmelighet har system, navn og doc: ${JSON.stringify(h)}` });
+  return f;
+}
+
 // Det som aldri skal stå i et offentlig repo. Kundenavn holdes ute ved review; her står det som kan sjekkes.
 export const INTERNAL = [
   { re: /\.ghe\.com/i, why: "en intern GitHub-vert" },
@@ -130,7 +165,8 @@ export function run(root) {
       const plugin = readJson(root, pf, f, "manifests");
       if (!plugin) continue;
       if (plugin.name !== name) f.push({ check: "manifests", file: pf, message: `name er «${plugin.name}», mappa er «${name}»` });
-      if (!plugin.description || !entry.description) f.push({ check: "manifests", file: pf, message: `${name}: beskrivelsen mangler (i plugin.json eller marketplace.json)` });
+      if (!plugin.description) f.push({ check: "manifests", file: pf, message: `${name}: beskrivelsen mangler i plugin.json` });
+      if (entry.description !== undefined) f.push({ check: "manifests", file: mf, message: `${name}: beskrivelsen står i plugin.json; ta den bort fra marketplace.json, så den står ett sted` });
       if (!plugin.license) f.push({ check: "manifests", file: pf, message: `${name}: lisensen mangler. Repoet er offentlig, og uten lisens kan ingen bruke det` });
       if (!plugin.version || plugin.version !== entry.version) {
         f.push({ check: "versions", file: pf, message: `${name}: ${plugin.version ?? "ingen versjon"} i plugin.json, ${entry.version ?? "ingen versjon"} i marketplace.json. Bump begge, ellers ser ingen endringen` });
@@ -147,7 +183,7 @@ export function run(root) {
   }
   for (const file of walk(root)) {
     const rel = relative(root, file);
-    if (rel === "scripts/check.mjs" || rel === "scripts/check.test.mjs") continue;
+    if (rel === "scripts/check.mjs" || rel === "scripts/check.test.mjs" || rel.startsWith("check/node_modules/")) continue;
     const text = readFileSync(file, "utf8");
     text.split("\n").forEach((line, i) => {
       for (const { re, why } of INTERNAL) if (re.test(line)) f.push({ check: "public", file: rel, line: i + 1, message: `Linja nevner ${why}. Repoet er offentlig` });
@@ -159,12 +195,18 @@ export function run(root) {
     if (!existsSync(join(root, kf))) f.push({ check: "config", file: kf, message: "Mangler. Hver plugin sier hva den leser fra .claude/neo.config.json, også når det er ingenting" });
     else {
       const keys = readJson(root, kf, f, "config");
-      if (keys && keys.plugin !== p) f.push({ check: "config", file: kf, message: `plugin er «${keys.plugin}», mappa er «${p}»` });
+      if (keys) f.push(...checkKeys(root, p, keys));
     }
   }
   if (existsSync(join(root, "shared"))) {
-    for (const i of plan(root).filter((x) => !x.same)) f.push({ check: "config", file: `plugins/${i.plugin}/scripts/lib/${i.mod.split("/")[1]}`, message: `Ikke lik shared/${i.mod}. Kjør node scripts/sync-shared.mjs` });
+    for (const i of plan(root)) {
+      const at = i.text !== undefined ? `plugins/${i.plugin}/scripts/${i.mod}` : `plugins/${i.plugin}/scripts/lib/${i.mod}`;
+      if (i.missing) f.push({ check: "config", file: `plugins/${i.plugin}`, message: `Importerer lib/${i.mod}, som ikke finnes i shared/` });
+      else if (i.unused) f.push({ check: "config", file: at, message: "Ingen skript eller skill i pluginen bruker den. Kjør node scripts/sync-shared.mjs" });
+      else if (!i.same) f.push({ check: "config", file: at, message: `Ikke lik ${i.text !== undefined ? "nøkkelfilene til pluginene" : `shared/${i.mod}`}. Kjør node scripts/sync-shared.mjs` });
+    }
   }
+  f.push(...checkSkillRefs(root, plugins, walk(root)));
   f.push(...checkDocs(root));
   f.push(...checkSkills(root, plugins));
   return f.map((x) => ({ level: "fail", ...x }));

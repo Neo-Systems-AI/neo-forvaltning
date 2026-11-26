@@ -1,12 +1,20 @@
 {
   "plugin": "solution",
-  "neo": true,
-  "filer": true,
   "keys": [
     {
-      "path": "off",
-      "fallback": [],
-      "doc": "Reglene i mønstrene som er slått av i dette repoet, med id"
+      "path": "neo.url",
+      "required": true,
+      "doc": "Adressen til Neo. Skjemaet for konfigfilene hentes derfra (/api/config/schema)"
+    },
+    {
+      "path": "neo.org",
+      "required": true,
+      "doc": "Org-en i Neo med sandkassen konfigen skrives til"
+    },
+    {
+      "path": "neo.mcpServer",
+      "required": true,
+      "doc": "Navnet på MCP-serveren for Neo i .mcp.json"
     }
   ]
 }

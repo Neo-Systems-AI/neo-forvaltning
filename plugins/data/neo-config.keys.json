@@ -1,10 +1,14 @@
 {
   "plugin": "data",
-  "neo": true,
   "keys": [
     {
-      "path": "maxRows",
-      "fallback": 50,
+      "path": "neo.mcpServer",
+      "required": true,
+      "doc": "Navnet på MCP-serveren for Neo i .mcp.json"
+    },
+    {
+      "path": "data.maxRows",
+      "standard": 50,
       "doc": "Flest rader pluginen viser i ett svar"
     }
   ]

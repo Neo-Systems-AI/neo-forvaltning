@@ -19,7 +19,7 @@ Et krav løses ved å stille spørsmålene i denne rekkefølgen:
 4. Hva starter skrivingen?
 
 Reglene per flate sier hvordan hvert objekt settes opp, og avgjør når det finnes flere veier. Valget og grunnen står i
-sporingen til kravene.
+designet, og kravet sier hva det ble (`blir`).
 
 ## Neo registrerer selv
 

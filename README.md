@@ -7,8 +7,7 @@ sitt i [Neo](https://neosystems.ai), og for den som lager Altinn-skjemaer.
 
 | Plugin | Hva |
 |---|---|
-| [`config`](./plugins/config) | Repoet og konfigen inn og ut av Neo: oppsettet, hentingen som filer i Neos format, planen og skrivingen til sandkassen, hemmelighetene fra hvelvet, og sjekken av oppsettet |
-| [`solution`](./plugins/solution) | Løpet fra en idé til en løsning som er testet i UI og gitt til kunden: research, krav, design, konfig med KI-oppsettet, testene og funnene, og gjennomgangen av konfigen mot mønstrene |
+| [`solution`](./plugins/solution) | Repoet og løypa fra en idé til en løsning som er testet i UI og gitt til kunden: research, krav, design, konfig i Neos format, planen og skrivingen til sandkassen, testene og funnene. Sjekken av repoet følger med |
 | [`monitoring`](./plugins/monitoring) | Flytene og kjøringene i et tidsvindu, og feilsøk av én kjøring |
 | [`data`](./plugins/data) | Spørsmål om sakene, bare lesing, med personopplysninger maskert |
 
@@ -23,15 +22,16 @@ sitt i [Neo](https://neosystems.ai), og for den som lager Altinn-skjemaer.
 | [`krr`](./plugins/krr) | Kontakt- og reservasjonsregisteret |
 | [`enhetsregisteret`](./plugins/enhetsregisteret) | Enheter og underenheter |
 
-**Oppsett i kundens egne systemer**, steg for steg, med kommandoene et menneske kjører selv:
+**Oppsett i kundens egne systemer**, med kommandoene et menneske kjører selv:
 
 | Plugin | Hva |
 |---|---|
 | [`entra`](./plugins/entra) | Microsoft-tenanten: SSO og SCIM med Entra ID, og en felles postboks fra Exchange Online |
 
-De som kaller Neo eller et eksternt system, leser én config-fil i repoet, `.claude/neo.config.json`: miljøet i Neo med
-MCP-serveren, adressen og org-en, og én del per plugin med systemets egne miljøer (test og produksjon). Fila har ingen
-hemmeligheter; referansene til hvelvet står i kunderepoet der de brukes.
+De som kaller Neo eller et eksternt system, leser én config-fil i kunderepoet, `.claude/neo.config.json`: Neo (adressen,
+org-en og MCP-serveren) og én del per plugin. Fila har ingen hemmeligheter og ingen referanser. Referansene til
+hvelvet står i `integrasjoner/<system>/hemmeligheter.yaml`, og skriptene henter verdien fra hvelvet ved hvert kall,
+med personens egen innlogging.
 
 **Dokumentasjonen** står i pluginen som bruker den (`plugins/<plugin>/docs/`), så den følger pluginens versjon.
 Inngangen er [`docs/`](./docs/README.md): mønstrene for god konfig og oppskriftene for integrasjonene.
@@ -40,27 +40,80 @@ Inngangen er [`docs/`](./docs/README.md): mønstrene for god konfig og oppskrift
 
 ```
 /plugin marketplace add Neo-Systems-AI/neo-forvaltning
-/plugin install config@neo-forvaltning
+/plugin install solution@neo-forvaltning
 ```
-
-Resten skrus på med `/config:set-up-repo` i repoet, eller én og én med `/plugin install <plugin>@neo-forvaltning`.
 
 Skal du forvalte oppsettet i Neo, start med et eget, privat repo fra malen
 [`neo-forvaltning-mal`](https://github.com/Neo-Systems-AI/neo-forvaltning-mal), i din egen organisasjon: en kopi av
-malens filer i et tomt repo, med første push av en org-admin (`/config:set-up-repo` viser hvordan). Malen tar inn
-pluginene selv.
+malens filer i et tomt repo, med første push av en org-admin. `/solution:set-up-repo` viser hvordan, og skrur på
+resten av pluginene.
+
+## Sjekken av et kunderepo
+
+Én sjekk, ett sted. Kilden står i [`check/`](./check), med `yaml` (den Neo bruker) og `ajv` låst i
+`check/package.json`, og er bygget til én fil uten avhengigheter: `plugins/solution/scripts/sjekk.mjs`. Pluginen
+kjører den lokalt, og malens CI henter den samme fila i en låst versjon. Malen har ingen egen kopi av logikken.
+
+Versjonen står i `check/package.json` (`node sjekk.mjs --versjon`). Hver versjon som skal brukes i en mal, får en tag i
+dette repoet, `sjekk-v<versjon>`, på commiten der fila er bygget. Malens CI henter fila fra den taggen og kontrollerer
+sha256, fordi kunderepoene ligger på GitHub Enterprise og dette repoet på github.com, og et kall på tvers ikke kan
+bruke en action fra dette repoet:
+
+```yaml
+- name: Hent sjekken
+  env:
+    VERSJON: "1.0.0"
+    SHA256: "<sha256 for fila i taggen>"
+  run: |
+    curl -fsSL "https://raw.githubusercontent.com/Neo-Systems-AI/neo-forvaltning/sjekk-v$VERSJON/plugins/solution/scripts/sjekk.mjs" -o "$RUNNER_TEMP/sjekk.mjs"
+    echo "$SHA256  $RUNNER_TEMP/sjekk.mjs" | sha256sum -c -
+- name: Sjekken
+  env:
+    BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+  run: |
+    # Første push i et nytt repo har ingen forrige commit: da er det ingen endring å sammenligne kildene med.
+    git cat-file -e "$BASE^{commit}" 2>/dev/null || BASE=HEAD
+    node "$RUNNER_TEMP/sjekk.mjs" --base "$BASE" --annotate --summary
+```
+
+Sjekken leser historikken til basen, så `actions/checkout` trenger `fetch-depth: 0`.
+
+Sha256 for fila i en tag: `curl -fsSL <adressen> | sha256sum`. En ny versjon tas inn i malen med en PR som bytter begge
+verdiene.
+
+```bash
+node sjekk.mjs [--base <ref>] [--annotate] [--summary] [--json]   # hele sjekken; rødt gir exit 1, gult står
+node sjekk.mjs regler [--losning <navn>] [--json]                 # mønstrene, med det som ikke er vurdert
+node sjekk.mjs filer [--losning <navn>] [--json | --stier]        # konfigfilene med stien i Neo, i rekkefølgen Neo gir
+node sjekk.mjs hos-kunden                                         # lista over det kunden må gjøre (committes ikke)
+node sjekk.mjs --versjon
+```
+
+`--base` er det endringen sammenlignes med når sjekken ser at ingen lagret kilde er endret: grenen PR-en skal inn i,
+og `HEAD` før det finnes noe å sammenligne med. Uten basen er det rødt, ikke hoppet over.
 
 ## Hva som ligger her, og hva som ikke gjør det
 
-- **Her:** pluginene vi deler med kunder og partnere, versjonert. En fiks her treffer alle ved neste oppdatering.
-- **I malen:** strukturen og reglene for ett kunderepo. Ingen plugins og ingen innhold.
+- **Her:** pluginene vi deler med kunder og partnere, versjonert, og sjekken av et kunderepo. En fiks her treffer alle
+  ved neste oppdatering.
+- **I malen:** strukturen og reglene for ett kunderepo, og CI som henter sjekken. Ingen plugins, ingen sjekk-logikk og
+  ikke noe innhold.
 - **Ikke her:** noe om en enkelt kunde, eller det Neo Systems bruker internt.
 - **Aldri her eller hos oss:** kundens hemmeligheter, klienter, sertifikater og kontoer. De er kundens, i kundens hvelv.
 
 ## Bidra
 
-Endringer går som PR mot `main`, med `check` grønn (`node scripts/check.mjs` og `node --test "scripts/*.test.mjs" "shared/**/*.test.mjs"
-"plugins/**/*.test.mjs"` lokalt, og `node scripts/sync-shared.mjs` etter en endring i `shared/`). Bump versjonen både i `plugin.json` og i `.claude-plugin/marketplace.json`.
+Endringer går som PR mot `main`, med `check` grønn. Lokalt:
+
+```bash
+node --test "scripts/*.test.mjs" "shared/*.test.mjs" "plugins/**/*.test.mjs"
+node scripts/check.mjs
+(cd check && npm ci && node --test && node build.mjs --check)
+```
+
+Etter en endring i `shared/`: `node scripts/sync-shared.mjs`. Etter en endring i `check/`: `node check/build.mjs`, og
+bump versjonen i `check/package.json`. Bump versjonen til en plugin både i `plugin.json` og i
+`.claude-plugin/marketplace.json`; beskrivelsen står bare i `plugin.json`.
 
 ## Lisens
 

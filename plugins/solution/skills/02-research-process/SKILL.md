@@ -9,8 +9,8 @@ En løsning bygges fra det som faktisk gjelder for prosessen, ikke fra hvordan d
 som gjelder, med kilde, så hvert krav og hvert valg senere kan spores tilbake.
 
 **Inn:** en idé, en kunngjøring, en utlysning eller et ønske fra kunden, og det som gjelder hele kunden (i
-`virksomheten/`). **Ut:** `1-kilder/` og `2-forstaelse/` i løsningen. Formen står i repoets regler for mappene
-(`.claude/rules/`).
+`felles/forstaelse/`, i et kunderepo). **Ut:** `kilder/` og `forstaelse/` i løsningen, og `losning.yaml` i status
+`utkast` med formålet og eieren når løsningen er ny. Formen står i repoets regler for mappene (`.claude/rules/`).
 
 ## De fem dimensjonene
 
@@ -22,8 +22,8 @@ som gjelder, med kilde, så hvert krav og hvert valg senere kan spores tilbake.
 | Data og regler | Egenskapene saken har (type, lovlige verdier, hvor de kommer fra), og betingelsene på dem |
 | Dokumentene | Det som kommer inn og det som går ut, med maler, flettefelt og skjerming |
 
-Det som gjelder hele kunden (rollene, språket, partene, systemene, porteføljen), står i `virksomheten/`. Har prosessen
-noe eget i en av dem, står det i løsningen med en henvisning dit.
+Det som gjelder hele kunden (rollene, språket, partene, systemene, porteføljen), står i `felles/forstaelse/`. Har
+prosessen noe eget i en av dem, står det i løsningen med en henvisning dit.
 
 ## Slik gjør du det
 
@@ -37,7 +37,7 @@ noe eget i en av dem, står det i løsningen med en henvisning dit.
 5. **Kontrollér mot kildene.** En egen agent, som ikke skrev forståelsen, leser hver påstand mot den lagrede kilden og
    lister avvikene. Les hjemmelen særlig nøye: en påstand om hva loven krever, uten at paragrafen sier det, blir et
    krav som ikke skulle vært der.
-6. **Kjør repoets sjekk** til den er grønn.
+6. **Kjør sjekken** (`node "${CLAUDE_PLUGIN_ROOT}/scripts/sjekk.mjs" --base origin/main`) til den er grønn.
 
 ## Personen avgjør
 

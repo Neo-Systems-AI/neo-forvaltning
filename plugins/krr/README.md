@@ -7,20 +7,19 @@ Bare lesing; personnummeret maskeres (de seks første sifrene og `*****`).
 |---|---|
 | `krr:api` | `person`: kontaktinformasjon, reservasjon og varslingsstatus for én eller flere personer |
 
-`scripts/krr.mjs` har kommandoen, uten avhengigheter. Miljøene er `test` (test.kontaktregisteret.no) og
-`produksjon` (kontaktregisteret.no). Oppslaget går mot `POST /rest/v1/personer` (eller v2 med `--v2`).
+`scripts/krr.mjs` har kommandoen, uten avhengigheter. Miljøet (`krr.miljo`) er `test` (test.kontaktregisteret.no)
+eller `produksjon` (kontaktregisteret.no). Oppslaget går mot `POST /rest/v1/personer` (eller v2 med `--v2`).
 
 ## Config
 
 ```json
-"krr": { "environments": ["test", "produksjon"], "defaultEnv": "test", "klient": "krr" }
+"krr": { "miljo": "test", "klient": "krr" }
 ```
 
-**Klienten hentes fra `maskinporten`-delen** (`maskinporten.byEnv.<miljø>.klienter.<klient>`, standard `krr`), ikke
-fra egne nøkler her. Det er det enkleste: klienten, nøkkelen og scopet står ett sted, og
-Tokenet for klienten `krr` i Maskinporten-pluginen prøver nøyaktig den klienten KRR-oppslaget bruker. Står ingen scopes på
-klienten, brukes `krr:global/kontaktinformasjon.read`. Pluginen `maskinporten` trenger ikke være installert; bare
-delen i config-fila.
+**Klienten hentes fra `maskinporten`-delen** (`maskinporten.klienter.<klient>`), ikke fra egne nøkler her: klienten,
+nøkkelen og scopet står ett sted, og tokenet for klienten i Maskinporten-pluginen prøver nøyaktig den klienten
+KRR-oppslaget bruker. Klienten trenger `krr:global/kontaktinformasjon.read` i `scopes`. Pluginen `maskinporten`
+trenger ikke være installert; bare delen i config-fila og nøkkelen i `integrasjoner/maskinporten/hemmeligheter.yaml`.
 
 ## Det kunden må ha selv
 

@@ -1,17 +1,17 @@
 ---
 name: query-cases
-description: Svarer på spørsmål om sakene i Neo - hvor mange, hvilke, hvor står saken, statushistorikken, partene og oppgavene - uten at du skriver spørringen. Bare lesing, med personens egne rettigheter. Maskerer personopplysninger i svaret og sier alltid hvilket miljø svaret kom fra.
+description: Svarer på spørsmål om sakene i Neo - hvor mange, hvilke, hvor står saken, statushistorikken, partene og oppgavene - uten at du skriver spørringen. Bare lesing, med personens egne rettigheter. Maskerer personopplysninger i svaret og sier alltid hvilken org svaret kom fra.
 ---
 
 # Spørsmål om sakene
 
 ## Før du starter
 
-1. Miljøet (standard `neo.defaultEnv`). Spørsmål om ekte saker gjelder ofte produksjonen: spør hvis det ikke er sagt.
-2. Slå opp MCP-serveren for miljøet før du kaller et verktøy, og bruk verktøyene den gir:
+1. Slå opp Neo før du kaller et verktøy, og bruk verktøyene den gir. Gjelder spørsmålet en annen org enn den
+   config-fila sier, si det og stopp:
 
    ```bash
-   node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/mcp-server.mjs" <miljø>
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/config.mjs"
    ```
 
 ## Verktøyene
@@ -21,7 +21,7 @@ description: Svarer på spørsmål om sakene i Neo - hvor mange, hvilke, hvor st
 ## Slik gjør du det
 
 1. Ett kall er normalen. Bygg på svaret bare når spørsmålet krever det, og si hvor mange kall du gjorde.
-2. Vis høyst så mange rader som `node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/neo-config.mjs" --get maxRows` sier, og
+2. Vis høyst så mange rader som `node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/config.mjs" data.maxRows` sier, og
    tell opp resten.
 3. Masker svaret før det vises:
 
@@ -35,4 +35,4 @@ description: Svarer på spørsmål om sakene i Neo - hvor mange, hvilke, hvor st
   går gjennom repoet.
 - **Personopplysninger:** vis ikke mer enn spørsmålet trenger. Fødselsnummer, telefon og e-post maskeres alltid.
   Lagre aldri et svar med personopplysninger i repoet.
-- **Si hvilket miljø og når.** Et tall uten miljø er verre enn ingen tall.
+- **Si hvilken org og når.** Et tall uten org er verre enn ingen tall.

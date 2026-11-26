@@ -6,7 +6,7 @@ installeres. Her er inngangen.
 ## Mønstrene for god konfig
 
 [Mønstrene](../plugins/solution/docs/monstre/README.md) i pluginen `solution`: grunnreglene, og reglene per flate med
-beslutningstabellene. Det som kan sjekkes maskinelt, sjekker `rules.mjs` i samme plugin, med samme id.
+beslutningstabellene. Det som kan sjekkes maskinelt, sjekker `scripts/sjekk.mjs` i samme plugin, med samme id.
 
 ## Integrasjonene
 
@@ -16,7 +16,7 @@ det prøves. Hvor langt én kunde er kommet, står i kundens eget repo (`integra
 
 | System | Hva det er | Hva Neo bruker det til | Må kunden gjøre noe? |
 |---|---|---|---|
-| [Hvelvet](../plugins/config/docs/hvelvet.md) | Azure Key Vault | Kanalen for hemmeligheter og ID-er mellom kunden og forvalteren | Ja, først av alt |
+| [Hvelvet](../plugins/solution/docs/hvelvet.md) | Azure Key Vault | Kanalen for hemmeligheter og ID-er mellom kunden og forvalteren | Ja, først av alt |
 | [Entra ID](../plugins/entra/docs/entra.md) | Microsofts katalog for brukere og grupper | Innlogging (SSO) og brukerne, rollene og tilgangsgruppene (SCIM) | Ja |
 | [Exchange Online](../plugins/entra/docs/exchange.md) | Microsofts e-post | Felles postbokser inn i innboksen, og sending fra dem | Ja, når Neo skal lese e-post |
 | [Documaster](../plugins/documaster/docs/documaster.md) | Arkivsystem (Noark 5) | Arkivering i bakgrunnen og søk, visning og arkivering for saksbehandlerne | Ja, når kunden arkiverer i Documaster |
@@ -24,7 +24,7 @@ det prøves. Hvor langt én kunde er kommet, står i kundens eget repo (`integra
 | [Altinn](../plugins/altinn/docs/altinn.md) | Digdirs plattform for skjemaer og meldinger | Innsendingene fra skjemaene, og vedtak og meldinger til innbyggere og virksomheter | Ja, når kunden har skjemaer i Altinn |
 | [KS Fiks](../plugins/fiks/docs/fiks.md) | KS sine fellestjenester: SvarUt, SvarInn og Fiks folkeregister | Sende og motta brev, digital post til innbyggere, og oppslag i Folkeregisteret | Ja |
 | [Kontakt- og reservasjonsregisteret](../plugins/krr/docs/krr.md) | Digdirs register over kontaktinformasjon og reservasjoner | Varsling til innbyggere | Ja |
-| [eSignering](../plugins/config/docs/esignering.md) | Digdirs tjeneste for elektronisk signering | Signering av dokumenter | Ja |
+| [eSignering](../plugins/solution/docs/esignering.md) | Digdirs tjeneste for elektronisk signering | Signering av dokumenter | Ja |
 | Enhetsregisteret | Brønnøysundregistrenes register over virksomheter, åpne data | Oppslag på organisasjonsnumre | Nei, API-et er åpent |
 
 ### Rekkefølgen

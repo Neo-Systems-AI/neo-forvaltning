@@ -8,8 +8,8 @@ description: Skriver kravene til en løsning fra forståelsen - ett krav per vil
 Kravene sier hva som må holde, ikke hvordan. De er det oppsettet bygges fra og testene sjekker, så et krav som mangler
 her, blir ikke bygget, og et krav som er feil, blir bygget feil.
 
-**Inn:** forståelsen i løsningen og i `virksomheten/`. **Ut:** `3-krav/` i løsningen, som items. Formen på et krav står
-i repoets regel for mappa (`.claude/rules/`).
+**Inn:** forståelsen i løsningen og i `felles/forstaelse/`. **Ut:** `krav/` i løsningen, som items, og det som er felles
+for flere løsninger i `felles/krav/`. Formen på et krav står i repoets regel for mappa (`.claude/rules/`).
 
 ## Et krav
 
@@ -22,18 +22,19 @@ i repoets regel for mappa (`.claude/rules/`).
   - `menneske`: skjønn eller en beslutning et menneske tar.
 - **Hvorfor**, i én setning, med hjemmelen eller grunnen.
 - **Kilden:** id-en til kilden eller ankeret i forståelsen.
-- **Hva det blir** står tomt til oppsettet bygges. Kravene antar ikke hva Neo har.
+- **Hva det blir** (`blir`) står tomt til oppsettet bygges. Kravene antar ikke hva Neo har.
 
 ## Slik gjør du det
 
 1. Gå gjennom forståelsen dimensjon for dimensjon, og skriv kravene i samme rekkefølge, så hullene synes.
-2. Ta med kravene fra `virksomheten/` som løsningen berører (en rolle som godkjenner, et system som skal oppdateres,
+2. Ta med det som gjelder hele kunden og som løsningen berører (en rolle som godkjenner, et system som skal oppdateres,
    en rapport oppover), med kilde dit.
 3. Velg hvem som utfører hvert krav etter hva det krever: en regel som kan skrives ned, er deterministisk, selv om den
    gjøres for hånd i dag. Skjønn som en agent kan forberede med kilde, er agentisk. Det som er en beslutning, er et
    menneske.
 4. Spørsmålene fra researchen som ikke er besvart, blir ikke krav. Si hvilke krav som venter på dem.
-5. Kjør repoets sjekk til den er grønn: hvert krav har hvem som utfører det, hvorfor og en kilde som finnes.
+5. Kjør sjekken (`node "${CLAUDE_PLUGIN_ROOT}/scripts/sjekk.mjs" --base origin/main`) til den er grønn: hvert krav har
+   hvem som utfører det, hvorfor og en kilde som finnes.
 
 ## Regler
 

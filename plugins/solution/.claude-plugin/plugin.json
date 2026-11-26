@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "solution",
-  "version": "0.2.0",
-  "description": "Å designe og bygge en løsning i Neo, fra en idé eller en kunngjøring til konfig som er testet i UI og gitt til kunden. Løpet er nummerert: research på kunden og på prosessen fra kilder som lagres uendret, kravene, designvalgene, konfigen i Neos format bygget fra kravene med mønstrene for god konfig og skjemaet fra Neo (med KI-oppsettet per sakstype), testene og personaene, runden i UI med personen som observatør, og sorteringen av funnene i konfig og ønsker til Neo. Ved siden av: gjennomgangen av konfigfilene mot mønstrene, og overleveringen til kunden. Mønstrene følger med i docs/monstre/.",
+  "version": "0.3.0",
+  "description": "Repoet og løypa fra en idé til en løsning i Neo som er testet i UI og gitt til kunden: oppsettet av repoet, research på kunden og prosessen fra kilder som lagres uendret, kravene med hva hvert krav ble, designvalgene med avvikene fra mønstrene, konfigen i Neos format bygget med mønstrene for god konfig og skjemaet fra Neo, planen i PR-en og skrivingen til sandkassen etter godkjenningen, testene, runden i UI og sorteringen av funnene. Ved siden av: hentingen av konfigen fra Neo, sjekken av oppsettet, hemmelighetene fra hvelvet (aldri verdier), gjennomgangen mot mønstrene og overleveringen til kunden. Sjekken av repoet følger med som ett skript uten avhengigheter.",
   "author": {
     "name": "Neo Systems AS",
     "url": "https://github.com/Neo-Systems-AI"
@@ -13,6 +13,7 @@
     "neo",
     "løsning",
     "konfigurasjon",
+    "konfig-som-fil",
     "research",
     "krav",
     "test"

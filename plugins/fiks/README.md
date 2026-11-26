@@ -11,38 +11,26 @@ det Neo gjorde. Bare lesing. Hemmelighetene sladdes, og fødselsnummer maskeres.
 
 ## Config
 
-I `.claude/neo.config.json`, under `fiks`. Miljøene heter `test` og `produksjon`. En hemmelighet står aldri med verdi,
-bare med navnet på variabelen:
+I `.claude/neo.config.json`, under `fiks`, med Maskinporten-klienten beskrevet under `maskinporten.klienter` (se
+pluginen `maskinporten`). Id-ene er ikke hemmelige:
 
 ```json
-{
-  "fiks": {
-    "environments": ["test", "produksjon"],
-    "defaultEnv": "test",
-    "byEnv": {
-      "test": {
-        "maskinporten": {
-          "klientId": "<klient-id>",
-          "kid": "<kid, valgfri>",
-          "nokkel": { "$env": "FIKS_MASKINPORTEN_NOKKEL" }
-        },
-        "integrasjon": {
-          "id": "<integrasjonens id i Fiks forvaltning>",
-          "passord": { "$env": "FIKS_INTEGRASJON_PASSORD" }
-        },
-        "svarut": { "kontoId": "<avsenderkontoen>" },
-        "svarinn": {
-          "mottakersystemId": "<mottakersystemets id>",
-          "passord": { "$env": "FIKS_SVARINN_PASSORD" }
-        },
-        "folkeregister": { "rolleId": "<rollen i Fiks register>" }
-      }
-    }
-  }
+"fiks": {
+  "miljo": "test",
+  "klient": "fiks",
+  "integrasjon": "<integrasjonens id i Fiks forvaltning>",
+  "svarutKonto": "<avsenderkontoen>",
+  "svarinnMottakersystem": "<mottakersystemets id>",
+  "folkeregisterRolle": "<rollen i Fiks register>"
 }
 ```
 
-Hemmelige er Maskinporten-nøkkelen, integrasjonens passord og SvarInn-passordet. Id-ene er ikke hemmelige.
+Passordene står som referanser i `integrasjoner/fiks/hemmeligheter.yaml`, og hentes fra hvelvet for kallet:
+
+```yaml
+integrasjon-passord: { kilde: azure-keyvault:<hvelv>/fiks-integrasjon-passord }
+svarinn-passord: { kilde: azure-keyvault:<hvelv>/fiks-svarinn-service-passord }
+```
 
 ## Det kunden må ha selv
 

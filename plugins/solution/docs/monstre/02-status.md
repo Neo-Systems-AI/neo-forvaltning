@@ -46,8 +46,7 @@ opphav: forslag
 ```
 
 - **Gjør:** Lag en status når ansvaret skifter (fra oss til parten og tilbake), når noen skal filtrere eller telle på
-  den, eller når en flyt, en betingelse i veiviseren eller en oppgavemal skal lese den. Skriv leseren i sporingen til
-  kravene.
+  den, eller når en flyt, en betingelse i veiviseren eller en oppgavemal skal lese den. Skriv leseren i designet.
 - **Ikke gjør:** Ikke lag statuser for å vise framdrift som oppgavene alt viser. Ikke lag en status for at et brev er
   sendt; brevet står i saken.
 - **Hvorfor:** Hver status er en kolonne, et filter og noe flytene må holde i takt. Omfanget følger kravene: en status

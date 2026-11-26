@@ -22,8 +22,7 @@ node "$D" dokumenter --registrering <id>          # dokumentversjonene: filnavn,
 node "$D" sok --type <Noark-type> --query "felt = @p" --param @p=verdi
 ```
 
-`--miljo <miljø>` velger instans (standard: `documaster.defaultEnv`, ellers det første i `documaster.environments`).
-`--limit` er 10 som standard, høyst 50.
+Instansen er den i `documaster` i `.claude/neo.config.json`. `--limit` er 10 som standard, høyst 50.
 
 ## Slik feilsøker du
 
@@ -47,6 +46,6 @@ node "$D" sok --type <Noark-type> --query "felt = @p" --param @p=verdi
   ingen skal legges til her.
 - **Svarene er arkivinnhold.** Titler og parter kan være personopplysninger. Vis det som trengs for feilsøket, og
   skriv det aldri inn i repoet.
-- **Hemmeligheten er kundens.** Står den ikke i `.env.local`, sier skriptet navnet på variabelen. Et menneske
-  henter den fra kundens hvelv; agenten gjør det aldri.
+- **Hemmeligheten er kundens.** Skriptet henter den fra kundens hvelv for kallet, og skriver den aldri ut. Får det den
+  ikke, sier det referansen: personen logger inn med `az login`, eller ber kunden om tilgang.
 - **Spørrespråket:** bare `felt = @param` er brukt her, det produktet bruker. Om `&&` og `||` virker, er ikke prøvd.

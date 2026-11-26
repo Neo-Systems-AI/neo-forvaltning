@@ -1,20 +1,30 @@
 # neo-forvaltning
 
-Neo Systems sine offentlige plugins til Claude Code. Repoet er offentlig: alt som committes, kan leses av alle.
+Neo Systems sine offentlige plugins til Claude Code, og sjekken av et kunderepo. Repoet er offentlig: alt som
+committes, kan leses av alle.
 
 ## Regler
 
 - **Bare det en kunde eller partner skal bruke.** Det som er internt hos Neo Systems, hører ikke hjemme her.
 - **Ingenting om en enkelt kunde**, heller ikke som eksempel. Bruk oppdiktede eksempler.
-- **Ingen hemmeligheter.** Innloggingen er alltid personens egen; et token står aldri i en fil.
-- **Tynn mal, tykke plugins:** innhold hører hjemme her, i en versjonert plugin. Malen (`neo-forvaltning-mal`) har bare
-  struktur og regler.
+- **Ingen hemmeligheter.** Innloggingen er alltid personens egen; et token eller en verdi står aldri i en fil.
+- **Tynn mal, tykke plugins:** innhold og logikk hører hjemme her, i en versjonert plugin. Malen
+  (`neo-forvaltning-mal`) har bare struktur og regler, og henter sjekken herfra.
+- **Én sjekk, ett sted:** kilden står i `check/`, og bygges med `node check/build.mjs` til
+  `plugins/solution/scripts/sjekk.mjs` og `shared/yaml.mjs`. De bygde filene endres aldri for hånd; CI stopper når de
+  ikke er ferske.
+- **Ett bibliotek:** det skriptene deler (config-fila, hemmelighetene, fødselsnummer og mod 11, argumentene, kallene,
+  Maskinporten), står i `shared/`, og kopieres inn i pluginene med `node scripts/sync-shared.mjs` etter importene.
+  Ingen kopier av samme logikk i pluginene.
 - **Dokumentasjonen står i pluginen som bruker den** (`plugins/<plugin>/docs/`). `docs/` i roten er bare inngangen med
-  lenker. Skillene leser den fra `${CLAUDE_PLUGIN_ROOT}/docs/`.
-- **En skill sier hva, ikke hvor,** viser ikke til andre skills, og har ingen historikk eller datoer. Løpet beskrives
-  én gang, i README-en til `solution`. `check` stopper en henvisning til en annen skill og en dato.
-- **De felles modulene står i `shared/`** og kopieres inn i pluginene med `node scripts/sync-shared.mjs`.
-- **Versjonen bumpes to steder** (`plugin.json` og `.claude-plugin/marketplace.json`), minor for noe nytt, patch for en fiks.
+  lenker. Stegene står ett sted: oppskriften er det kunden leser, skillen har rekkefølgen, kontrollen og feilene, og
+  kommandoene som er like hver gang, står i et skript.
+- **En skill sier hva, ikke hvor,** viser ikke til andre skills, og har ingen historikk eller datoer. Løypa beskrives
+  én gang, i README-en til `solution`. `check` stopper en henvisning til en annen skill, en dato, og en henvisning til
+  en skill som ikke finnes, i alle filer.
+- **Ingen stille fallbacks:** mangler noe, sier skriptet hva og gir en feilkode.
+- **Versjonen bumpes to steder** (`plugin.json` og `.claude-plugin/marketplace.json`), minor for noe nytt, patch for en
+  fiks. Beskrivelsen står bare i `plugin.json`.
 - **Alt til `main` går gjennom PR** med `check` grønn, med merge commit.
 - Teksten er norsk. Stier i hooks og skript bruker `${CLAUDE_PLUGIN_ROOT}`.
 - Digdirs skills i `plugins/altinn` endres aldri for hånd: `node plugins/altinn/scripts/sync-skills.mjs` henter dem.

@@ -8,80 +8,63 @@
   },
   "plugins": [
     {
-      "name": "config",
-      "source": "./plugins/config",
-      "description": "Repoet og veien for konfigen inn og ut av Neo, gjennom Neos MCP-server med personens egen innlogging: oppsettet av repoet (repo.yaml, config-fila, MCP-serveren, pluginene og CODEOWNERS), hentingen av konfigen som filer i Neos format, planen per fil mot sandkassen med formsjekken og mønstrene først, skrivingen til sandkassen med planen som er godkjent, hemmelighetene fra hvelvet (bare navn, aldri verdier) med en vakt mot .env og .keys/, og sjekken av hva hver plugin trenger i config-fila. Brukes i et repo laget fra neo-forvaltning-mal.",
-      "version": "0.2.0",
-      "category": "forvaltning"
-    },
-    {
       "name": "solution",
       "source": "./plugins/solution",
-      "description": "Å designe og bygge en løsning i Neo, fra en idé eller en kunngjøring til konfig som er testet i UI og gitt til kunden. Løpet er nummerert: research på kunden og på prosessen fra kilder som lagres uendret, kravene, designvalgene, konfigen i Neos format bygget fra kravene med mønstrene for god konfig og skjemaet fra Neo (med KI-oppsettet per sakstype), testene og personaene, runden i UI med personen som observatør, og sorteringen av funnene i konfig og ønsker til Neo. Ved siden av: gjennomgangen av konfigfilene mot mønstrene, og overleveringen til kunden. Mønstrene følger med i docs/monstre/.",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "category": "forvaltning"
     },
     {
       "name": "monitoring",
       "source": "./plugins/monitoring",
-      "description": "Helsa til oppsettet i Neo: flytene og kjøringene i et tidsvindu, hva som har feilet og hvorfor, og feilsøk av én kjøring. Bare lesing, gjennom Neo sin MCP-server. Sier UKJENT når den ikke kan se, aldri OK.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "forvaltning"
     },
     {
       "name": "data",
       "source": "./plugins/data",
-      "description": "Spørsmål om sakene i Neo uten å skrive spørringen: hvor mange, hvilke, hvor står saken, hvem er parter og oppgaver. Bare lesing, gjennom Neo sin MCP-server med personens egne rettigheter. Maskerer fødselsnummer, telefon og e-post i svaret.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "forvaltning"
     },
     {
       "name": "maskinporten",
       "source": "./plugins/maskinporten",
-      "description": "Maskinporten slik den selv svarer: well-known for miljøet, og et token for kundens egen klient med scopet og utløpet som faktisk ble innvilget. Bare lesing; tokenet skrives aldri ut.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "system"
     },
     {
       "name": "fiks",
       "source": "./plugins/fiks",
-      "description": "Rå lese-kall mot KS Fiks: SvarUt (forsendelsestyper, mottakersystem, status og hendelser), SvarInn (nye forsendelser) og Folkeregisteret via Fiks. For feilsøk: hva sier Fiks selv, satt opp mot det Neo gjorde. Bare lesing; hemmelighetene sladdes og fødselsnummer maskeres.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "system"
     },
     {
       "name": "documaster",
       "source": "./plugins/documaster",
-      "description": "Rå lese-kall mot kundens Documaster-arkiv (Noark 5), til feilsøk: ble journalposten arkivert, i hvilken mappe, med hvilke dokumenter. Ett skript uten avhengigheter (scripts/documaster.mjs) henter et token med kundens egen klient og spør med Noark 5-spørringen: arkivdeler, mappe på id eller saksnummer, registrering og journalpost på id eller registreringsIdent, registreringene i en mappe, dokumentversjonene til en registrering, og et fritt søk. Bare lesing: ingen kall som oppretter, endrer eller sletter. Instansen og klienten hos Documaster er kundens, og hemmeligheten står bare som referanse til hvelvet. Oppskriften for oppsettet følger med i docs/.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "system"
     },
     {
       "name": "altinn",
       "source": "./plugins/altinn",
-      "description": "Bygg og publiser Altinn Studio-apper (skjemaer) fra Claude Code, og les hva Altinn 3 selv sier ved feilsøk. Digdirs sju skills bak KI-assistenten i Altinn Studio, kopiert uendret fra Altinn/altinn-studio (MIT) og låst i UPSTREAM.json, forklarer hvordan filene skal se ut. publish-app er løpet fra tom app til publisert i tt02: hva bare et menneske kan gjøre, mal fra en app som kjører, metadata, «Lag kopi» til tjenesteeier-org-en, bygg og publiser, med to avhengighetsfrie kontrollskript (check-app.mjs for at filene henger sammen, check-deployed.mjs for at klonen er det som kjører). api er rå lese-kall mot Altinn 3 med kundens Maskinporten-klient: instanser, prosessen, data-elementene, hendelsene og appens metadata. Bare lesing, fødselsnumre skjult, nøkkelen bare som referanse.",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "category": "system"
     },
     {
       "name": "entra",
       "source": "./plugins/entra",
-      "description": "Oppsettet i kundens egen Microsoft-tenant for Neo: innlogging med Entra ID (SSO) og automatisk brukerprovisjonering (SCIM) med grupper koblet til jobbroller og tilgangsgrupper (set-up-sso), og en felles postboks i Exchange Online inn i innboksen (set-up-shared-mailbox). Kommandoene i rekkefølgen Neo krever, kontrollen etter hvert steg og feilene som pleier å komme. Kommandoene mot Microsoft kjøres av et menneske med sin egen innlogging, og agenten gjør det som er trygt i Neo over MCP; client secret og SCIM-token går aldri gjennom agenten.",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "category": "system"
     },
     {
       "name": "krr",
       "source": "./plugins/krr",
-      "description": "Oppslag i Kontakt- og reservasjonsregisteret (KRR) for én eller flere personer, slik registeret selv svarer, med Maskinporten-klienten fra maskinporten-delen av config-fila. Bare lesing; personnummeret maskeres.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "system"
     },
     {
       "name": "enhetsregisteret",
       "source": "./plugins/enhetsregisteret",
-      "description": "Oppslag av enheter og underenheter i Enhetsregisteret, slik Brønnøysundregistrene selv svarer, gjennom det åpne API-et. Bare lesing, uten innlogging.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "system"
     }
   ]

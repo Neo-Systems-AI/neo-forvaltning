@@ -1,8 +1,8 @@
 # entra
 
 Oppsettet i kundens egen Microsoft-tenant for Neo: innlogging med Entra ID, brukerprovisjonering med SCIM, og en
-felles postboks i Exchange Online inn i innboksen. Pluginen er veiledning: kommandoene mot Microsoft kjøres av et
-menneske med sin egen innlogging, og agenten leser utdataene og finner feilen. I Neo gjør agenten det som verken
+felles postboks i Exchange Online inn i innboksen. Kommandoene mot Microsoft er ett skript (`scripts/entra.mjs`) som
+et menneske kjører med sin egen innlogging, og agenten leser utdataene og finner feilen. I Neo gjør agenten det som verken
 bærer en hemmelighet eller kan stenge noen ute, over MCP, når Neo er koblet til; resten gjør mennesket i nettleseren.
 
 | Skill | Hva |
@@ -13,11 +13,12 @@ bærer en hemmelighet eller kan stenge noen ute, over MCP, når Neo er koblet ti
 De to er uavhengige: en organisasjon kan ha den ene uten den andre, og de bruker hver sin app i Entra.
 
 Oppskriftene for kunden står i [`docs/entra.md`](./docs/entra.md) (innlogging og brukere) og
-[`docs/exchange.md`](./docs/exchange.md) (felles postbokser). Skillene leser dem, og gjentar dem ikke.
+[`docs/exchange.md`](./docs/exchange.md) (felles postbokser): hva kunden gjør, og når det er ferdig. Skillene har
+rekkefølgen, hvem som gjør hva, kontrollen og feilene, og viser til skriptet for kommandoene. Ingenting står to steder.
 
 ## Config
 
-Ingen. Pluginen leser ingenting fra `.claude/neo.config.json`, og har ingen egne skript. `entra:set-up-sso` bruker
+Ingen. Pluginen leser ingenting fra `.claude/neo.config.json`. `entra:set-up-sso` bruker
 Neos MCP-server når den er koblet til for organisasjonen (eier eller administrator), og virker uten.
 
 ## Det kunden må ha selv

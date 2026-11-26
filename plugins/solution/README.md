@@ -1,57 +1,95 @@
 # solution
 
-Å designe og bygge en løsning i Neo: fra en idé eller en kunngjøring til konfig som er testet i UI og gitt til kunden.
-Løpet er skillene under, i rekkefølge. Hver skill gjør ett ledd og vet ikke om de andre; løpet står bare her.
+Å designe og bygge en løsning i Neo: fra en idé eller en kunngjøring til konfig som er testet i UI og gitt til kunden,
+og repoet og veien for konfigen inn og ut av Neo. Løypa er skillene under, i rekkefølge. Hver skill gjør ett ledd og
+vet ikke om de andre; løypa står bare her.
 
-## Løpet
+## Løypa
 
 | # | Skill | Spørsmålet | Fra → til | Personen avgjør |
 |---|---|---|---|---|
-| 01 | `solution:01-research-organisation` | Hvem er kunden, og hva gjelder på tvers? | `repo.yaml` → `virksomheten/` | Spørsmålene til kunden |
-| 02 | `solution:02-research-process` | Hvordan går prosessen, og hva sier hjemmelen? | En idé eller en kunngjøring → `1-kilder` og `2-forstaelse`, kontrollert mot kildene av en egen agent | Avvikene i forståelsen |
-| 03 | `solution:03-write-requirements` | Hva må holde? | Forståelsen → `3-krav` | Kravene |
-| 04 | `solution:04-choose-design` | Hvilke valg gjør vi? | Kravene → `4-design`: hva løsningen bygger på, variantene, og hva som er felles i `organisasjon/4-design/` | Designvalgene |
-| 05 | `solution:05-build-config` | Hvordan ser konfigen ut? | Krav, design, mønstrene og skjemaet fra Neo → `5-oppsett` og `organisasjon/5-oppsett`, med `spor.yaml` | — |
-| 06 | `config:plan-change` og `config:apply-change` | Er det i sandkassen? | `5-oppsett` → sandkassen, med planen i PR-en | Godkjenningen av planen |
-| 07 | `solution:07-write-tests` | Hva skal prøves i UI? | Kravene → testcasene, testplanen og personaene | — |
-| 08 | `solution:08-run-ui-test` | Holder det i UI? | Testplanen → en runde med funn, og observasjonene ordrett | Observasjonene |
-| 09 | `solution:09-triage-findings` | Hva retter vi, og hvor? | Funnene → konfig (tilbake til 05) eller produkt (et ønske til Neo) | Hva som er konfig, og hva som er produkt |
-| 10 | *kommer* | Er det klart til bruk? | Løsningen → i bruk hos kunden | Publiseringen |
+| — | `solution:set-up-repo` | Er repoet klart? | Malen → et repo på GHE, satt opp for typen | Typen og kunden |
+| 01 | `solution:01-research-organisation` | Hvem er kunden? | → `felles/kilder` og `felles/forstaelse` (bare et kunderepo) | Spørsmålene til kunden |
+| 02 | `solution:02-research-process` | Hvordan går prosessen, og hva sier hjemmelen? | En idé → `kilder` og `forstaelse` | Avvikene i forståelsen |
+| 03 | `solution:03-write-requirements` | Hva må holde? | → `krav` | Kravene |
+| 04 | `solution:04-choose-design` | Hvilke valg gjør vi? | → `design`, og det felles i `felles/` | Designvalgene |
+| 05 | `solution:05-build-config` | Hvordan ser konfigen ut? | Krav, design, mønstrene og skjemaet → `oppsett`, og `blir` på kravene | — |
+| 06 | `solution:06-deploy-to-sandbox` | Er det i sandkassen? | `oppsett` → planen i PR-en → sandkassen etter godkjenningen | Godkjenningen |
+| 07 | `solution:07-write-tests` | Hva skal prøves i UI? | → testcasene, testplanen og personaene | — |
+| 08 | `solution:08-run-ui-test` | Holder det i UI? | → en runde med funn | Observasjonene |
+| 09 | `solution:09-triage-findings` | Hva retter vi, og hvor? | Funnene → konfig (tilbake til 05) eller et ønske til Neo | Konfig eller produkt |
 
 01 tas én gang per kunde, og ikke i et repo for standardløsninger; resten per løsning. 08 og 09 går i runder, med 05,
-06 og 07 imellom, til funnene er tatt. 06 er pluginen `config`: planen per fil mot sandkassen i PR-en, og skrivingen
-når planen er godkjent. Promoteringen fra sandkassen gjør et menneske i Neo.
+06 og 07 imellom, til funnene er tatt. Promoteringen fra sandkassen gjør et menneske i Neo. Publiseringen av en
+løsning står ikke i løypa før Neo har den.
 
-**Ved siden av løpet:**
+**07–09 har sitt hjem her.** Testene for konfig i Neo skrives, kjøres og sorteres med disse skillene; det finnes ingen
+egen kopi andre steder. Testcasene og personaene lages i sandkassen av et menneske, til Neo har et API for det; 07
+skriver lista over hva som skal lages.
+
+**Ved siden av løypa:**
 
 | Skill | Når |
 |---|---|
-| `solution:review-config` | Konfigfilene gjennomgått mot mønstrene, med tiltak. Før overleveringen, når et oppsett tas over, eller jevnlig |
+| `solution:fetch-config` | Konfigen hentes fra Neo inn i repoet: når et repo tar over en org, og etter at noe er skrevet til sandkassen |
+| `solution:check-setup` | Hva hver plugin som er på, trenger, og hva som mangler. Feilkode når noe mangler |
+| `solution:show-secrets` | Hemmelighetene repoet viser til, og om du når dem. Aldri verdier |
+| `solution:review-config` | Konfigfilene gjennomgått mot mønstrene, med tiltak |
 | `solution:hand-over-to-customer` | Den testede løsningen gitt til kunden i én PR kunden godkjenner |
 
-## Hvor det står
+## Repoet
 
-Skillene bruker strukturen i repoet fra malen [`neo-forvaltning-mal`](https://github.com/Neo-Systems-AI/neo-forvaltning-mal):
-`repo.yaml` med typen (kunde eller standard), `virksomheten/` for det som gjelder hele kunden, `losninger/<løsning>/`
-med `losning.yaml` og de seks leddene, `organisasjon/4-design/` og `organisasjon/5-oppsett/` for det som er felles,
-`integrasjoner/<system>/`, og personaene i `test/personaer/`. Formen på hver mappe står i repoets regler
-(`.claude/rules/`), og repoets sjekk holder den.
+Skillene bruker strukturen fra malen [`neo-forvaltning-mal`](https://github.com/Neo-Systems-AI/neo-forvaltning-mal).
+Formen på hver mappe står i repoets regler (`.claude/rules/`), og sjekken holder den.
 
-Konfigen står i Neos eget format, én fil per objekt, i mappa for typen og navngitt etter nøkkelen. Stien Neo får, er
-stien under `5-oppsett/`. Skjemaet er Neos, på `GET <adressen>/api/config/schema`, og hentes; det kopieres aldri hit.
+```text
+repo.yaml                     typen (kunde eller standard), eieren og forvalteren
+felles/                       det som gjelder hele org-en, med de samme leddene som en løsning
+  kilder/ forstaelse/         det som gjelder hele kunden (bare i et kunderepo)
+  krav/ design/ oppsett/      det som er felles for flere løsninger
+integrasjoner/<system>/       hos-kunden.md, hemmeligheter.yaml, og artefaktene systemet trenger
+losninger/<losning>/          losning.yaml, kilder/, forstaelse/, krav/, design/, oppsett/, test/
+test/personaer/               testbrukerne, felles for alle løsningene
+.claude/neo.config.json       Neo (url, org, mcpServer) og én del per plugin; ingen hemmeligheter
+```
 
-[Mønstrene for god konfig](docs/monstre/README.md) følger med pluginen, i `docs/monstre/`.
+- **Mappene har navn, ikke tall.** Rekkefølgen står i løypa.
+- **Et krav sier selv hva det ble** (`blir`): en fil i `oppsett/` (også i `felles/oppsett/`), et steg et menneske gjør i
+  Neo, eller et ønske til Neo, de to siste med `hvorfor`. Det finnes ingen egen sporingsfil.
+- **Et avvik fra mønstrene** står i `design/` med regelens id og grunnen (`avvik`, `grunn`), og meldes ikke på nytt.
+- **Konfigen er Neos format, uendret:** én fil per objekt i `oppsett/<mappa for typen>/`. Stien Neo får, er stien under
+  `oppsett/`, og om den stemmer, avgjør Neo i planen. Skjemaet hentes fra `<neo.url>/api/config/schema`; det kopieres
+  aldri hit.
 
 ## Skriptene
 
 | Skript | Hva |
 |---|---|
-| `scripts/rules.mjs` | Reglene i mønstrene som kan sjekkes maskinelt, kjørt på konfigfilene i repoet. Hver regel har samme id som i mønstrene |
-| `scripts/lib/konfigfiler.mjs` | Konfigfilene med stien Neo skal ha, i rekkefølgen for apply; stopper når samme nøkkel står to steder |
-| `scripts/lib/mcp-server.mjs` | MCP-serveren, adressen og org-en for et miljø |
+| `scripts/sjekk.mjs` | Sjekken av repoet: strukturen for typen, kildene på endringen, påstandene, kravene og `blir`, konfigfilene mot skjemaet fra Neo, samme objekt to steder, og mønstrene. Bygget fra `check/` i dette repoet; endres der |
+| `scripts/check-setup.mjs` | Hva hver plugin som er på, trenger i config-fila og i `hemmeligheter.yaml`, og hva som mangler |
+| `scripts/vis-hemmeligheter.mjs` | Referansene til hvelvet, og om personen når dem. Aldri verdier |
+| `scripts/lib/config.mjs` | Neo for repoet: adressen, org-en, MCP-serveren og om den står i `.mcp.json` |
+
+```bash
+node scripts/sjekk.mjs [--base <ref>] [--annotate] [--summary] [--json]   # hele sjekken; rødt gir exit 1
+node scripts/sjekk.mjs regler [--losning <navn>]                          # mønstrene, med det som ikke er vurdert
+node scripts/sjekk.mjs filer [--losning <navn>] [--json | --stier]        # konfigfilene i rekkefølgen Neo skriver dem
+node scripts/sjekk.mjs hos-kunden                                         # lista over det kunden må gjøre
+node scripts/sjekk.mjs --versjon
+```
+
+## Dokumentasjonen
+
+| Fil | Hva |
+|---|---|
+| [`docs/monstre/`](docs/monstre/README.md) | Mønstrene for god konfig: grunnreglene, og reglene per flate med beslutningstabellene |
+| [`docs/hvelvet.md`](docs/hvelvet.md) | Hvelvet: oppgavene, navnene, og formen på referansene i repoet |
+| [`docs/esignering.md`](docs/esignering.md) | eSignering hos Digdir |
 
 ## Config
 
 | Nøkkel | Hva |
 |---|---|
-| `solution.off` | Reglene som er slått av i dette repoet, med id |
+| `neo.url` | Adressen til Neo. Skjemaet for konfigfilene hentes derfra |
+| `neo.org` | Org-en med sandkassen konfigen skrives til |
+| `neo.mcpServer` | Navnet på MCP-serveren i `.mcp.json` |

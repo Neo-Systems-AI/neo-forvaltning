@@ -10,7 +10,7 @@ den, og den som godkjenner endringer, skal vite hva de godkjenner. Overleveringe
 prosesseieren, ikke for den som bygget.
 
 **Inn:** løsningen (formålet i `losning.yaml`, kravene, designet, konfigen), siste testrunde med funnene og pakkene, og
-integrasjonene. **Ut:** en PR med overleveringen, godkjent av den som står som godkjenner i `repo.yaml`.
+integrasjonene. **Ut:** en PR med overleveringen, godkjent av godkjenneren i `.github/CODEOWNERS`.
 
 ## Det som skal med
 
@@ -22,20 +22,24 @@ integrasjonene. **Ut:** en PR med overleveringen, godkjent av den som står som 
    ikke holder, står med hvorfor og hva som skjer med det.
 4. **Det som står åpent:** funnene som ikke er rettet, og ønskene til Neo, med hva de betyr for saksbehandleren til de
    er løst.
-5. **Det kunden selv må gjøre:** oppgavene i kundens egne systemer, fra lista repoet lager over integrasjonene. Den
-   skrives ikke for hånd her; lenk til den, og si hvilke oppgaver som stopper bruken.
+5. **Det kunden selv må gjøre:** oppgavene i kundens egne systemer, fra `integrasjoner/<system>/hos-kunden.md`. Lista
+   lages, den skrives ikke for hånd; ta den med i PR-en, og si hvilke oppgaver som stopper bruken:
+
+   ```bash
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/sjekk.mjs" hos-kunden
+   ```
 6. **Endringer etterpå:** hvordan en endring foreslås, hvem som godkjenner, og at testene kjøres igjen.
 
 ## Slik gjør du det
 
 1. Sjekk at det som skal overleveres, er ferdig: hvert krav har et bestått punkt eller et avvik personen har godtatt,
-   og repoets sjekk er grønn.
+   og sjekken er grønn.
 2. Sett statusen i `losning.yaml` til `i-bruk` i overleveringen. Statusene er `utkast` (mens den researches og
    designes), `i-test` (konfigen er i sandkassen og testes), `i-bruk` (kunden har tatt den i bruk) og `avviklet`. En
    løsning går ikke fra `utkast` rett til `i-bruk`.
 3. Skriv PR-beskrivelsen etter punktene over, kort og uten interne ord. Spør personen om hva kunden allerede vet, så
    overleveringen ikke gjentar det.
-4. Be godkjenneren i `repo.yaml` om review.
+4. Be godkjenneren i `.github/CODEOWNERS` om review.
 
 ## Personen avgjør
 

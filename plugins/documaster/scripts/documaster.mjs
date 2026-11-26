@@ -12,47 +12,37 @@
 //   node documaster.mjs dokumenter --registrering <id> [--limit n]
 //   node documaster.mjs sok --type <Noark-type> [--query "felt = @p"] [--param @p=verdi …] [--limit n]
 //
-//   --miljo <miljø>   et miljø i documaster.environments (standard: documaster.defaultEnv, ellers det første)
-//
-// Config: `documaster` i .claude/neo.config.json. Hemmeligheten leses fra miljøet eller .env.local, aldri fra fila.
+// Config: `documaster` i .claude/neo.config.json (apiUrl, tokenUrl, clientId, scope): instansen repoet arbeider mot.
+// Hemmeligheten er `client-secret` i integrasjoner/documaster/hemmeligheter.yaml, hentet fra hvelvet for kallet.
 // Exit: 0 svar 2xx · 1 feil eller ikke-2xx · 2 feil bruk.
-import { load, resolve, pluginKeys } from "./lib/neo-config.mjs";
-import { loadEnvLocal, secretValues, value } from "./lib/hemmeligheter.mjs";
+import { fileURLToPath } from "node:url";
+import { parse, Usage } from "./lib/argumenter.mjs";
+import { load, need } from "./lib/config.mjs";
+import { ref, secret } from "./lib/hemmeligheter.mjs";
 import { call, redact, report } from "./lib/http.mjs";
 
 export const QUERY_PATH = "/rms/api/public/noark5/v1/query";
 export const MAX_LIMIT = 50;
-const KEYS = ["apiUrl", "tokenUrl", "clientId", "clientSecret", "scope"];
+const KEYS = [
+  ["apiUrl", "adressen til API-et på instansen, for eksempel https://<instans>:8083"],
+  ["tokenUrl", "token-adressen til innloggingen"],
+  ["clientId", "klient-ID-en kunden har fått av Documaster eller registrert i Entra ID"],
+  ["scope", "scopet i token-kallet"],
+];
 
-export class Usage extends Error {}
-
-// Miljøet: det som er bedt om, ellers documaster.defaultEnv, ellers det første. Et ukjent miljø er en feil.
-export function pickEnv(data, wanted) {
-  const envs = data?.documaster?.environments ?? [];
-  if (!envs.length) throw new Error("documaster.environments mangler i .claude/neo.config.json. Se /documaster:env");
-  const env = wanted ?? data.documaster.defaultEnv ?? envs[0];
-  if (!envs.includes(env)) throw new Error(`«${env}» er ikke et miljø i documaster.environments (${envs.join(", ")})`);
-  return env;
-}
-
-// Innstillingene for miljøet, med hemmeligheten som referanse. Mangler en, sies stien, aldri en verdi.
-export function settings(data, miljo, keys = pluginKeys()) {
-  const out = { miljo };
-  for (const k of KEYS) {
-    const r = resolve(data, k, { keys, env: miljo });
-    if (r.source === "usatt") throw new Error(`${r.path} er ikke satt i .claude/neo.config.json. Se /documaster:env`);
-    out[k] = r.value;
-  }
-  if (typeof out.clientSecret !== "object") throw new Error(`documaster.byEnv.${miljo}.clientSecret skal være en referanse ({ "$env": …, "kilde": … }), ikke en verdi. Fjern verdien fra fila`);
-  out.apiUrl = String(out.apiUrl).replace(/\/+$/, "");
+// Innstillingene for instansen. Mangler en, sies stien, aldri en verdi.
+export function settings(data) {
+  const out = {};
+  for (const [k, what] of KEYS) out[k] = String(need(data, `documaster.${k}`, what));
+  out.apiUrl = out.apiUrl.replace(/\/+$/, "");
   return out;
 }
 
-export async function getToken(s, { fetchImpl = fetch } = {}) {
+export async function getToken(s, clientSecret, { fetchImpl = fetch } = {}) {
   const res = await call(s.tokenUrl, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded", accept: "application/json" },
-    body: new URLSearchParams({ grant_type: "client_credentials", client_id: s.clientId, client_secret: value(s.clientSecret), scope: s.scope }),
+    body: new URLSearchParams({ grant_type: "client_credentials", client_id: s.clientId, client_secret: clientSecret, scope: s.scope }),
     fetchImpl,
   });
   if (!res.ok || !res.body?.access_token) {
@@ -82,23 +72,7 @@ export const QUERIES = {
   dokumentversjoner: (id, limit) => one("Dokumentversjon", "refDokument.refRegistrering.id", "registreringsId", id, limit),
 };
 
-export function parseArgs(argv) {
-  const out = { _: [], param: [] };
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (!a.startsWith("--")) {
-      out._.push(a);
-      continue;
-    }
-    const name = a.slice(2);
-    const v = argv[i + 1];
-    if (v === undefined || v.startsWith("--")) throw new Usage(`--${name} trenger en verdi`);
-    if (name === "param") out.param.push(v);
-    else out[name] = v;
-    i++;
-  }
-  return out;
-}
+export const parseArgs = (argv) => parse(argv, { verdier: ["limit", "saksnummer", "ident", "mappe", "registrering", "type", "query"], flere: ["param"] });
 
 // Kommandoen til en spørring, eller null for `token`. Feil bruk er Usage.
 export function buildQuery(args) {
@@ -159,28 +133,24 @@ export async function query(s, body, { accessToken, fetchImpl = fetch }) {
   return { url, result, html };
 }
 
-// Hele kjøringen, med config og fetch utenfra så den kan testes. Skriver til out/err og returnerer exit-koden.
-export async function run(argv, { data, fetchImpl = fetch, out = console.log, err = console.error } = {}) {
-  let args, body;
+// Hele kjøringen, med config, fetch og hvelvet utenfra så den kan testes. Skriver til out/err og gir exit-koden.
+export async function run(argv, { config, fetchImpl = fetch, hemmelighet = secret, out = console.log, err = console.error } = {}) {
+  let body;
+  const secrets = [];
   try {
-    args = parseArgs(argv);
-    body = buildQuery(args);
-  } catch (e) {
-    if (!(e instanceof Usage)) throw e;
-    err(e.message);
-    return 2;
-  }
-  const secrets = secretValues(data?.documaster);
-  try {
-    const s = settings(data, pickEnv(data, args.miljo));
-    const t = await getToken(s, { fetchImpl });
+    body = buildQuery(parseArgs(argv));
+    const { data, root } = config ?? load();
+    const s = settings(data);
+    const clientSecret = hemmelighet(ref(root, "documaster", "client-secret"));
+    secrets.push(clientSecret);
+    const t = await getToken(s, clientSecret, { fetchImpl });
     secrets.push(t.accessToken);
     if (!body) {
-      out(`Miljø: ${s.miljo}\nToken hentet fra ${s.tokenUrl}: ${t.tokenType ?? "ukjent type"}, utløper om ${t.expiresIn ?? "?"} s, scope «${t.scope}».`);
+      out(`Instans: ${s.apiUrl}\nToken hentet fra ${s.tokenUrl}: ${t.tokenType ?? "ukjent type"}, utløper om ${t.expiresIn ?? "?"} s, scope «${t.scope}».`);
       return 0;
     }
     const { url, result, html } = await query(s, body, { accessToken: t.accessToken, fetchImpl });
-    out(redact(`Miljø: ${s.miljo}\nSpørring: ${JSON.stringify(body)}`, secrets));
+    out(redact(`Instans: ${s.apiUrl}\nSpørring: ${JSON.stringify(body)}`, secrets));
     out(report("POST", url, result, secrets));
     if (html) {
       err(`Svaret er HTML, ikke JSON. apiUrl (${s.apiUrl}) peker trolig på nettsiden (/v2/), ikke API-et (vanligvis port 8083).`);
@@ -189,17 +159,9 @@ export async function run(argv, { data, fetchImpl = fetch, out = console.log, er
     if (result.ok && body.limit && result.body?.hasMore) err(`Flere treff enn ${body.limit}. Øk --limit (høyst ${MAX_LIMIT}) eller snevre inn.`);
     return result.ok ? 0 : 1;
   } catch (e) {
-    err(redact(e.message, secrets));
-    return 1;
+    err(e instanceof Usage ? e.message : redact(`Feil: ${e.message}`, secrets));
+    return e instanceof Usage ? 2 : 1;
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const { found, data, errors } = load();
-  if (!data) {
-    console.error(errors.join("\n"));
-    process.exit(1);
-  }
-  loadEnvLocal(found.root);
-  process.exit(await run(process.argv.slice(2), { data }));
-}
+if (process.argv[1] === fileURLToPath(import.meta.url)) process.exitCode = await run(process.argv.slice(2));

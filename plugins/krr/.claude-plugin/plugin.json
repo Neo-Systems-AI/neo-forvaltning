@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "krr",
-  "version": "0.3.0",
-  "description": "Oppslag i Kontakt- og reservasjonsregisteret (KRR) for én eller flere personer, slik registeret selv svarer, med Maskinporten-klienten fra maskinporten-delen av config-fila. Bare lesing; personnummeret maskeres.",
+  "version": "0.4.0",
+  "description": "Oppslag i Kontakt- og reservasjonsregisteret (KRR) for én eller flere personer, slik registeret selv svarer, med en Maskinporten-klient fra maskinporten.klienter i config-fila og nøkkelen hentet fra kundens hvelv for kallet. Bare lesing; personnummeret maskeres.",
   "author": {
     "name": "Neo Systems AS",
     "url": "https://github.com/Neo-Systems-AI"

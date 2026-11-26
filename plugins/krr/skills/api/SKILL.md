@@ -9,7 +9,7 @@ Det rå svaret fra KRR, så det kan settes opp mot det Neo gjorde: sa registeret
 `IKKE_REGISTRERT` eller `KAN_IKKE_VARSLES`, og valgte Neo kanal etter det?
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/krr.mjs" person <fødselsnummer> [<fødselsnummer> …] [--v2] [--klient <navn>] [--miljo test|produksjon]
+node "${CLAUDE_PLUGIN_ROOT}/scripts/krr.mjs" person <fødselsnummer> [<fødselsnummer> …] [--v2]
 ```
 
 - Svaret skrives ut som KRR ga det, og så én linje per person: status, reservasjon, varslingsstatus, e-post, mobil.
@@ -17,9 +17,8 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/krr.mjs" person <fødselsnummer> [<fødselsn
   for å sammenligne med det Neo gjør, ikke for å si at noen mangler.
 - **v1 sjekker ikke kontrollsifrene**: et nummer med feil kontrollsiffer gir `IKKE_REGISTRERT`, som en person som ikke
   finnes. Skriptet sier fra (`MERK: … ugyldige kontrollsifre`) og sender nummeret likevel.
-- Tokenet hentes med Maskinporten-klienten `krr` (eller `krr.klient`, eller `--klient`) fra
-  `maskinporten.byEnv.<miljø>.klienter`. Avslår Maskinporten, er feilen hos klienten eller
-  scopet, ikke hos KRR.
+- Tokenet hentes med Maskinporten-klienten `krr.klient` fra `maskinporten.klienter`, i miljøet `krr.miljo`. Avslår
+  Maskinporten, er feilen hos klienten eller scopet, ikke hos KRR.
 - Høyst 1000 personer per kall.
 
 ## Reglene
