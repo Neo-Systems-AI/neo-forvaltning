@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "forvaltning",
   "version": "0.2.0",
-  "description": "Forvaltning av oppsettet i Neo gjennom MCP: oppstarten som skriver config-fila og skrur på pluginene, snapshot av det som kjører, plan mot repoet, gjennomføring i sandkassen, og hemmelighetene fra kundens hvelv (bare navn, aldri verdier). Brukes i et repo laget fra neo-forvaltning-mal.",
+  "description": "Oppsettet i Neo som filer: oppstarten som skriver config-fila og registrerer maskinklienten, snapshot av sandkassen, plan mot repoet og gjennomføring i sandkassen med skript mot Neo sitt API, og hemmelighetene fra kundens hvelv (bare navn, aldri verdier). Brukes i et repo laget fra neo-forvaltning-mal.",
   "author": {
     "name": "Neo Systems AS",
     "url": "https://github.com/Neo-Systems-AI"

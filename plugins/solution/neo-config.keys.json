@@ -1,6 +1,7 @@
 {
   "plugin": "solution",
   "neo": true,
+  "neoApi": true,
   "keys": [
     {
       "path": "off",

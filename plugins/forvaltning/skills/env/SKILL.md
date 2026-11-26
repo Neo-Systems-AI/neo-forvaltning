@@ -11,4 +11,8 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/neo-config.mjs" --check
 
 - **Kilden** står på hver linje: `config` er valgt i fila, `plugin-standard` følger med pluginen, `usatt` mangler.
 - **Mangler fila**, kjør `/forvaltning:oppstart`, eller kopier `.claude/neo.config.json` fra `neo-forvaltning-mal`.
-- **Fila har ingen hemmeligheter.** Innloggingen mot Neo er personens egen, gjennom `/mcp`.
+- **Maskinklienten** står i `neo.byEnv.<miljø>.apiClient` (`clientId`, og `clientSecret` som referanse). Sjekken over
+  viser den ikke; skriptene sier fra når den mangler, og `node "${CLAUDE_PLUGIN_ROOT}/scripts/konfig.mjs" token` viser
+  om Neo godtar den.
+- **Fila har ingen hemmeligheter.** Maskinklientens hemmelighet står bare som referanse til kundens hvelv, og hentes
+  til `.env.local` av et menneske (`/forvaltning:hemmeligheter`).

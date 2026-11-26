@@ -5,24 +5,28 @@ Oppsettet i Neo som filer i et repo, endret med PR og godkjent av kunden. Brukes
 
 | Skill | Hva | Endrer Neo |
 |---|---|---|
-| `forvaltning:oppstart` | Setter opp repoet, eller skrur på en plugin til | nei |
-| `forvaltning:snapshot` | Henter det som kjører, som filer Neo skriver (`export_config`) | nei |
-| `forvaltning:plan` | Neo prøver hver fil i sandkassen uten å lagre, og sier hva den vil gjøre (`plan_config`), til PR-en | nei |
-| `forvaltning:gjennomfor` | Gjør en godkjent plan i sandkassen, én fil om gangen (`apply_config`) | ja, i sandkassen |
+| `forvaltning:oppstart` | Setter opp repoet og maskinklienten, eller skrur på en plugin til | nei |
+| `forvaltning:snapshot` | Henter sandkassens oppsett som filer Neo skriver | nei |
+| `forvaltning:plan` | Neo prøver hver fil i sandkassen uten å lagre, og sier hva den vil gjøre, til PR-en | nei |
+| `forvaltning:gjennomfor` | Gjør en godkjent plan i sandkassen, fil for fil | ja, i sandkassen |
 | `forvaltning:hemmeligheter` | Hvilke hemmeligheter som trengs, hvor de ligger, og om de er satt (bare navn) | nei |
 | `forvaltning:env` | Viser config-fila slik pluginen leser den | nei |
 
-Alt går gjennom Neo sin MCP-server, med personens egen innlogging, og Neo gjør arbeidet: Neo skriver filene, med
-nøkler i stedet for id-er, sammenligner dem med sandkassen, prøver skrivingen og skriver hver fil i én transaksjon.
-Formatet (`neo-config/v1`) og rekkefølgen står i Neo sitt manifest (`<adresse>/api/config/schema`), ikke her.
-Skriptene i `scripts/` flytter bare svarene mellom Neo og repoet. De er deterministiske og har ingen avhengigheter:
+Snapshot, plan og gjennomføring går med `scripts/konfig.mjs`, som kaller Neo sitt API (`/api/config/*`) med en
+maskinklient i sandkassen (`neo.byEnv.sandkasse.apiClient`), uten MCP og uten at svarene går gjennom modellen. Neo gjør
+arbeidet: skriver filene, med nøkler i stedet for id-er, prøver skrivingen i sandkassen, og skriver hver fil i én
+transaksjon. Formatet (`neo-config/v1`) og rekkefølgen står i Neo sitt manifest (`<adresse>/api/config/schema`), ikke
+her. Produksjonen endres bare ved promotering i Neo, og forhåndsvisningen der viser hva som mangler.
 
-- `skriv-eksport.mjs` legger svaret fra `export_config` ut som filer, fjerner det Neo ikke lenger har, og skriver
-  `ikke-med.md`.
+Skriptene i `scripts/` er deterministiske og har ingen avhengigheter:
+
+- `konfig.mjs` er kommandoen: `token`, `miljo`, `export`, `plan` (alle filene, eller `--fil` for én) og `apply`.
+- `lib/neo-api.mjs` (fra `shared/neo-kall/`) henter token med maskinklienten og kaller Neo. Hemmeligheten leses fra
+  miljøet eller `.env.local`, aldri fra config-fila.
+- `skriv-eksport.mjs` legger eksporten ut som filer, fjerner det Neo ikke lenger har, og skriver `ikke-med.md`.
 - `rekkefolge.mjs` sorterer filene i oppsettet i rekkefølgen fra manifestet.
-- `planrapport.mjs` setter sammen planen av svarene fra `plan_config` og `config_not_in_files`, og sjekker før
-  gjennomføringen at planen er den som ble godkjent.
-
+- `planrapport.mjs` setter sammen planen av Neo sine svar, og sjekker før gjennomføringen at planen er den som ble
+  godkjent.
 - `hent-hemmeligheter.mjs` henter hemmelighetene fra kundens hvelv (Azure Key Vault, 1Password, eller manuelt) til
   `.env.local` og `.keys/`. Et menneske kjører hentingen.
 - `vakt.mjs` er en hook som stopper agenten fra å lese `.env.local` og `.keys/`, og fra å kjøre hentingen.

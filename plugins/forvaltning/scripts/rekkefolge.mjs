@@ -17,7 +17,7 @@ export async function loadManifest(source, fetchImpl = fetch) {
   return res.json();
 }
 
-const yamlFiles = (root, dir = root) => {
+export const yamlFiles = (root, dir = root) => {
   const out = [];
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);

@@ -1,6 +1,7 @@
 {
   "plugin": "forvaltning",
   "neo": true,
+  "neoApi": true,
   "keys": [
     {
       "path": "oppsettDir",
