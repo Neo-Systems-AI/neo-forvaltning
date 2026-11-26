@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Sjekken 3.1.0 for et repo laget fra neo-forvaltning-mal. GENERERT fra check/ i neo-forvaltning med
+// Sjekken 4.0.0 for et repo laget fra neo-forvaltning-mal. GENERERT fra check/ i neo-forvaltning med
 // `node check/build.mjs`: endres der, ikke her. Én fil uten avhengigheter (yaml 2.9.1 er bygget inn).
 import { createRequire as __createRequire } from "node:module";
 const require = __createRequire(import.meta.url);
@@ -7599,7 +7599,6 @@ var CHECKS = [
   { name: "repo", about: "Repoet har mappene typen sier, og ingen andre: konfigen i oppsett/ i roten, snapshotene per milj\xF8, og ingen oppsett/ i en l\xF8sning eller i felles/" },
   { name: "config", about: ".claude/neo.config.json er version 1 med milj\xF8ene sandkasse og produksjon, adressen, maskinklienten og hvelvet, og ingen hemmeligheter, heller ikke referanser" },
   { name: "hemmeligheter", about: "Ingen filer med hemmeligheter (.env, .keys/) er committet" },
-  { name: "godkjenner", about: ".github/CODEOWNERS nevner en ekte godkjenner" },
   { name: "losning", about: "Hver l\xF8sning har losning.yaml med form\xE5l, eier, status og integrasjonene, og hva den bygger p\xE5 n\xE5r den er ute av utkast" },
   { name: "integrasjon", about: "Ingen hemmelighet st\xE5r med verdi, og oppgavene hos kunden har status, hvem og det de venter p\xE5" },
   { name: "persona", about: "Hver persona har navn og rolle, og ingen hemmeligheter: personen logger inn selv" },
@@ -7616,7 +7615,8 @@ var GAMMELT = {
   state: "Id-ene per milj\xF8 finnes ikke lenger: Neo skriver filene med n\xF8kler (forvaltning 0.2.0). Ta bort state/",
   "profil.yaml": "profil.yaml har ingen form i Neo enn\xE5. Ta den bort",
   virksomheten: "Det som gjelder hele kunden, st\xE5r i felles/kilder/ og felles/forstaelse/. Flytt innholdet dit, og ta bort mappa",
-  organisasjon: "Det som er felles, st\xE5r i felles/ (felles/krav/, felles/design/), og konfigen i oppsett/. Flytt innholdet dit, og ta bort mappa"
+  organisasjon: "Det som er felles, st\xE5r i felles/ (felles/krav/, felles/design/), og konfigen i oppsett/. Flytt innholdet dit, og ta bort mappa",
+  "oppsett/manuelt": "Det som gj\xF8res for h\xE5nd, st\xE5r i kravet det gjelder (blir: { steg, hvorfor }), og ikke-med.md i snapshotet viser hva Neo ikke skriver som fil. Flytt hver beskrivelse til kravet, og ta bort mappa"
 };
 var NUMMERERT = { "1-kilder": "kilder", "2-forstaelse": "forstaelse", "3-krav": "krav", "4-design": "design", "5-oppsett": "oppsett", "6-test": "test" };
 var LEDD = ["kilder", "forstaelse", "krav", "design"];
@@ -7642,27 +7642,24 @@ function checkLayout(root, type, envs = []) {
   const f = [];
   const red = (file, message) => f.push({ check: "repo", file, message });
   for (const [p, why] of Object.entries(GAMMELT)) if (existsSync2(join2(root, p))) red(p, why);
-  if (existsSync2(join2(root, "integrasjoner/README.md"))) red("integrasjoner/README.md", "Lista over det kunden m\xE5 gj\xF8re, lages av sjekken (sjekk.mjs hos-kunden) og committes ikke. Ta den bort fra git");
   for (const n of dirs(root, ".")) {
     if (n.startsWith(".") || ROTEN.includes(n) || n in GAMMELT) continue;
-    red(n, `En mappe p\xE5 roten er en av ${ROTEN.join(", ")}. Det som ikke har en form, finnes ikke. Flytt innholdet dit det h\xF8rer hjemme etter reglene i .claude/rules/, og ta bort mappa`);
+    red(n, `En mappe p\xE5 roten er en av ${ROTEN.join(", ")}. Det som ikke har en form, finnes ikke. Flytt innholdet dit det h\xF8rer hjemme etter README.md i mappene, og ta bort mappa`);
   }
   for (const n of entries(root, "snapshots")) {
     if (n === "README.md" || n.startsWith(".")) continue;
     if (!dirs(root, "snapshots").includes(n)) red(`snapshots/${n}`, "snapshots/ har \xE9n mappe per milj\xF8, med filene Neo eksporterte. Ta bort fila, og ta et nytt snapshot med /forvaltning:snapshot");
     else if (envs.length && !envs.includes(n)) red(`snapshots/${n}`, `${n} er ikke et milj\xF8 i neo.environments (${envs.join(", ")}). Ta bort mappa, eller rett navnet til milj\xF8et`);
   }
-  const kunde = type !== "standard";
   for (const p of places(root)) {
-    const allowed = /* @__PURE__ */ new Set(["README.md", ...p.felles ? [] : ["losning.yaml", "test"], ...LEDD.filter((l) => !p.felles || kunde || !["kilder", "forstaelse"].includes(l))]);
+    const allowed = /* @__PURE__ */ new Set(["README.md", ...p.felles ? [] : ["losning.yaml", "test"], ...LEDD]);
     for (const n of entries(root, p.dir)) {
       if (allowed.has(n) || n.startsWith(".")) continue;
       const rel = `${p.dir}/${n}`;
       if (NUMMERERT[n]) red(rel, `Mappene har navn, ikke tall: ${n} heter ${NUMMERERT[n]}. Gi mappa nytt navn`);
       else if (n === "spor.yaml") red(rel, "Hva hvert krav ble, st\xE5r i kravet selv (blir). Det finnes ingen sporingsfil. Flytt hver rad til blir i kravet den gjelder, og ta bort fila");
       else if (n === "oppsett") red(rel, EGEN_OPPSETT);
-      else if (p.felles && ["kilder", "forstaelse"].includes(n)) red(rel, "Et repo for standardl\xF8sninger har ingen kunde \xE5 forst\xE5, s\xE5 felles/ har ikke kilder eller forstaelse. Flytt det som gjelder \xE9n l\xF8sning, inn i l\xF8sningen, og ta bort mappa");
-      else red(rel, `${p.felles ? "felles/" : "En l\xF8sning"} har ${[...allowed].sort().join(", ")}. Det som ikke har en form, finnes ikke. Flytt innholdet inn i en av dem etter reglene i .claude/rules/, og ta bort ${rel.split("/").pop()}`);
+      else red(rel, `${p.felles ? "felles/" : "En l\xF8sning"} har ${[...allowed].sort().join(", ")}. Det som ikke har en form, finnes ikke. Flytt innholdet inn i en av dem etter README.md i mappene, og ta bort ${rel.split("/").pop()}`);
     }
     if (!p.felles) {
       for (const n of entries(root, `${p.dir}/test`)) {
@@ -7742,12 +7739,6 @@ function checkCommitted(root) {
   }
   return files.filter((p) => /(^|\/)(\.env(\.[^/]*)?|\.keys\/.*)$/.test(p) && !p.endsWith(".example")).map((p) => ({ check: "hemmeligheter", file: p, message: "Hemmeligheter er committet. Fjern fila fra git (git rm --cached), og be eieren bytte verdiene: de er ikke hemmelige lenger. Legg de nye inn med /forvaltning:nokler" }));
 }
-function checkCodeowners(root) {
-  const co = join2(root, ".github/CODEOWNERS");
-  const owners = existsSync2(co) ? readFileSync2(co, "utf8").split("\n").filter((l) => l.trim() && !l.trim().startsWith("#")) : [];
-  if (owners.length && !owners.some((l) => /@ENDRE-MEG/.test(l))) return [];
-  return [{ check: "godkjenner", level: "warn", file: ".github/CODEOWNERS", message: "Godkjenneren er ikke satt. Uten den kan hvem som helst med skrivetilgang godkjenne en endring" }];
-}
 function secretValues(data, path = "") {
   const out = [];
   if (isMap(data) || Array.isArray(data)) {
@@ -7776,13 +7767,13 @@ function checkLosninger(root) {
   for (const s of dirs(root, "losninger")) {
     const file = `losninger/${s}/losning.yaml`;
     if (!existsSync2(join2(root, file))) {
-      f.push({ check: "losning", file: `losninger/${s}`, message: "losning.yaml mangler: form\xE5let, eieren, statusen, integrasjonene og hva den bygger p\xE5. L\xF8ypa i pluginen solution lager den; formen st\xE5r i .claude/rules/losninger.md" });
+      f.push({ check: "losning", file: `losninger/${s}`, message: "losning.yaml mangler: form\xE5let, eieren, statusen, integrasjonene og hva den bygger p\xE5. L\xF8ypa i pluginen solution lager den; formen st\xE5r i losninger/README.md" });
       continue;
     }
     const y = readYaml(root, file, "losning", f);
     if (y === void 0) continue;
     if (!isMap(y)) {
-      f.push({ check: "losning", file, message: "Fila er tom eller ikke et kart. Fyll den ut etter .claude/rules/losninger.md" });
+      f.push({ check: "losning", file, message: "Fila er tom eller ikke et kart. Fyll den ut etter losninger/README.md" });
       continue;
     }
     if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(s)) f.push({ check: "losning", file: `losninger/${s}`, message: "Navnet p\xE5 l\xF8sningen har sm\xE5 bokstaver, tall og bindestrek" });
@@ -7836,7 +7827,7 @@ function checkPersonaer(root) {
     const y = readYaml(root, rel, "persona", f);
     if (y === void 0) continue;
     if (!isMap(y)) {
-      f.push({ check: "persona", file: rel, message: "Fila er tom eller ikke et kart. Fyll den ut etter .claude/rules/personaer.md" });
+      f.push({ check: "persona", file: rel, message: "Fila er tom eller ikke et kart. Fyll den ut etter test/personaer/README.md" });
       continue;
     }
     for (const k of ["navn", "rolle"]) if (!text(y[k])) f.push({ check: "persona", file: rel, message: `${k} mangler. Legg det inn i personaen` });
@@ -7854,7 +7845,7 @@ function checkTester(root, kravIder) {
     const y = readYaml(root, rel, "test", f);
     if (y === void 0) continue;
     if (!isMap(y)) {
-      f.push({ check: "test", file: rel, message: "Fila er tom eller ikke et kart. Fyll den ut etter .claude/rules/test.md" });
+      f.push({ check: "test", file: rel, message: "Fila er tom eller ikke et kart. Fyll den ut etter test/README.md" });
       continue;
     }
     if (!text(y.beskrivelse)) f.push({ check: "test", file: rel, message: "beskrivelse mangler. Skriv hva testcasen pr\xF8ver" });
@@ -7998,7 +7989,7 @@ function checkKrav(root, places2, { status = () => void 0 } = {}) {
     }
     if (seen.has(r.id)) f.push({ ...at, message: `Id-en ${r.id} er brukt f\xF8r, i ${seen.get(r.id)}. Gi dette kravet en ny id` });
     else seen.set(r.id, r.file);
-    if (!FLYT.includes(r.fields.flyt)) f.push({ ...at, message: `${r.id}: flyt m\xE5 v\xE6re ${FLYT.join(", ")}. Sett den som passer (formen st\xE5r i .claude/rules/krav.md)` });
+    if (!FLYT.includes(r.fields.flyt)) f.push({ ...at, message: `${r.id}: flyt m\xE5 v\xE6re ${FLYT.join(", ")}. Sett den som passer (formen st\xE5r i felles/krav/README.md)` });
     if (!text(r.fields.hvorfor)) f.push({ ...at, message: `${r.id}: hvorfor mangler. Skriv hvorfor kravet finnes` });
     const kilde = list(r.fields.kilde).map(String);
     if (!kilde.length) f.push({ ...at, message: `${r.id}: kilde mangler. Vis til kilden kravet bygger p\xE5 (kilde: [K1]); finnes den ikke, er det et forslag, ikke et krav` });
@@ -8050,11 +8041,10 @@ var CHECKS4 = [
   { name: "oppsett", about: "Hver fil i oppsett/ og snapshots/ er en konfigfil fra Neo (neo-config/v1, kind og spec), og ingen r\xE5 svar er committet" },
   { name: "brukt", about: "Hver konfigfil i oppsett/ er det et krav ble (blir)" }
 ];
-var MANUELT = "oppsett/manuelt/";
 function checkConfigFile(rel, text2) {
-  if (/(^|\/)README\.md$/.test(rel) || /(^|\/)ikke-med\.md$/.test(rel) || rel.startsWith(MANUELT) || rel.endsWith(".gitkeep")) return [];
+  if (/(^|\/)README\.md$/.test(rel) || /(^|\/)ikke-med\.md$/.test(rel) || rel.endsWith(".gitkeep")) return [];
   if (rel.endsWith(".json")) return [{ check: "oppsett", file: rel, message: "Formen fra f\xF8r forvaltning 0.2.0. Ta et nytt snapshot (/forvaltning:snapshot) og bygg oppsettet fra filene Neo skriver" }];
-  if (!rel.endsWith(".yaml")) return [{ check: "oppsett", file: rel, message: "Ikke en konfigfil. Oppsettet er .yaml-filer fra Neo; det som gj\xF8res for h\xE5nd, st\xE5r i oppsett/manuelt/. Ta fila bort, eller flytt den dit" }];
+  if (!rel.endsWith(".yaml")) return [{ check: "oppsett", file: rel, message: "Ikke en konfigfil. Oppsettet er .yaml-filer fra Neo; det som gj\xF8res for h\xE5nd, st\xE5r i kravet det gjelder (blir: { steg, hvorfor }). Ta fila bort" }];
   const missing = [/^apiVersion: neo-config\/v1$/m, /^kind: \S+/m, /^spec:/m].filter((re) => !re.test(text2));
   return missing.length ? [{ check: "oppsett", file: rel, message: "Ikke en konfigfil fra Neo: den m\xE5 ha apiVersion: neo-config/v1, kind og spec \xF8verst. Ta et snapshot (/forvaltning:snapshot) og bygg fila fra den Neo skriver" }] : [];
 }
@@ -8064,7 +8054,7 @@ function checkConfigFiles(root) {
     if (/(^|\/)raw\//.test(rel)) findings.push({ check: "oppsett", file: rel, message: "Et r\xE5tt svar er committet. raw/ st\xE5r i .gitignore" });
     else findings.push(...checkConfigFile(rel, readFileSync5(join5(root, rel), "utf8")));
   }
-  const files = filesIn(root, "oppsett").filter((rel) => rel.endsWith(".yaml") && !rel.startsWith(MANUELT));
+  const files = filesIn(root, "oppsett").filter((rel) => rel.endsWith(".yaml"));
   return { findings, files };
 }
 function checkUsed(files, used) {
@@ -8137,7 +8127,7 @@ function render(root) {
 
 // sjekk.mjs
 function version() {
-  if (true) return "3.1.0";
+  if (true) return "4.0.0";
   return JSON.parse(readFileSync8(join8(dirname2(fileURLToPath2(import.meta.url)), "package.json"), "utf8")).version;
 }
 var CHECKS6 = [...CHECKS, ...CHECKS2, ...CHECKS3, ...CHECKS4, ...CHECKS5];
@@ -8148,7 +8138,6 @@ function run(root, { base = "origin/main" } = {}) {
   const config = readConfig(root);
   f.push(...config.findings);
   f.push(...checkLayout(root, kunde.type, config.envs));
-  f.push(...checkCodeowners(root));
   f.push(...checkCommitted(root));
   f.push(...checkLosninger(root));
   f.push(...checkIntegrasjoner(root));

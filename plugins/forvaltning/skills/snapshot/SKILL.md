@@ -39,5 +39,5 @@ Snapshotet tas av sandkassen. Hva som skiller den fra produksjonen, viser forhå
 ## Det som ikke er med ennå
 
 `ikke-med.md` sier hva, per objekt. Det Neo ikke skriver som fil ennå (for eksempel skjemaer, lagrede visninger,
-saksnummeret, Innsikt og flyter som tildeler til et bestemt medlem), styres i Neo og beskrives for hånd i
-`oppsett/manuelt/`. Når Neo tar det med, kommer det med i neste snapshot av seg selv.
+saksnummeret, Innsikt og flyter som tildeler til et bestemt medlem), styres i Neo, og står som et steg på
+kravet det gjelder (`blir: steg`). Når Neo tar det med, kommer det med i neste snapshot av seg selv.

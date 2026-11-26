@@ -10,7 +10,7 @@ som gjelder, med kilde, så hvert krav og hvert valg senere kan spores tilbake.
 
 **Inn:** en idé, en kunngjøring, en utlysning eller et ønske fra kunden, og det som gjelder hele kunden (i
 `felles/forstaelse/`, i et kunderepo). **Ut:** `kilder/` og `forstaelse/` i løsningen, og `losning.yaml` i status
-`utkast` med formålet og eieren når løsningen er ny. Formen står i repoets regler for mappene (`.claude/rules/`).
+`utkast` med formålet og eieren når løsningen er ny. Formen står i README.md i hver mappe.
 
 ## De fem dimensjonene
 

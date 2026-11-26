@@ -53,7 +53,6 @@ export const GOOD = () => ({
   "losninger/parkering/test/testplan.md": "# Testplanen\n\n## p1 Søknaden innen fristen\n\n```yaml\nkrav: [frist]\n```\n",
   "losninger/parkering/test/runder/2026-11-20.md": "# Runden\n",
   "oppsett/case-types/parkering.yaml": caseType("parkering"),
-  "oppsett/manuelt/README.md": "# Det som gjøres for hånd\n",
   "snapshots/sandkasse/case-types/parkering.yaml": caseType("parkering"),
   "snapshots/sandkasse/ikke-med.md": "# Ikke med i filene\n",
   "test/personaer/saksbehandler.yaml": "navn: Sara Saksbehandler\nrolle: saksbehandler\n",

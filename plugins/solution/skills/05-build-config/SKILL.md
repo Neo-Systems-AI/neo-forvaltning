@@ -55,8 +55,8 @@ i roten av repoet, og `blir` på hvert krav.
    se etter. Det som gjelder hele org-en (bryterne, de tillatte modellene, modellpolicyen), står i
    `felles/design/`. Et bytte av modell endrer hva saksbehandlerne får foreslått: si hva som må testes.
 5. **`blir` på hvert krav:** fila i `oppsett/`, fra roten, et steg et menneske gjør i Neo, eller et ønske til Neo når
-   produktet ikke har det, de to siste med hvorfor. Det Neo ikke skriver som fil ennå, er et steg, og beskrives i
-   `oppsett/manuelt/`:
+   produktet ikke har det, de to siste med hvorfor. Det Neo ikke skriver som fil ennå, er et steg på
+   kravet, med hva et menneske gjør i Neo:
 
    ```yaml
    blir:

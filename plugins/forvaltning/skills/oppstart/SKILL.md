@@ -1,6 +1,6 @@
 ---
 name: oppstart
-description: Setter opp et repo for oppsettet i Neo - et kunderepo eller et repo for standardløsninger - eller skrur på en plugin til. Lager repoet som en kopi av malen i et tomt, privat repo, intervjuer, skriver kunde.yaml, .claude/neo.config.json med sandkassen, produksjonen og maskinklienten skriptene kaller sandkassen med, og CODEOWNERS, og skrur på pluginene. MCP-koblingen settes bare opp for pluginene som trenger den (data, monitoring). Kjør når et nytt repo skal lages fra neo-forvaltning-mal, eller når en plugin skal tas i bruk.
+description: Setter opp et repo for oppsettet i Neo - et kunderepo eller et repo for standardløsninger - eller skrur på en plugin til. Lager repoet som en kopi av malen i et tomt, privat repo, intervjuer, skriver kunde.yaml, .claude/neo.config.json med hvelvet, sandkassen, produksjonen og maskinklienten skriptene kaller sandkassen med, og skrur på pluginene. MCP-koblingen settes bare opp for pluginene som trenger den (data, monitoring). Kjør når et nytt repo skal lages fra neo-forvaltning-mal, eller når en plugin skal tas i bruk.
 ---
 
 # Oppstarten
@@ -16,7 +16,7 @@ gjennom MCP. Svarene går ikke gjennom modellen, og den samme kommandoen virker 
 Hopp over dette når repoet finnes.
 
 Repoet lages som en kopi av malens filer, ikke med «Use this template»: malen ligger på github.com og repoet på
-GitHub Enterprise, og regelsettet krever PR for alt etter den første pushen.
+GitHub Enterprise.
 
 1. **En org-admin** lager et tomt, privat repo i organisasjonen (kundens, eller vår for standardløsninger), uten
    README, lisens eller `.gitignore`.
@@ -29,7 +29,8 @@ GitHub Enterprise, og regelsettet krever PR for alt etter den første pushen.
    git remote add origin <adressen til det nye repoet> && git push -u origin main
    ```
 
-3. **Den første pushen gjør org-admin**, som kan gå forbi regelsettet. Alt etter den går som PR.
+3. **Den første pushen gjør org-admin.** Har org-en et regelsett som krever PR, kan org-admin gå forbi det; alt etter
+   den går som PR.
 
 ## 2. Intervjuet
 
@@ -71,7 +72,8 @@ Spør om det som mangler, ett tema om gangen, og vis hva du har før du skriver:
 
 - **`kunde.yaml`:** `type`, `kunde` (navn og organisasjonsnummer), `godkjenner`, `forvalter`, og versjonene repoet er
   laget for under `verktoy` (malen fra `VERSION`, og `forvaltning`).
-- **`.github/CODEOWNERS`:** `*` til godkjenneren, så alt i repoet krever godkjenningen. Det er det GitHub håndhever.
+- **Godkjenningen** er kundens: hvem som godkjenner, og hvordan (regler for `main`, CODEOWNERS eller annet), følger
+  kundens rutiner. Vi krever bare at Neo endres fra en merget PR, og det sikrer gjennomføringen selv.
 - **`.claude/neo.config.json`:** hvelvet, miljøene og maskinklienten. Ingen hemmeligheter, heller ikke referanser:
 
   ```json

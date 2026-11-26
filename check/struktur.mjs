@@ -11,7 +11,6 @@ export const CHECKS = [
   { name: "repo", about: "Repoet har mappene typen sier, og ingen andre: konfigen i oppsett/ i roten, snapshotene per miljø, og ingen oppsett/ i en løsning eller i felles/" },
   { name: "config", about: ".claude/neo.config.json er version 1 med miljøene sandkasse og produksjon, adressen, maskinklienten og hvelvet, og ingen hemmeligheter, heller ikke referanser" },
   { name: "hemmeligheter", about: "Ingen filer med hemmeligheter (.env, .keys/) er committet" },
-  { name: "godkjenner", about: ".github/CODEOWNERS nevner en ekte godkjenner" },
   { name: "losning", about: "Hver løsning har losning.yaml med formål, eier, status og integrasjonene, og hva den bygger på når den er ute av utkast" },
   { name: "integrasjon", about: "Ingen hemmelighet står med verdi, og oppgavene hos kunden har status, hvem og det de venter på" },
   { name: "persona", about: "Hver persona har navn og rolle, og ingen hemmeligheter: personen logger inn selv" },
@@ -37,6 +36,7 @@ const GAMMELT = {
   "profil.yaml": "profil.yaml har ingen form i Neo ennå. Ta den bort",
   virksomheten: "Det som gjelder hele kunden, står i felles/kilder/ og felles/forstaelse/. Flytt innholdet dit, og ta bort mappa",
   organisasjon: "Det som er felles, står i felles/ (felles/krav/, felles/design/), og konfigen i oppsett/. Flytt innholdet dit, og ta bort mappa",
+  "oppsett/manuelt": "Det som gjøres for hånd, står i kravet det gjelder (blir: { steg, hvorfor }), og ikke-med.md i snapshotet viser hva Neo ikke skriver som fil. Flytt hver beskrivelse til kravet, og ta bort mappa",
 };
 const NUMMERERT = { "1-kilder": "kilder", "2-forstaelse": "forstaelse", "3-krav": "krav", "4-design": "design", "5-oppsett": "oppsett", "6-test": "test" };
 const LEDD = ["kilder", "forstaelse", "krav", "design"];
@@ -68,27 +68,24 @@ export function checkLayout(root, type, envs = []) {
   const f = [];
   const red = (file, message) => f.push({ check: "repo", file, message });
   for (const [p, why] of Object.entries(GAMMELT)) if (existsSync(join(root, p))) red(p, why);
-  if (existsSync(join(root, "integrasjoner/README.md"))) red("integrasjoner/README.md", "Lista over det kunden må gjøre, lages av sjekken (sjekk.mjs hos-kunden) og committes ikke. Ta den bort fra git");
   for (const n of dirs(root, ".")) {
     if (n.startsWith(".") || ROTEN.includes(n) || n in GAMMELT) continue;
-    red(n, `En mappe på roten er en av ${ROTEN.join(", ")}. Det som ikke har en form, finnes ikke. Flytt innholdet dit det hører hjemme etter reglene i .claude/rules/, og ta bort mappa`);
+    red(n, `En mappe på roten er en av ${ROTEN.join(", ")}. Det som ikke har en form, finnes ikke. Flytt innholdet dit det hører hjemme etter README.md i mappene, og ta bort mappa`);
   }
   for (const n of entries(root, "snapshots")) {
     if (n === "README.md" || n.startsWith(".")) continue;
     if (!dirs(root, "snapshots").includes(n)) red(`snapshots/${n}`, "snapshots/ har én mappe per miljø, med filene Neo eksporterte. Ta bort fila, og ta et nytt snapshot med /forvaltning:snapshot");
     else if (envs.length && !envs.includes(n)) red(`snapshots/${n}`, `${n} er ikke et miljø i neo.environments (${envs.join(", ")}). Ta bort mappa, eller rett navnet til miljøet`);
   }
-  const kunde = type !== "standard";
   for (const p of places(root)) {
-    const allowed = new Set(["README.md", ...(p.felles ? [] : ["losning.yaml", "test"]), ...LEDD.filter((l) => !p.felles || kunde || !["kilder", "forstaelse"].includes(l))]);
+    const allowed = new Set(["README.md", ...(p.felles ? [] : ["losning.yaml", "test"]), ...LEDD]);
     for (const n of entries(root, p.dir)) {
       if (allowed.has(n) || n.startsWith(".")) continue;
       const rel = `${p.dir}/${n}`;
       if (NUMMERERT[n]) red(rel, `Mappene har navn, ikke tall: ${n} heter ${NUMMERERT[n]}. Gi mappa nytt navn`);
       else if (n === "spor.yaml") red(rel, "Hva hvert krav ble, står i kravet selv (blir). Det finnes ingen sporingsfil. Flytt hver rad til blir i kravet den gjelder, og ta bort fila");
       else if (n === "oppsett") red(rel, EGEN_OPPSETT);
-      else if (p.felles && ["kilder", "forstaelse"].includes(n)) red(rel, "Et repo for standardløsninger har ingen kunde å forstå, så felles/ har ikke kilder eller forstaelse. Flytt det som gjelder én løsning, inn i løsningen, og ta bort mappa");
-      else red(rel, `${p.felles ? "felles/" : "En løsning"} har ${[...allowed].sort().join(", ")}. Det som ikke har en form, finnes ikke. Flytt innholdet inn i en av dem etter reglene i .claude/rules/, og ta bort ${rel.split("/").pop()}`);
+      else red(rel, `${p.felles ? "felles/" : "En løsning"} har ${[...allowed].sort().join(", ")}. Det som ikke har en form, finnes ikke. Flytt innholdet inn i en av dem etter README.md i mappene, og ta bort ${rel.split("/").pop()}`);
     }
     if (!p.felles) {
       for (const n of entries(root, `${p.dir}/test`)) {
@@ -177,14 +174,6 @@ export function checkCommitted(root) {
     .map((p) => ({ check: "hemmeligheter", file: p, message: "Hemmeligheter er committet. Fjern fila fra git (git rm --cached), og be eieren bytte verdiene: de er ikke hemmelige lenger. Legg de nye inn med /forvaltning:nokler" }));
 }
 
-// Godkjenneren står i eierlinjene; en kommentar som forklarer @ENDRE-MEG, teller ikke.
-export function checkCodeowners(root) {
-  const co = join(root, ".github/CODEOWNERS");
-  const owners = existsSync(co) ? readFileSync(co, "utf8").split("\n").filter((l) => l.trim() && !l.trim().startsWith("#")) : [];
-  if (owners.length && !owners.some((l) => /@ENDRE-MEG/.test(l))) return [];
-  return [{ check: "godkjenner", level: "warn", file: ".github/CODEOWNERS", message: "Godkjenneren er ikke satt. Uten den kan hvem som helst med skrivetilgang godkjenne en endring" }];
-}
-
 // En nøkkel som ser ut som en hemmelighet, står aldri med verdi.
 export function secretValues(data, path = "") {
   const out = [];
@@ -216,13 +205,13 @@ export function checkLosninger(root) {
   for (const s of dirs(root, "losninger")) {
     const file = `losninger/${s}/losning.yaml`;
     if (!existsSync(join(root, file))) {
-      f.push({ check: "losning", file: `losninger/${s}`, message: "losning.yaml mangler: formålet, eieren, statusen, integrasjonene og hva den bygger på. Løypa i pluginen solution lager den; formen står i .claude/rules/losninger.md" });
+      f.push({ check: "losning", file: `losninger/${s}`, message: "losning.yaml mangler: formålet, eieren, statusen, integrasjonene og hva den bygger på. Løypa i pluginen solution lager den; formen står i losninger/README.md" });
       continue;
     }
     const y = readYaml(root, file, "losning", f);
     if (y === undefined) continue;
     if (!isMap(y)) {
-      f.push({ check: "losning", file, message: "Fila er tom eller ikke et kart. Fyll den ut etter .claude/rules/losninger.md" });
+      f.push({ check: "losning", file, message: "Fila er tom eller ikke et kart. Fyll den ut etter losninger/README.md" });
       continue;
     }
     if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(s)) f.push({ check: "losning", file: `losninger/${s}`, message: "Navnet på løsningen har små bokstaver, tall og bindestrek" });
@@ -283,7 +272,7 @@ export function checkPersonaer(root) {
     const y = readYaml(root, rel, "persona", f);
     if (y === undefined) continue;
     if (!isMap(y)) {
-      f.push({ check: "persona", file: rel, message: "Fila er tom eller ikke et kart. Fyll den ut etter .claude/rules/personaer.md" });
+      f.push({ check: "persona", file: rel, message: "Fila er tom eller ikke et kart. Fyll den ut etter test/personaer/README.md" });
       continue;
     }
     for (const k of ["navn", "rolle"]) if (!text(y[k])) f.push({ check: "persona", file: rel, message: `${k} mangler. Legg det inn i personaen` });
@@ -303,7 +292,7 @@ export function checkTester(root, kravIder) {
     const y = readYaml(root, rel, "test", f);
     if (y === undefined) continue;
     if (!isMap(y)) {
-      f.push({ check: "test", file: rel, message: "Fila er tom eller ikke et kart. Fyll den ut etter .claude/rules/test.md" });
+      f.push({ check: "test", file: rel, message: "Fila er tom eller ikke et kart. Fyll den ut etter test/README.md" });
       continue;
     }
     if (!text(y.beskrivelse)) f.push({ check: "test", file: rel, message: "beskrivelse mangler. Skriv hva testcasen prøver" });

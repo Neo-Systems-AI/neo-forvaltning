@@ -42,7 +42,7 @@ export function checkKrav(root, places, { status = () => undefined } = {}) {
     }
     if (seen.has(r.id)) f.push({ ...at, message: `Id-en ${r.id} er brukt før, i ${seen.get(r.id)}. Gi dette kravet en ny id` });
     else seen.set(r.id, r.file);
-    if (!FLYT.includes(r.fields.flyt)) f.push({ ...at, message: `${r.id}: flyt må være ${FLYT.join(", ")}. Sett den som passer (formen står i .claude/rules/krav.md)` });
+    if (!FLYT.includes(r.fields.flyt)) f.push({ ...at, message: `${r.id}: flyt må være ${FLYT.join(", ")}. Sett den som passer (formen står i felles/krav/README.md)` });
     if (!text(r.fields.hvorfor)) f.push({ ...at, message: `${r.id}: hvorfor mangler. Skriv hvorfor kravet finnes` });
     const kilde = list(r.fields.kilde).map(String);
     if (!kilde.length) f.push({ ...at, message: `${r.id}: kilde mangler. Vis til kilden kravet bygger på (kilde: [K1]); finnes den ikke, er det et forslag, ikke et krav` });

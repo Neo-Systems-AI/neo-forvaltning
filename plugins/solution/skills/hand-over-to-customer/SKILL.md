@@ -10,7 +10,7 @@ den, og den som godkjenner endringer, skal vite hva de godkjenner. Overleveringe
 prosesseieren, ikke for den som bygget.
 
 **Inn:** løsningen (formålet i `losning.yaml`, kravene, designet, konfigen), siste testrunde med funnene og pakkene, og
-integrasjonene. **Ut:** en PR med overleveringen, godkjent av godkjenneren i `.github/CODEOWNERS`.
+integrasjonene. **Ut:** en PR med overleveringen, godkjent etter kundens rutiner (godkjenneren står i `kunde.yaml`).
 
 ## Det som skal med
 
@@ -36,7 +36,7 @@ integrasjonene. **Ut:** en PR med overleveringen, godkjent av godkjenneren i `.g
    løsning går ikke fra `utkast` rett til `i-bruk`.
 3. Skriv PR-beskrivelsen etter punktene over, kort og uten interne ord. Spør personen om hva kunden allerede vet, så
    overleveringen ikke gjentar det.
-4. Be godkjenneren i `.github/CODEOWNERS` om review.
+4. Be godkjenneren i `kunde.yaml` om review.
 
 ## Personen avgjør
 

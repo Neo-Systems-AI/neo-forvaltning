@@ -9,7 +9,7 @@ Testen er første gang løsningen møter et menneske. Den viser at kravene holde
 og den leter etter stedene der det blir kronglete. Testplanen skrives så en annen kan kjøre runden uten å spørre.
 
 **Inn:** kravene, designet, konfigen og forrige runde når den finnes. **Ut:** testcasene og testplanen i `test/` i
-løsningen, og personaene i `test/personaer/` i roten. Formen står i repoets regler (`.claude/rules/`).
+løsningen, og personaene i `test/personaer/` i roten. Formen står i README.md i mappene.
 
 ## Testcasene
 

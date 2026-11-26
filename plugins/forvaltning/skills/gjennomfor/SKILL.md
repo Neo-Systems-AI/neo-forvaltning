@@ -7,8 +7,8 @@ description: Gjennomfører en godkjent plan i Neo sin sandkasse med ett skript o
 
 ## Før du starter
 
-- PR-en med planen er godkjent av den som står som godkjenner i `kunde.yaml` (og i `CODEOWNERS`), og merget. Er den
-  ikke det, stopp og si det. Gjennomfør fra `main`, så filene og planen er de som ble godkjent.
+- PR-en med planen er godkjent etter kundens egne rutiner (den som godkjenner, står i `kunde.yaml`), og merget. Er
+  den ikke det, stopp og si det. Gjennomfør fra `main`, så filene og planen er de som ble godkjent.
 - Skriptet kaller sandkassen med maskinklienten (`neo.byEnv.sandkasse.apiClient`). Produksjonen endres ikke herfra:
   endringen promoteres fra sandkassen av kundens org-admin i Neo, og den står da i revisjonsloggen.
 
@@ -51,6 +51,6 @@ description: Gjennomfører en godkjent plan i Neo sin sandkasse med ett skript o
 
 ## Det som gjøres utenom
 
-- Det som står i `ikke-med.md` i snapshotet og i `oppsett/manuelt/` (det Neo ikke skriver som fil ennå), gjøres i
-  Neo, og snapshotet etterpå viser at det er gjort.
+- Det Neo ikke skriver som fil ennå (`ikke-med.md` i snapshotet), og stegene i kravene (`blir: steg`), gjøres i Neo
+  av et menneske, og snapshotet etterpå viser at det er gjort.
 - Den samme kommandoen kan kjøres av en jobb i GitHub etter merge, med maskinklientens hemmelighet som secret.
