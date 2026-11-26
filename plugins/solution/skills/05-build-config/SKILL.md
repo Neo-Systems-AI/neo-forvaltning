@@ -74,6 +74,10 @@ i roten av repoet, og `blir` på hvert krav.
   tas aldri bort for å forenkle.
 - **Ikke spekuler i Neo.** Bruk bare felt og verdier skjemaet tar imot. Det Neo ikke kan, står som et gap med kravet og
   det som mangler, ikke som en vei rundt.
+- **Integrasjonene og postboksene en flyt bruker,** hentes fra Neo, aldri gjettet: `list_config_environment` gir dem
+  med tokenet ferdig skrevet (`ref:integration:<app>/<navn>` i `integrationId` på noden,
+  `ref:mailbox:<leverandør>/<adresse>` i `sender.integrationId`). Finnes ikke den løsningen trenger, er det noe
+  kunden må sette opp i Neo, og det står som et gap.
 - **Ferdig konfigurert:** hver innstilling er Neos standard eller satt med en grunn.
 - **Navn og tekst** er norsk bokmål og klarspråk, etter skrivereglene i `felles/design/` og mønstrene for navn og
   skriving.
