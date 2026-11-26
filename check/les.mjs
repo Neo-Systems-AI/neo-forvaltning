@@ -33,9 +33,8 @@ export function readYaml(root, rel, check, f) {
   }
 }
 
-// Stedene med de samme leddene (kilder, forstaelse, krav, design): felles/ og hver løsning. Et repo for
-// standardløsninger har ingen kunde, så felles/ har ikke kilder eller forstaelse der. Konfigen står ikke på et sted,
-// men i oppsett/ i roten, slik Neo eksporterer den.
+// Stedene med de samme leddene (kilder, forstaelse, krav, design): felles/ og hver løsning, likt i et kunderepo og i
+// et repo for standardløsninger. Konfigen står ikke på et sted, men i oppsett/ i roten, slik Neo eksporterer den.
 export function places(root) {
   return [{ dir: "felles", navn: "felles", felles: true }, ...dirs(root, "losninger").map((l) => ({ dir: `losninger/${l}`, navn: l }))];
 }

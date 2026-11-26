@@ -40,7 +40,6 @@ export function run(root, { base = "origin/main" } = {}) {
   const config = struktur.readConfig(root);
   f.push(...config.findings);
   f.push(...struktur.checkLayout(root, kunde.type, config.envs));
-  f.push(...struktur.checkCodeowners(root));
   f.push(...struktur.checkCommitted(root));
   f.push(...struktur.checkLosninger(root));
   f.push(...struktur.checkIntegrasjoner(root));

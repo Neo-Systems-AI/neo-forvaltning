@@ -46,8 +46,8 @@ endringene, `unchanged`, eller `rejected` med grunnene. Rett fila til den ikke e
 
    Skriptet sender alle filene i ett kall, spør hva sandkassen har uten fil, og skriver `<reportsDir>/plan-<miljø>.md`
    og `.json`, i rekkefølgen Neo skriver filene. Exit 1 betyr at minst én fil er avvist; grunnen står i planen. En fil
-   i en mappe Neo ikke kjenner, er avvist: flytt den, eller legg den i `oppsett/manuelt/` om den beskriver noe som
-   gjøres for hånd.
+   i en mappe Neo ikke kjenner, er avvist: flytt den; beskriver den noe som
+   gjøres for hånd, hører det til kravet som et steg (`blir: steg`).
 2. Skriv over planen, i klartekst og per sakstype: hva endres, hvorfor (lenke til kravet eller saken), og hva
    saksbehandlerne vil merke.
 3. Commit `plan-<miljø>.md` og `plan-<miljø>.json`, og legg planen i PR-beskrivelsen. Godkjenningen av PR-en er kundens

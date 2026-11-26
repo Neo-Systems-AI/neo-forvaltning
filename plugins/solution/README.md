@@ -10,7 +10,7 @@ pluginen [`forvaltning`](../forvaltning/README.md).
 | # | Skill | Spørsmålet | Fra → til | Personen avgjør |
 |---|---|---|---|---|
 | — | `forvaltning:oppstart` | Er repoet klart? | Malen → et repo på GHE, med sandkassen og produksjonen | Typen og kunden |
-| 01 | `solution:01-research-organisation` | Hvem er kunden? | → `felles/kilder` og `felles/forstaelse` (bare et kunderepo) | Spørsmålene til kunden |
+| 01 | `solution:01-research-organisation` | Hva er felles for løsningene? | → `felles/kilder` og `felles/forstaelse`: kunden i et kunderepo, målgruppen og feltet i et repo for standardløsninger | Spørsmålene |
 | 02 | `solution:02-research-process` | Hvordan går prosessen, og hva sier hjemmelen? | En idé → `kilder` og `forstaelse` | Avvikene i forståelsen |
 | 03 | `solution:03-write-requirements` | Hva må holde? | → `krav` | Kravene |
 | 04 | `solution:04-choose-design` | Hvilke valg gjør vi? | → `design`, og det felles i `felles/` | Designvalgene |
@@ -20,7 +20,7 @@ pluginen [`forvaltning`](../forvaltning/README.md).
 | 08 | `solution:08-run-ui-test` | Holder det i UI? | → en runde med funn | Observasjonene |
 | 09 | `solution:09-triage-findings` | Hva retter vi, og hvor? | Funnene → konfig (tilbake til 05) eller et ønske til Neo | Konfig eller produkt |
 
-01 tas én gang per kunde, og ikke i et repo for standardløsninger; resten per løsning. 08 og 09 går i runder, med 05,
+01 tas én gang per repo; resten per løsning. 08 og 09 går i runder, med 05,
 06 og 07 imellom, til funnene er tatt. Promoteringen fra sandkassen til produksjonen gjør kundens org-admin i Neo.
 Publiseringen av en løsning står ikke i løypa før Neo har den.
 
@@ -38,16 +38,15 @@ skriver lista over hva som skal lages.
 ## Repoet
 
 Skillene bruker strukturen fra malen [`neo-forvaltning-mal`](https://github.com/Neo-Systems-AI/neo-forvaltning-mal).
-Formen på hver mappe står i repoets regler (`.claude/rules/`), og sjekken holder den.
+Formen på hver mappe står i README.md i mappa, og sjekken holder den. Hele treet finnes fra start, tomt.
 
 ```text
-kunde.yaml                    typen (kunde eller standard), kunden, godkjenneren, forvalteren og versjonene
+kunde.yaml                    typen (kunde eller standard: hvem som eier løsningene), godkjenneren, forvalteren, versjonene
 felles/                       det som gjelder hele org-en, med de samme leddene som en løsning
-  kilder/ forstaelse/         det som gjelder hele kunden (bare i et kunderepo)
+  kilder/ forstaelse/         det som er felles: kunden, eller målgruppen og feltet for standardløsninger
   krav/ design/               det som er felles for flere løsninger
 losninger/<losning>/          losning.yaml, kilder/, forstaelse/, krav/, design/, test/
 oppsett/                      konfigen i Neos format, én fil per objekt, slik Neo eksporterer den
-  manuelt/                    det Neo ikke skriver som fil ennå, beskrevet for hånd
 snapshots/<miljø>/            det som kjører i sandkassen og produksjonen, fra Neo
 reports/                      planene fra Neo
 integrasjoner/<system>/       hos-kunden.md, og artefaktene systemet trenger

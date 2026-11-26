@@ -1,18 +1,19 @@
 ---
 name: 01-research-organisation
-description: Researcher kunden én gang, før den første løsningen - roller og tilgang, språket, partene og kanalene, systemene og porteføljen - fra kilder som lagres uendret med opphav, med en påstand per kilde og spørsmålene til kunden der kildene ikke svarer. Bruk når et nytt kunderepo er satt opp, eller når noe som gjelder hele kunden har endret seg.
+description: Researcher det som er felles for løsningene i repoet, én gang, før den første løsningen - kunden i et kunderepo, eller målgruppen og feltet i et repo for standardløsninger - roller og tilgang, språket, partene og kanalene, systemene og porteføljen, fra kilder som lagres uendret med opphav, med en påstand per kilde og spørsmålene der kildene ikke svarer. Bruk når et nytt repo er satt opp, eller når noe som gjelder alle løsningene har endret seg.
 ---
 
 # Research på kunden
 
-Det som gjelder hele kunden, researches én gang og brukes av alle løsningene: hvem som jobber der og med hvilke roller,
+Det som gjelder alle løsningene, researches én gang og brukes av dem alle: hvem som jobber der og med hvilke roller,
 hvordan kunden skriver, hvem kunden har med å gjøre, systemene rundt, og sakene på tvers. En løsning som bygges uten
 dette, gjetter.
 
-**Inn:** `kunde.yaml` (hvem kunden er, og hvem som godkjenner og forvalter). **Ut:** kildene i `felles/kilder/` og
-forståelsen i `felles/forstaelse/`. Formen på begge står i repoets regler for mappene (`.claude/rules/`). Et repo for
-standardløsninger (`type: standard` i `kunde.yaml`) har ingen kunde å forstå, og ingen `felles/kilder/` eller
-`felles/forstaelse/`; da gjelder ikke denne.
+**Inn:** `kunde.yaml` (typen, og hvem som godkjenner og forvalter). **Ut:** kildene i `felles/kilder/` og forståelsen
+i `felles/forstaelse/`. Formen på begge står i README.md i mappa. I et kunderepo er det felles kunden. I et repo for
+standardløsninger (`type: standard`) er det målgruppen og feltet: hvordan kundene er organisert, felles hjemmel
+(forvaltningsloven, offentleglova, arkivloven), vanlige roller og systemer, og hvordan kundene skiller seg fra
+hverandre. Dimensjonene er de samme.
 
 ## De fem dimensjonene
 
