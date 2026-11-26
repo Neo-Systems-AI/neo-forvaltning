@@ -6,6 +6,38 @@ import { join } from "node:path";
 import { checkPath, unwrap, write } from "./skriv-eksport.mjs";
 import { loadManifest, order } from "./rekkefolge.mjs";
 import { differences, markdown, summary } from "./planrapport.mjs";
+import { tokensIn, tokensInDir } from "./miljo-nokler.mjs";
+
+test("miljø-nøklene: integrasjoner og postbokser, med og uten anførselstegn, og ingenting annet", () => {
+  const text = [
+    "spec:",
+    "  definition:",
+    "    nodes:",
+    "      - id: krr",
+    "        data:",
+    "          integrationId: ref:integration:KRR/Kontaktregisteret",
+    "      - id: arkiv",
+    "        data:",
+    '          integrationId: "ref:integration:DOCUMASTER/Arkiv %2F bygg"',
+    "      - id: epost",
+    "        data:",
+    "          inputs:",
+    "            sender:",
+    "              integrationId: 'ref:mailbox:MICROSOFT/postmottak@kommune.example'",
+    "            caseTypeId: ref:caseType:byggesak",
+    "            notat: ikke ref:integration:X/Y midt i en tekst",
+  ].join("\n");
+  assert.deepEqual(tokensIn(text), [
+    "ref:integration:KRR/Kontaktregisteret",
+    "ref:integration:DOCUMASTER/Arkiv %2F bygg",
+    "ref:mailbox:MICROSOFT/postmottak@kommune.example",
+  ]);
+  const dir = tmp();
+  mkdirSync(join(dir, "workflows"), { recursive: true });
+  writeFileSync(join(dir, "workflows/a.yaml"), text);
+  writeFileSync(join(dir, "workflows/b.yaml"), "x: ref:integration:KRR/Kontaktregisteret\n");
+  assert.equal(tokensInDir(dir).length, 3);
+});
 
 const tmp = () => mkdtempSync(join(tmpdir(), "forvaltning-"));
 const TYPE = "apiVersion: neo-config/v1\nkind: caseType\nspec:\n  name: Byggesak\n  slug: byggesak\n";

@@ -22,6 +22,8 @@ Skriptene i `scripts/` flytter bare svarene mellom Neo og repoet. De er determin
 - `rekkefolge.mjs` sorterer filene i oppsettet i rekkefølgen fra manifestet.
 - `planrapport.mjs` setter sammen planen av svarene fra `plan_config` og `config_not_in_files`, og sjekker før
   gjennomføringen at planen er den som ble godkjent.
+- `miljo-nokler.mjs` finner integrasjonene og postboksene flytene i oppsettet er bundet til, så
+  `check_config_refs` kan si om produksjonen har dem før promoteringen.
 
 - `hent-hemmeligheter.mjs` henter hemmelighetene fra kundens hvelv (Azure Key Vault, 1Password, eller manuelt) til
   `.env.local` og `.keys/`. Et menneske kjører hentingen.
