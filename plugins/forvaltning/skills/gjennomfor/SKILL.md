@@ -43,7 +43,9 @@ description: Gjennomfører en godkjent plan i Neo sin sandkasse, én fil om gang
 
 - Objektet blir slik fila sier, med en versjon før og en etter i Neo.
 - Det fila har fjernet, blir stående (planen viste det som «blir stående i Neo»).
-- En flyt skrives som utkast. Den aktiveres i Neo.
+- En flyt beholder statusen sin: en aktiv flyt er aktiv etterpå, og godkjenningen til å skrive i saker stemples på
+  nytt for den som gjennomfører. Med begrenset tilgang for Claude kan bare en flyt som er utkast, endres.
+- En veiviser skrives som utkast og publiseres i Neo.
 
 ## Det som gjøres utenom
 
