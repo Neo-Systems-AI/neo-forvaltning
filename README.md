@@ -63,15 +63,16 @@ Sjekken vurderer ikke innholdet i konfigfilene: den ser at filene i `oppsett/` o
 strukturen for typen i `kunde.yaml`, config-fila med sandkassen og produksjonen, kildene på endringen, påstandene i
 forståelsen, kravene og `blir`, personaene, testene og testplanen, og avvikene i `design/`.
 
-Versjonen står i `check/package.json` (`node sjekk.mjs --versjon`). Malen låser sjekken til commiten der fila er bygget,
-og kontrollerer sha256, fordi kunderepoene ligger på GitHub Enterprise og dette repoet på github.com, og et kall på
-tvers ikke kan bruke en action fra dette repoet:
+Versjonen står i `check/package.json` (`node sjekk.mjs --versjon`). Når en ny versjon er merget, får merge-commiten
+taggen `sjekk-v<versjon>`, og malen bytter til den i en PR. Malen henter sjekken fra taggen og kontrollerer sha256, så
+en tag som flyttes, stopper i stedet for å gi en annen sjekk. Det er slik fordi kunderepoene ligger på GitHub
+Enterprise og dette repoet på github.com, og et kall på tvers ikke kan bruke en action fra dette repoet:
 
 ```yaml
 - name: Hent sjekken
   env:
-    REF: "<commiten i neo-forvaltning>"
-    SHA256: "<sha256 for fila i commiten>"
+    REF: "sjekk-v<versjon>"
+    SHA256: "<sha256 for fila i taggen>"
   run: |
     curl -fsSL "https://raw.githubusercontent.com/Neo-Systems-AI/neo-forvaltning/$REF/plugins/forvaltning/scripts/sjekk.mjs" -o "$RUNNER_TEMP/sjekk.mjs"
     echo "$SHA256  $RUNNER_TEMP/sjekk.mjs" | sha256sum -c -
