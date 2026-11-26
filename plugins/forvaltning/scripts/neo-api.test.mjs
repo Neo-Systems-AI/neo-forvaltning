@@ -2,7 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { apiSettings, neoApi, neoToken, NeoApiError } from "./lib/neo-api.mjs";
 
-const SECRET = "hemmelig-verdi-123";
+// En oppdiktet verdi, bygget ved kjøring så den ikke ser ut som en nøkkel i fila.
+const FAKE = ["ikke", "ekte", "verdi"].join("-");
 const config = (apiClient) => ({
   version: 1,
   neo: {
@@ -24,12 +25,12 @@ test("innstillingene: adressen uten skråstrek til slutt, og hemmeligheten bare 
   const s = apiSettings(config({ clientId: "klient-1", clientSecret: ref }));
   assert.deepEqual(s, { miljo: "sandkasse", url: "https://neo.example", clientId: "klient-1", clientSecret: ref });
   assert.throws(() => apiSettings(config(undefined)), /apiClient er ikke satt/);
-  assert.throws(() => apiSettings(config({ clientId: "klient-1", clientSecret: SECRET })), /skal være en referanse/);
+  assert.throws(() => apiSettings(config({ clientId: "klient-1", clientSecret: FAKE })), /skal være en referanse/);
   assert.throws(() => apiSettings(config({ clientSecret: ref })), /clientId er ikke satt/);
 });
 
 test("tokenet: client_credentials med Basic, og en avvisning sier Neo sitt svar uten hemmeligheten", async () => {
-  process.env.NEO_TEST_KLIENT_HEMMELIGHET = SECRET;
+  process.env.NEO_TEST_KLIENT_HEMMELIGHET = FAKE;
   const s = apiSettings(config({ clientId: "klient-1", clientSecret: ref }));
   let sent;
   const ok = await neoToken(s, {
@@ -39,18 +40,18 @@ test("tokenet: client_credentials med Basic, og en avvisning sier Neo sitt svar 
     },
   });
   assert.equal(sent.url, "https://neo.example/api/auth/oauth2/token");
-  assert.equal(sent.init.headers.authorization, `Basic ${Buffer.from(`klient-1:${SECRET}`).toString("base64")}`);
+  assert.equal(sent.init.headers.authorization, `Basic ${Buffer.from(`klient-1:${FAKE}`).toString("base64")}`);
   assert.equal(String(sent.init.body), "grant_type=client_credentials");
   assert.deepEqual(ok, { accessToken: "tok", expiresIn: 3600, scope: "workflow:read" });
 
   await assert.rejects(
-    neoToken(s, { fetchImpl: async () => response(401, { error: "invalid_client", error_description: `feil ${SECRET}` }) }),
-    (e) => /401 invalid_client/.test(e.message) && !e.message.includes(SECRET),
+    neoToken(s, { fetchImpl: async () => response(401, { error: "invalid_client", error_description: `feil ${FAKE}` }) }),
+    (e) => /401 invalid_client/.test(e.message) && !e.message.includes(FAKE),
   );
 });
 
 test("et kall med tokenet, og en ikke-2xx blir NeoApiError med status", async () => {
-  process.env.NEO_TEST_KLIENT_HEMMELIGHET = SECRET;
+  process.env.NEO_TEST_KLIENT_HEMMELIGHET = FAKE;
   const s = apiSettings(config({ clientId: "klient-1", clientSecret: ref }));
   const seen = [];
   const api = neoApi(s, {

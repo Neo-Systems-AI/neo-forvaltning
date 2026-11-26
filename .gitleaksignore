@@ -1,0 +1,3 @@
+# Falske funn gitleaks ikke skal stoppe på, med hvorfor. Et funn står med fingeravtrykket (commit:fil:regel:linje).
+# En oppdiktet verdi i en test (neo-api.test.mjs), skrevet om i neste commit; commiten er pushet til en åpen PR.
+69febd5963a56eab32e5c37800a06b0fc3b49c57:plugins/forvaltning/scripts/neo-api.test.mjs:generic-api-key:5
