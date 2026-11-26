@@ -56,14 +56,14 @@ test("en hemmelighet hentes fra hvelvet ved hvert kall, og en fil lastes ned til
     calls.push([cmd, ...args]);
     if (args[2] === "download") {
       downloaded = args[args.indexOf("--file") + 1];
-      writeFileSync(downloaded, "-----BEGIN PRIVATE KEY-----\n");
+      writeFileSync(downloaded, "innholdet i fila\n");
       return "";
     }
     return "verdi\n";
   };
   assert.equal(secret(ref(root, "fiks", "passord"), { exec }), "verdi");
   assert.deepEqual(calls[0], ["az", "keyvault", "secret", "show", "--vault-name", "kv-kunde", "--name", "fiks-passord", "--query", "value", "-o", "tsv"]);
-  assert.equal(secret(ref(root, "fiks", "nokkel"), { exec }), "-----BEGIN PRIVATE KEY-----\n");
+  assert.equal(secret(ref(root, "fiks", "nokkel"), { exec }), "innholdet i fila\n");
   assert.ok(!existsSync(dirname(downloaded)), "den midlertidige mappa er slettet");
   assert.throws(() => ref(root, "fiks", "borte"), /borte står ikke i integrasjoner\/fiks\/hemmeligheter.yaml/);
   assert.throws(() => ref(root, "fiks", "feil"), /er ikke en referanse/);
