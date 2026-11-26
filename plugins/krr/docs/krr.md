@@ -34,7 +34,7 @@ Ferdig når varslingspunktet er registrert.
 ## Det som legges i hvelvet
 
 Klient-ID-ene til KRR-klienten, se [Maskinporten](../../maskinporten/docs/maskinporten.md#det-som-legges-i-hvelvet):
-`maskinporten-krr-test-client-id` og `maskinporten-krr-prod-client-id`.
+`maskinporten--krr-test-client-id` og `maskinporten--krr-prod-client-id`.
 
 ## Det forvalteren gjør i Neo
 

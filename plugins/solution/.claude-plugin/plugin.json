@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "solution",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Løypa fra en idé til en løsning i Neo som er testet i UI og gitt til kunden: research på kunden og prosessen fra kilder som lagres uendret, kravene med hva hvert krav ble, designvalgene med avvikene fra mønstrene, konfigen i oppsett/ i Neos format bygget med mønstrene for god konfig, testene, runden i UI og sorteringen av funnene. Ved siden av: gjennomgangen av konfigen i et miljø mot mønstrene, og overleveringen til kunden. Veien inn og ut av Neo og repoet står i pluginen forvaltning.",
   "author": {
     "name": "Neo Systems AS",

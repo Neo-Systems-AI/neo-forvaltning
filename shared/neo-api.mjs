@@ -6,16 +6,14 @@
 // API-klienten. Plan og apply av oppsettet virker bare i en sandkasse, så en klient i sandkassen kan aldri skrive i
 // produksjonen.
 //
-// Config: `neo.byEnv.<miljø>.url` (adressen til Neo) og `neo.byEnv.<miljø>.apiClient`:
-//   { "clientId": "…", "clientSecret": { "$env": "NEO_SANDKASSE_KLIENT_HEMMELIGHET", "kilde": "azure-keyvault:<hvelv>/<navn>" } }
-// Hemmeligheten står bare som referanse. I CI settes variabelen fra jobbens hemmeligheter; ellers hentes verdien fra
-// hvelvet for kjøringen, med personens egen innlogging (hemmeligheter.mjs).
-import { secret as hemmelighet, secretValues } from "./hemmeligheter.mjs";
+// Config: `neo.byEnv.<miljø>.url` (adressen til Neo) og `neo.byEnv.<miljø>.apiClient.clientId`. Hemmeligheten er
+// nøkkelen `neo--<miljø>-klient` i hvelvet (nokler.mjs); den står ikke i config-fila.
+import { nokkel, secretValues } from "./nokler.mjs";
 import { call, redact } from "./http.mjs";
 
 const get = (o, path) => path.split(".").reduce((x, k) => (x && typeof x === "object" ? x[k] : undefined), o);
 
-// Adressen og klienten for miljøet. Mangler noe, sies stien; en hemmelighet som står med verdi i fila, er en feil.
+// Adressen og klienten for miljøet. Mangler noe, sies stien.
 export function apiSettings(data, miljo) {
   const env = miljo ?? get(data, "neo.defaultEnv") ?? "sandkasse";
   const base = `neo.byEnv.${env}`;
@@ -24,17 +22,15 @@ export function apiSettings(data, miljo) {
   if (typeof url !== "string" || !url.trim()) throw new Error(`${base}.url er ikke satt i .claude/neo.config.json. Se /forvaltning:env`);
   if (!client || typeof client !== "object") throw new Error(`${base}.apiClient er ikke satt: maskinklienten skriptene kaller Neo med. Se /forvaltning:oppstart`);
   if (typeof client.clientId !== "string" || !client.clientId) throw new Error(`${base}.apiClient.clientId er ikke satt`);
-  if (!client.clientSecret || typeof client.clientSecret !== "object") {
-    throw new Error(`${base}.apiClient.clientSecret skal være en referanse ({ "$env": …, "kilde": … }), ikke en verdi. Fjern verdien fra fila`);
-  }
-  return { miljo: env, url: url.trim().replace(/\/+$/, ""), clientId: client.clientId, clientSecret: client.clientSecret };
+  if (client.clientSecret !== undefined) throw new Error(`${base}.apiClient.clientSecret skal ikke stå i fila: hemmeligheten er nøkkelen neo--${env}-klient i hvelvet. Ta den bort`);
+  return { miljo: env, url: url.trim().replace(/\/+$/, ""), clientId: client.clientId, nokkel: `neo--${env}-klient`, data };
 }
 
 const basic = (user, password) => `Basic ${Buffer.from(`${user}:${password}`).toString("base64")}`;
 
 // Et token for maskinklienten. Feiler det, sies Neo sitt svar, aldri hemmeligheten.
 export async function neoToken(s, { fetchImpl = fetch } = {}) {
-  const secret = hemmelighet(s.clientSecret);
+  const secret = nokkel(s.data, s.nokkel);
   const res = await call(`${s.url}/api/auth/oauth2/token`, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded", accept: "application/json", authorization: basic(s.clientId, secret) },
@@ -76,6 +72,6 @@ export function neoApi(s, { fetchImpl = fetch } = {}) {
     settings: s,
     get: (path) => send("GET", path),
     post: (path, body) => send("POST", path, body),
-    secrets: () => secretValues({ clientSecret: s.clientSecret }),
+    secrets: () => secretValues([s.nokkel]),
   };
 }

@@ -18,14 +18,14 @@
 //   node fiks.mjs folkeregister hendelser [--seq <n>] [--rolle <rolle-id>]
 //
 // Config: `fiks` i .claude/neo.config.json (miljo, klient, integrasjon, svarutKonto, svarinnMottakersystem,
-// folkeregisterRolle). Passordene er referansene under fiks.hemmeligheter (integrasjon-passord,
-// svarinn-passord) og hentes fra hvelvet for kjøringen.
+// folkeregisterRolle). Passordene er nøklene fiks--integrasjon-passord og
+// fiks--svarinn-passord i hvelvet, hentet for kjøringen.
 import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./lib/argumenter.mjs";
 import { load, miljo, need } from "./lib/neo-config.mjs";
 import { maskFnr } from "./lib/fnr.mjs";
-import { ref, secret } from "./lib/hemmeligheter.mjs";
+import { nokkel } from "./lib/nokler.mjs";
 import { basic, call, redact, report } from "./lib/http.mjs";
 import { tokenFor } from "./lib/maskinporten.mjs";
 
@@ -37,11 +37,11 @@ export const HOSTS = {
 export const SCOPE = "ks:fiks";
 
 // Det et kall trenger, slått opp først når kallet trenger det.
-export function context(data, { fetchImpl = fetch, hemmelighet = secret }) {
+export function context(data, { fetchImpl = fetch, hemmelighet = nokkel }) {
   const env = miljo(data, "fiks", undefined, HOSTS);
   const secrets = [];
   const hent = (navn) => {
-    const v = hemmelighet(ref(data, "fiks", navn));
+    const v = hemmelighet(data, `fiks--${navn}`);
     secrets.push(v);
     return v;
   };
@@ -139,7 +139,7 @@ export function hint(status, command) {
 }
 
 // Hele kjøringen. Exit: 0 for 2xx, 1 når Fiks svarer noe annet eller noe mangler, 2 for feil bruk.
-export async function main(argv, { config, fetchImpl = fetch, hemmelighet = secret, out = console.log, err = console.error } = {}) {
+export async function main(argv, { config, fetchImpl = fetch, hemmelighet = nokkel, out = console.log, err = console.error } = {}) {
   let ctx;
   let ids = [];
   try {

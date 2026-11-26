@@ -8,5 +8,11 @@
       "fallback": [],
       "doc": "Reglene i mønstrene som er slått av i dette repoet, med id"
     }
+  ],
+  "nokler": [
+    {
+      "navn": "neo--<miljø>-klient",
+      "doc": "Hemmeligheten til maskinklienten i sandkassen (Neo → API-klienter → Ny API-klient, slaget «Maskin»). Neo viser den én gang"
+    }
   ]
 }

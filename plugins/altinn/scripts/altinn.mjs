@@ -16,13 +16,13 @@
 //
 // Config: `altinn` i .claude/neo.config.json: miljo (tt02 eller produksjon), klient (en klient i
 // maskinporten.klienter, med tjenesteeier-scopes), org og apps. Nøkkelen til klienten hentes fra hvelvet for kjøringen.
-// Har kunden en Ocp-Apim-Subscription-Key, er referansen altinn.hemmeligheter.subscription-key.
+// Har kunden en Ocp-Apim-Subscription-Key, er den nøkkelen altinn--subscription-key i hvelvet.
 // Exit: 0 svar 2xx · 1 feil eller ikke-2xx · 2 feil bruk.
 import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./lib/argumenter.mjs";
 import { get, load, miljo, need } from "./lib/neo-config.mjs";
-import { has, ref, secret } from "./lib/hemmeligheter.mjs";
+import { nokkel } from "./lib/nokler.mjs";
 import { call, redact, report } from "./lib/http.mjs";
 import { tokenFor } from "./lib/maskinporten.mjs";
 
@@ -55,7 +55,7 @@ export function settings(data) {
 const claims = (jwt) => JSON.parse(Buffer.from(jwt.split(".")[1], "base64url").toString("utf8"));
 
 // Maskinporten-tokenet gjelder ikke mot Altinn 3 direkte; det veksles med en GET (POST gir 411).
-export async function altinnToken(s, { data, fetchImpl = fetch, hemmelighet = secret, secrets = [] } = {}) {
+export async function altinnToken(s, { data, fetchImpl = fetch, hemmelighet = nokkel, secrets = [] } = {}) {
   const mp = await tokenFor({ data, navn: s.klient, miljo: s.hosts.maskinporten, fetchImpl, hemmelighet, secrets }).catch((e) => {
     throw /Ingen scopes/.test(e.message) ? new Error(`${e.message}. Tjenesteeier-scopes er for eksempel altinn:serviceowner/instances.read, altinn:serviceowner/events og altinn:events.subscribe; sett bare dem klienten har, for Maskinporten avviser hele kallet om ett mangler`) : e;
   });
@@ -93,7 +93,7 @@ const size = (n) => {
 };
 
 // Hele kjøringen, med config, fetch og hvelvet utenfra så den kan testes. Skriver til out/err og gir exit-koden.
-export async function run(argv, { config, fetchImpl = fetch, hemmelighet = secret, out = console.log, err = console.error } = {}) {
+export async function run(argv, { config, fetchImpl = fetch, hemmelighet = nokkel, out = console.log, err = console.error } = {}) {
   let args;
   try {
     args = parseArgs(argv);
@@ -122,7 +122,8 @@ export async function run(argv, { config, fetchImpl = fetch, hemmelighet = secre
     secrets.push(t.token);
     let subscriptionKey;
     // En subscription key bare når kunden har fått en.
-    if (has(data, "altinn", "subscription-key")) secrets.push((subscriptionKey = hemmelighet(ref(data, "altinn", "subscription-key"))));
+    subscriptionKey = hemmelighet(data, "altinn--subscription-key", { valgfri: true }) ?? undefined;
+    if (subscriptionKey) secrets.push(subscriptionKey);
     const headers = { authorization: `Bearer ${t.token}`, accept: "application/json", ...(subscriptionKey ? { "ocp-apim-subscription-key": subscriptionKey } : {}) };
     const get = (url, extra = {}) => call(url, { headers: { ...headers, ...extra }, fetchImpl });
     const print = (url, result, body = result.body) => out(report("GET", url, { ...result, body: show(body) }, secrets));

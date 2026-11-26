@@ -47,5 +47,5 @@ Instansen er den i `documaster` i `.claude/neo.config.json`. `--limit` er 10 som
 - **Svarene er arkivinnhold.** Titler og parter kan være personopplysninger. Vis det som trengs for feilsøket, og
   skriv det aldri inn i repoet.
 - **Hemmeligheten er kundens.** Skriptet henter den fra kundens hvelv for kjøringen, og skriver den aldri ut. Får det den
-  ikke, sier det referansen: personen logger inn med `az login`, eller ber kunden om tilgang.
+  ikke, sier det navnet på nøkkelen: personen logger inn med `az login`, eller ber kunden om tilgang.
 - **Spørrespråket:** bare `felt = @param` er brukt her, det produktet bruker. Om `&&` og `||` virker, er ikke prøvd.

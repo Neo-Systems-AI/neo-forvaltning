@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Oppsettet i repoet for hver plugin fra neo-forvaltning som er på: hva pluginen leser fra `.claude/neo.config.json`,
 // hva som er satt, hvor verdien kom fra, og hva som mangler, også Neo per miljø (MCP-serveren for pluginene som går
-// gjennom MCP, maskinklienten i sandkassen for dem som kaller Neo med skript), referansene til hemmelighetene og
-// Maskinporten-klientene pluginene viser til. Hva hver plugin trenger, står i
+// gjennom MCP, maskinklienten i sandkassen for dem som kaller Neo med skript), Maskinporten-klientene pluginene viser
+// til, og nøklene de trenger i hvelvet (bare navnene; om de står der, sier nokler.mjs). Hva hver plugin trenger, står i
 // `nokler.json` ved siden av (samlet fra nøkkelfilene til alle pluginene). Bare lesing. Exit 1 når noe påkrevd mangler.
 //
 //   node check-setup.mjs [--json]
@@ -10,7 +10,6 @@ import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { environments, get, load, neo } from "./lib/neo-config.mjs";
-import { isRef, ref } from "./lib/hemmeligheter.mjs";
 
 export const MARKET = "neo-forvaltning";
 const KEYS = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "nokler.json"), "utf8"));
@@ -36,15 +35,17 @@ export function enabled(root) {
   return [...on].filter(([, v]) => v).map(([k]) => k).sort();
 }
 
-// En referanse under <system>.hemmeligheter.<navn>.
-const hasRef = (data, path) => {
-  const [, system, navn] = path.match(/^([^.]+)\.hemmeligheter\.(.+)$/);
-  try {
-    ref(data, system, navn);
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, why: e.message };
-  }
+// Navnet på en nøkkel slik pluginen sier det, med <klient> (hver klient i maskinporten.klienter) og <miljø>
+// (standardmiljøet) fylt ut.
+export function expand(data, navn) {
+  if (navn.includes("<klient>")) return Object.keys(get(data, "maskinporten.klienter") ?? {}).map((k) => navn.replace("<klient>", k));
+  return [navn.replace("<miljø>", get(data, "neo.defaultEnv") ?? "sandkasse")];
+}
+
+// En rad for en nøkkel i hvelvet. Om den står der, sier /forvaltning:nokler; her er den bare satt når hvelvet er det.
+const keyRow = (data, n, doc, { valgfri = false, fil = false } = {}) => {
+  const hv = typeof data?.hvelv === "string" && /^[A-Za-z0-9-]{3,24}$/.test(data.hvelv);
+  return { path: `nøkkel ${n}`, nokkel: n, value: hv ? `${data.hvelv}/${n}` : undefined, source: hv ? "hvelvet" : "usatt", required: !valgfri, valgfri, fil, ok: hv || valgfri, doc: hv ? doc : `${doc}. hvelv er ikke satt i config-fila` };
 };
 
 // Neo per miljø, for en plugin som snakker med Neo. Gjennom MCP er MCP-serveren påkrevd. Med skript (`neoApi`) er
@@ -66,14 +67,13 @@ export function neoRows(data, { api = false } = {}) {
       const base = `neo.byEnv.${env}.apiClient`;
       const id = get(data, `${base}.clientId`);
       out.push({ path: `${base}.clientId`, value: id, source: unset(id) ? "usatt" : "config", required: true, ok: !unset(id), doc: `Maskinklienten skriptene kaller ${env} med (API-klienter → Ny API-klient, slaget «Maskin»)` });
-      const sec = get(data, `${base}.clientSecret`);
-      out.push({ path: `${base}.clientSecret`, value: isRef(sec) ? sec.kilde ?? sec.$env : undefined, source: isRef(sec) ? "referanse" : sec === undefined ? "mangler" : "ikke en referanse", required: true, ok: isRef(sec), doc: isRef(sec) ? "Hemmeligheten til maskinklienten" : 'Hemmeligheten til maskinklienten, som referanse: { "$env": "NEO_SANDKASSE_KLIENT_HEMMELIGHET", "kilde": "azure-keyvault:<hvelv>/<navn>" }' });
     }
   }
   return out;
 }
 
-// Radene for én plugin: Neo når den snakker med Neo, hver nøkkel, hver referanse, og klientene den viser til. Nøklene
+// Radene for én plugin: Neo når den snakker med Neo, hver nøkkel i config-fila, klientene den viser til, og nøklene i
+// hvelvet den trenger. Nøklene
 // står relativt til pluginens del av config-fila (`window` er `monitoring.window`).
 export function rows(data, plugin, keys = KEYS) {
   const spec = keys[plugin];
@@ -88,21 +88,18 @@ export function rows(data, plugin, keys = KEYS) {
       const klient = get(data, `maskinporten.klienter.${v}`);
       out.push({ path: `maskinporten.klienter.${v}`, value: klient?.clientId ? `clientId ${klient.clientId}` : undefined, source: klient ? "config" : "usatt", required: true, ok: !!klient?.clientId, doc: `Klienten ${path} viser til, med clientId` });
       if (blank(get(data, "maskinporten.miljo"))) out.push({ path: "maskinporten.miljo", source: "usatt", required: true, ok: false, doc: "Miljøet klientene er registrert i" });
-      const kp = `maskinporten.hemmeligheter.${v}-nokkel`;
-      const r = hasRef(data, kp);
-      out.push({ path: kp, value: r.ok ? get(data, kp).kilde ?? get(data, kp).$env : undefined, source: r.ok ? "referanse" : "mangler", required: true, ok: r.ok, doc: r.ok ? "Nøkkelen til klienten" : r.why });
+      out.push(keyRow(data, `maskinporten--${v}-nokkel`, `Den private nøkkelen (PEM) til klienten ${v}`, { fil: true }));
     }
   }
-  for (const h of spec.hemmeligheter ?? []) {
-    const paths = h.perKlient ? Object.keys(get(data, "maskinporten.klienter") ?? {}).map((n) => h.path.replace("<klient>", n)) : [h.path];
-    for (const path of paths) {
-      const r = hasRef(data, path);
-      // En valgfri referanse kan mangle, men står den, må den være en referanse.
-      const absent = get(data, path) === undefined;
-      out.push({ path, value: r.ok ? get(data, path).kilde ?? get(data, path).$env : undefined, source: r.ok ? "referanse" : absent ? "mangler" : "ikke en referanse", required: !h.valgfri, ok: r.ok || (!!h.valgfri && absent), doc: r.ok ? h.doc : `${h.doc}. ${r.why}` });
-    }
-  }
+  for (const n of spec.nokler ?? []) for (const navn of expand(data, n.navn)) out.push(keyRow(data, navn, n.doc, n));
   return out;
+}
+
+// Nøklene pluginene som er på, trenger i hvelvet, hver én gang.
+export function needed(data, plugins, keys = KEYS) {
+  const seen = new Map();
+  for (const p of plugins) for (const r of rows(data, p, keys)) if (r.nokkel && !seen.has(r.nokkel)) seen.set(r.nokkel, { navn: r.nokkel, doc: r.doc, valgfri: r.valgfri, fil: r.fil, plugin: p });
+  return [...seen.values()];
 }
 
 export function report(root, { data, plugins = enabled(root) } = {}) {

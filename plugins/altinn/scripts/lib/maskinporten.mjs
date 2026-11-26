@@ -1,10 +1,10 @@
 // Maskinporten: token med JWT-grant (RS256), uten avhengigheter. Klientene beskrives ett sted, i
 // `maskinporten.klienter.<navn>` i config-fila (clientId, kid, scopes), for miljøet i `maskinporten.miljo`. Altinn, Fiks
-// og KRR viser til en klient med navn. Nøkkelen er referansen `maskinporten.hemmeligheter.<navn>-nokkel`,
-// en PEM i hvelvet, hentet for kjøringen. Klienten, nøkkelen og virksomhetssertifikatet er kundens; vi har koden.
+// og KRR viser til en klient med navn. Nøkkelen er `maskinporten--<navn>-nokkel`, en PEM
+// i hvelvet, hentet for kjøringen. Klienten, nøkkelen og virksomhetssertifikatet er kundens; vi har koden.
 import { createHash, createPrivateKey, createPublicKey, createSign, randomUUID } from "node:crypto";
 import { get, need } from "./neo-config.mjs";
-import { ref, secret } from "./hemmeligheter.mjs";
+import { nokkel } from "./nokler.mjs";
 import { call } from "./http.mjs";
 
 export const HOSTS = { test: "https://test.maskinporten.no", produksjon: "https://maskinporten.no" };
@@ -64,11 +64,11 @@ export function klient(data, navn, { miljo } = {}) {
 }
 
 // Et token for klienten med navnet. Nøkkelen hentes fra hvelvet for kjøringen; verdien legges i `secrets` så den sladdes.
-export async function tokenFor({ data, navn, miljo, scopes, consumerOrg, fetchImpl = fetch, hemmelighet = secret, secrets = [] }) {
+export async function tokenFor({ data, navn, miljo, scopes, consumerOrg, fetchImpl = fetch, hemmelighet = nokkel, secrets = [] }) {
   const k = klient(data, navn, { miljo });
   const wanted = scopes?.length ? scopes : k.scopes;
   if (!wanted.length) throw new Error(`Ingen scopes for ${k.sted}. Sett scopes der, eller bruk --scope`);
-  const pem = hemmelighet(ref(data, "maskinporten", `${navn}-nokkel`));
+  const pem = hemmelighet(data, `maskinporten--${navn}-nokkel`);
   secrets.push(pem);
   const t = await token({ miljo: k.miljo, clientId: k.clientId, scopes: wanted, pem, kid: k.kid, consumerOrg, fetchImpl });
   secrets.push(t.accessToken);

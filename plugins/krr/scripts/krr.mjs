@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./lib/argumenter.mjs";
 import { load, miljo, need } from "./lib/neo-config.mjs";
 import { gyldigFnr, maskFnr } from "./lib/fnr.mjs";
-import { secret } from "./lib/hemmeligheter.mjs";
+import { nokkel } from "./lib/nokler.mjs";
 import { call, redact, report } from "./lib/http.mjs";
 import { tokenFor } from "./lib/maskinporten.mjs";
 
@@ -32,7 +32,7 @@ export function oppsummer(personer) {
   });
 }
 
-export async function main(argv, { fetchImpl = fetch, config, hemmelighet = secret, out = console.log, err = console.error } = {}) {
+export async function main(argv, { fetchImpl = fetch, config, hemmelighet = nokkel, out = console.log, err = console.error } = {}) {
   const secrets = [];
   let ids = [];
   const say = (fn, text) => fn(maskFnr(redact(text, secrets), ids));

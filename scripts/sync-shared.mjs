@@ -67,7 +67,7 @@ export function plan(root) {
   return out;
 }
 
-// Nøkkelfilene til alle pluginene, i én fil: { <plugin>: { keys, hemmeligheter } }.
+// Nøkkelfilene til alle pluginene, i én fil: { <plugin>: { keys, nokler } }.
 export function keysText(root, plugins) {
   const all = {};
   for (const p of [...plugins].sort()) {

@@ -29,16 +29,16 @@
       "doc": "Rollen i Fiks register som gir hjemmel og bestemmer hvilke opplysninger oppslaget får"
     }
   ],
-  "hemmeligheter": [
+  "nokler": [
     {
-      "path": "fiks.hemmeligheter.integrasjon-passord",
+      "navn": "fiks--integrasjon-passord",
       "valgfri": true,
-      "doc": "Integrasjonens servicepassord (headeren IntegrasjonPassord), for SvarUt og Folkeregisteret"
+      "doc": "Integrasjonens servicepassord (headeren IntegrasjonPassord), fra Fiks forvaltning, for SvarUt og Folkeregisteret"
     },
     {
-      "path": "fiks.hemmeligheter.svarinn-passord",
+      "navn": "fiks--svarinn-passord",
       "valgfri": true,
-      "doc": "Service-passordet til SvarInn-mottakersystemet"
+      "doc": "Service-passordet til SvarInn-mottakersystemet, fra Fiks forvaltning"
     }
   ]
 }

@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./argumenter.mjs";
 import { environment, load, miljo, neo, resolve } from "./neo-config.mjs";
 import { gyldigFnr, gyldigOrgnr, maskFnr } from "./fnr.mjs";
-import { has, parseKilde, ref, refs, secret, secretValues, SOURCES } from "./hemmeligheter.mjs";
+import { azEnv, envName, nokkel, names, secretValues } from "./nokler.mjs";
 import { basic, call, redact, report } from "./http.mjs";
 import { assertion, klient, loadKey, token, tokenFor } from "./maskinporten.mjs";
 
@@ -68,42 +68,32 @@ test("miljøet hos et system: --miljo, ellers <system>.miljo, og aldri en stille
   assert.throws(() => miljo({}, "krr", "prod", hosts), /har ikke miljøet «prod»/);
 });
 
-test("en hemmelighet hentes fra hvelvet for kjøringen, én gang, eller fra variabelen når den er satt, og lagres aldri", () => {
-  const data = { fiks: { miljo: "test", hemmeligheter: { passord: { $env: "FIKS_PASSORD_T", kilde: "azure-keyvault:kv-kunde/fiks-passord" }, nokkel: { $env: "FIKS_NOKKEL_T", kilde: "azure-keyvault:kv-kunde/fiks-nokkel", fil: true }, man: { $env: "FIKS_MAN_T", kilde: "manuell" }, feil: { kilde: "azure-keyvault:kv-kunde/x" } } } };
+test("en nøkkel hentes fra hvelvet med det faste navnet, én gang per kjøring, eller fra variabelen når den er satt", () => {
+  const data = { hvelv: "kv-kunde" };
   const calls = [];
-  const exec = (cmd, args) => (calls.push([cmd, ...args]), args.includes("fiks-nokkel") ? "-----BEGIN-----\nabc\n-----END-----\n" : "verdi\n");
-  assert.equal(secret(ref(data, "fiks", "passord"), { exec, env: {} }), "verdi");
-  assert.equal(secret(ref(data, "fiks", "passord"), { exec, env: {} }), "verdi");
+  const exec = (cmd, args, opts) => (calls.push([cmd, ...args, opts.env.AZURE_CONFIG_DIR]), args.includes("fiks--pem-t") ? "-----BEGIN-----\nabc\n-----END-----\n" : "verdi\n");
+  const env = { NEO_PERSON_AZURE_CONFIG_DIR: "/person/.azure", AZURE_CONFIG_DIR: "/tjeneste" };
+  assert.equal(nokkel(data, "fiks--passord-t", { exec, env }), "verdi");
+  assert.equal(nokkel(data, "fiks--passord-t", { exec, env }), "verdi");
   assert.equal(calls.length, 1, "én gang per kjøring");
-  assert.deepEqual(calls[0], ["az", "keyvault", "secret", "show", "--vault-name", "kv-kunde", "--name", "fiks-passord", "--query", "value", "-o", "tsv"]);
-  assert.equal(secret(ref(data, "fiks", "nokkel"), { exec, env: {} }), "-----BEGIN-----\nabc\n-----END-----", "en nøkkelfil er teksten, i minnet");
-  assert.equal(secret(ref(data, "fiks", "passord"), { exec: () => assert.fail("ikke hvelvet"), env: { FIKS_PASSORD_T: "fra-ci" } }), "fra-ci");
-  assert.throws(() => secret(ref(data, "fiks", "man"), { exec, env: {} }), /FIKS_MAN_T \(fiks.hemmeligheter.man\) er ikke satt. Kilden er manuell/);
-  const failing = () => {
+  assert.deepEqual(calls[0], ["az", "keyvault", "secret", "show", "--vault-name", "kv-kunde", "--name", "fiks--passord-t", "--query", "value", "-o", "tsv", "/person/.azure"], "med personens egen innlogging");
+  assert.equal(nokkel(data, "fiks--pem-t", { exec, env }), "-----BEGIN-----\nabc\n-----END-----", "en nøkkelfil er teksten, i minnet");
+  assert.equal(nokkel(data, "fiks--ci-t", { exec: () => assert.fail("ikke hvelvet"), env: { FIKS_CI_T: "fra-ci" } }), "fra-ci");
+  assert.equal(envName("maskinporten--krr-nokkel"), "MASKINPORTEN_KRR_NOKKEL");
+  const borte = () => {
+    throw Object.assign(new Error("x"), { stderr: "ERROR: (SecretNotFound) A secret with (name/id) x was not found" });
+  };
+  assert.throws(() => nokkel(data, "fiks--borte-t", { exec: borte, env: {} }), /Fikk ikke hentet nøkkelen fiks--borte-t fra kv-kunde: ERROR: \(SecretNotFound\).*Legg den inn med \/forvaltning:nokler/);
+  assert.equal(nokkel(data, "altinn--valgfri-t", { exec: borte, env: {}, valgfri: true }), null);
+  const login = () => {
     throw Object.assign(new Error("x"), { stderr: "ERROR: Please run 'az login' to setup account.\nmore" });
   };
-  const ny = { $env: "NY_T", kilde: "azure-keyvault:kv/ny", sted: "x.hemmeligheter.ny" };
-  assert.throws(() => secret(ny, { exec: failing, env: {} }), /Fikk ikke hentet NY_T \(x.hemmeligheter.ny\) fra azure-keyvault:kv\/ny: ERROR: Please run 'az login' to setup account.. Er du logget inn med az login/);
-  assert.throws(() => secret({ $env: "U", kilde: "s3:x" }, { exec, env: {} }), /en ukjent kilde «s3:x»/);
-  assert.throws(() => ref(data, "fiks", "mangler"), /fiks.hemmeligheter.mangler står ikke i .claude\/neo.config.json. Legg inn "mangler"/);
-  assert.throws(() => ref(data, "fiks", "feil"), /fiks.hemmeligheter.feil i .claude\/neo.config.json er ikke en referanse/);
-  assert.ok(has(data, "fiks", "passord") && !has(data, "fiks", "mangler") && !has({}, "altinn", "subscription-key"));
-  assert.ok(secretValues({}, { env: {} }).includes("verdi"), "det som er hentet, sladdes");
-});
-
-test("kildene: Key Vault, 1Password, og en kilde i feil form", () => {
-  let args;
-  assert.equal(SOURCES["1password"]("op://kunde/svarinn/passord", (cmd, a) => ((args = [cmd, ...a]), "v")), "v");
-  assert.deepEqual(args, ["op", "read", "--no-newline", "op://kunde/svarinn/passord"]);
-  assert.throws(() => SOURCES["1password"]("feil"), /op:\/\//);
-  assert.throws(() => SOURCES["azure-keyvault"]("bare-hvelv"), /<hvelv>\/<navn>/);
-  assert.deepEqual(parseKilde("azure-keyvault:kv/x"), { type: "azure-keyvault", rest: "kv/x" });
-  assert.equal(parseKilde("uten-kolon"), null);
-});
-
-test("referansene står hvor som helst i config-fila, også maskinklienten, bare med navn", () => {
-  const data = { version: 1, neo: { byEnv: { sandkasse: { apiClient: { clientId: "c", clientSecret: { $env: "NEO_K", kilde: "azure-keyvault:kv/neo" } } } } }, fiks: { hemmeligheter: { passord: { $env: "P", kilde: "azure-keyvault:kv/p" } } } };
-  assert.deepEqual(refs(data).map((r) => [r.path, r.env]), [["neo.byEnv.sandkasse.apiClient.clientSecret", "NEO_K"], ["fiks.hemmeligheter.passord", "P"]]);
+  assert.throws(() => nokkel(data, "fiks--login-t", { exec: login, env: {} }), /Er du logget inn med az login/);
+  assert.throws(() => nokkel({}, "fiks--uten-hvelv-t", { exec, env: {} }), /hvelv er ikke satt i .claude\/neo.config.json/);
+  assert.throws(() => nokkel(data, "fiks.passord", { exec, env: {} }), /er ikke et navn på en nøkkel/);
+  assert.ok(secretValues([], { env: {} }).includes("verdi"), "det som er hentet, sladdes");
+  assert.equal(azEnv({}).AZURE_CONFIG_DIR.endsWith(".azure"), true);
+  assert.deepEqual([...names(data, { exec: () => '["a--b","c--d"]', env: {} })], ["a--b", "c--d"]);
 });
 
 test("fødselsnummer: gyldige kontrollsifre og de personen har gitt maskeres; saksnumre og beløp står", () => {
@@ -152,9 +142,9 @@ test("Maskinporten: klienten med navn, assertion signert med nøkkelen, og token
   };
   const secrets = [];
   const asked = [];
-  const t = await tokenFor({ data: { ...data, maskinporten: { ...data.maskinporten, hemmeligheter: { "krr-nokkel": { $env: "KRR_NOKKEL", kilde: "azure-keyvault:kv/krr-nokkel", fil: true } } } }, navn: "krr", fetchImpl, secrets, hemmelighet: (r) => (asked.push(r.kilde), pem) });
+  const t = await tokenFor({ data, navn: "krr", fetchImpl, secrets, hemmelighet: (d, n) => (asked.push(n), pem) });
   assert.equal(t.accessToken, "tok-1234");
-  assert.deepEqual(asked, ["azure-keyvault:kv/krr-nokkel"]);
+  assert.deepEqual(asked, ["maskinporten--krr-nokkel"]);
   assert.deepEqual(secrets, [pem, "tok-1234"]);
   assert.deepEqual(seen, ["https://test.maskinporten.no/.well-known/oauth-authorization-server", "https://test.maskinporten.no/token"]);
   const avslag = async (url) => (url.endsWith("oauth-authorization-server") ? new Response(JSON.stringify({ issuer: "i", token_endpoint: "https://t/token" })) : new Response(JSON.stringify({ error: "invalid_scope", error_description: "Scope x not allowed" }), { status: 400 }));

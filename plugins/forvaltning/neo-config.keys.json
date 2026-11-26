@@ -18,5 +18,11 @@
       "fallback": "reports",
       "doc": "Planer og rapporter"
     }
+  ],
+  "nokler": [
+    {
+      "navn": "neo--<miljø>-klient",
+      "doc": "Hemmeligheten til maskinklienten i sandkassen (Neo → API-klienter → Ny API-klient, slaget «Maskin»). Neo viser den én gang"
+    }
   ]
 }

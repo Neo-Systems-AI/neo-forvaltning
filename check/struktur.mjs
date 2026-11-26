@@ -9,12 +9,12 @@ import { dirs, entries, isMap, items, list, mdFiles, places, points, readYaml, t
 export const CHECKS = [
   { name: "kunde", about: "kunde.yaml har typen, kunden, godkjenneren, forvalteren og versjonene" },
   { name: "repo", about: "Repoet har mappene typen sier, og ingen andre: konfigen i oppsett/ i roten, snapshotene per miljø, og ingen oppsett/ i en løsning eller i felles/" },
-  { name: "config", about: ".claude/neo.config.json er version 1 med miljøene sandkasse og produksjon, adressen og maskinklienten, og hemmelighetene bare som referanser ({ $env, kilde })" },
-  { name: "hemmeligheter", about: "Ingen hentede hemmeligheter (.env.local, .keys/) er committet" },
+  { name: "config", about: ".claude/neo.config.json er version 1 med miljøene sandkasse og produksjon, adressen, maskinklienten og hvelvet, og ingen hemmeligheter, heller ikke referanser" },
+  { name: "hemmeligheter", about: "Ingen filer med hemmeligheter (.env, .keys/) er committet" },
   { name: "godkjenner", about: ".github/CODEOWNERS nevner en ekte godkjenner" },
   { name: "losning", about: "Hver løsning har losning.yaml med formål, eier, status og integrasjonene, og hva den bygger på når den er ute av utkast" },
   { name: "integrasjon", about: "Ingen hemmelighet står med verdi, og oppgavene hos kunden har status, hvem og det de venter på" },
-  { name: "persona", about: "Hver persona har navn og rolle, og hemmelighetene er referanser til hvelvet" },
+  { name: "persona", about: "Hver persona har navn og rolle, og ingen hemmeligheter: personen logger inn selv" },
   { name: "test", about: "Hver testcase har en beskrivelse og kravene den prøver, testplanen har et punkt per krav, og hver runde heter etter datoen" },
 ];
 
@@ -26,14 +26,9 @@ export const PERSONAER = "test/personaer";
 // En nøkkel med et navn som dette er en hemmelighet. Den står aldri med verdi i en fil.
 export const SECRET_KEY = /(passord|password|secret|hemmelig|token|apikey|api_key|privatekey|private_key|nokkel|nøkkel|^key$|keypem)/i;
 
-// En referanse til en hemmelighet: { $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> }, og fil: true for en
-// nøkkelfil. Skriptene henter verdien fra kilden for kjøringen; `$env` er variabelen som brukes i stedet når den er satt
-// (i jobbens hemmeligheter i GitHub).
-// Key Vault er standarden; 1Password og manuell finnes for en kunde uten.
-export const KILDE = /^(azure-keyvault:[A-Za-z0-9-]+\/[A-Za-z0-9-]+|1password:op:\/\/\S+|manuell)$/;
-export const REF = "{ $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil)";
-export const isRef = (v) => isMap(v) && /^[A-Z][A-Z0-9_]*$/.test(String(v.$env ?? "")) && KILDE.test(String(v.kilde ?? "")) && (v.fil === undefined || typeof v.fil === "boolean") && Object.keys(v).every((k) => ["$env", "kilde", "fil"].includes(k));
-const whyNotRef = (v) => `må være ${REF}, uten verdien`;
+// Nøklene ligger bare i hvelvet, med faste navn som pluginene bestemmer (<system>--<navn>), og config-fila sier bare
+// hvilket hvelv (`hvelv`). En referanse ({ $env, kilde }) og `<system>.hemmeligheter` er den gamle formen.
+export const NOKLER = "Nøklene ligger bare i hvelvet, med faste navn som pluginene bestemmer, og config-fila sier bare hvilket hvelv (hvelv). Ta den bort, og legg nøkkelen inn med /forvaltning:nokler";
 
 // Det som er blitt til noe annet. Står det igjen, sier sjekken hva det er blitt.
 const GAMMELT = {
@@ -111,7 +106,7 @@ export function checkLayout(root, type, envs = []) {
       const rel = `integrasjoner/${s}/${n}`;
       if (["hos-kunden.md", "README.md"].includes(n) || n.startsWith(".")) continue;
       if (n === "neo.yaml" || n === "miljoer") red(rel, `${n} har ingen form i Neo ennå. Ta den bort`);
-      else if (n === "hemmeligheter.yaml") red(rel, `Referansene til hvelvet står i .claude/neo.config.json under ${s}.hemmeligheter, ved siden av oppsettet av systemet. Flytt dem dit og ta bort fila`);
+      else if (n === "hemmeligheter.yaml") red(rel, NOKLER);
       else if (!dirs(root, `integrasjoner/${s}`).includes(n)) red(rel, "En integrasjon har hos-kunden.md, og artefaktene systemet trenger i en egen mappe");
     }
   }
@@ -119,8 +114,7 @@ export function checkLayout(root, type, envs = []) {
 }
 
 // Config-fila pluginene leser: version 1, miljøene i Neo (sandkasse og produksjon) med MCP-serveren og adressen per
-// miljø under neo.byEnv. Aldri en hemmelighet, bare referanser: under <system>.hemmeligheter ved siden av oppsettet av
-// systemet, og maskinklientens under neo.byEnv.<miljø>.apiClient.
+// miljø under neo.byEnv, og hvelvet nøklene ligger i. Aldri en hemmelighet, heller ikke en referanse til en.
 export const MILJOER = ["sandkasse", "produksjon"];
 export function readConfig(root) {
   const file = ".claude/neo.config.json";
@@ -145,20 +139,20 @@ export function readConfig(root) {
     const v = isMap(neo.byEnv?.[env]) ? neo.byEnv[env] : {};
     if (!/^https:\/\/[^<>\s]+$/.test(String(v.url ?? ""))) f.push({ check: "config", level: "warn", file, message: `Adressen til Neo for ${env} er ikke fylt ut (neo.byEnv.${env}.url)` });
     if (v.apiClient !== undefined && !/^[^<>\s]+$/.test(String(v.apiClient?.clientId ?? ""))) f.push({ check: "config", level: "warn", file, message: `Maskinklienten for ${env} er ikke fylt ut (neo.byEnv.${env}.apiClient). Skriptene i forvaltning trenger den` });
+    if (isMap(v.apiClient) && "clientSecret" in v.apiClient) f.push({ check: "config", file, message: `neo.byEnv.${env}.apiClient.clientSecret: ${NOKLER} (neo--${env}-klient)` });
   }
+  if (data.hvelv === undefined || /<[^>]*>/.test(String(data.hvelv))) f.push({ check: "config", level: "warn", file, message: "Hvelvet er ikke fylt ut (hvelv): navnet på Key Vault-hvelvet nøklene ligger i" });
+  else if (typeof data.hvelv !== "string" || !/^[A-Za-z0-9-]{3,24}$/.test(data.hvelv)) f.push({ check: "config", file, message: `hvelv er navnet på et Key Vault-hvelv (3–24 tegn: bokstaver, tall og bindestrek), ikke ${JSON.stringify(data.hvelv)}` });
   const walk = (x, path) => {
     if (!x || typeof x !== "object") return;
     if (!Array.isArray(x) && ("$env" in x || "kilde" in x)) {
-      // En plassholder fra malen (<hvelv>/<navn>) er ikke fylt ut ennå: gult, ikke en feil i formen.
-      if (/<[^>]*>/.test(String(x.kilde ?? "")) && isRef({ ...x, kilde: "azure-keyvault:a/b" })) f.push({ check: "config", level: "warn", file, message: `${path}: kilden er ikke fylt ut (${x.kilde})` });
-      else if (!isRef(x)) f.push({ check: "config", file, message: `${path} ${whyNotRef(x)}` });
+      if (!path.endsWith(".clientSecret")) f.push({ check: "config", file, message: `${path} er en referanse. ${NOKLER}` });
       return;
     }
     for (const [k, v] of Object.entries(x)) {
       const p = path ? `${path}.${k}` : k;
-      if (k === "hemmeligheter" && path && !path.includes(".")) {
-        if (!isMap(v)) f.push({ check: "config", file, message: `${p} er et kart fra navnet til referansen` });
-        else for (const [n, r] of Object.entries(v)) if (!isRef(r)) f.push({ check: "config", file, message: `${p}.${n} ${whyNotRef(r)}` });
+      if (k === "hemmeligheter") {
+        f.push({ check: "config", file, message: `${p}: ${NOKLER}` });
         continue;
       }
       if (SECRET_KEY.test(k) && v != null && typeof v !== "object" && !/Dir$|File$/i.test(k)) f.push({ check: "config", file, message: `${p} står med verdi. Config-fila har ingen hemmeligheter` });
@@ -194,7 +188,6 @@ export function checkCodeowners(root) {
 // En nøkkel som ser ut som en hemmelighet, står aldri med verdi.
 export function secretValues(data, path = "") {
   const out = [];
-  if (isRef(data)) return out;
   if (isMap(data) || Array.isArray(data)) {
     for (const [k, v] of Object.entries(data)) {
       const p = path ? `${path}.${k}` : k;
@@ -205,7 +198,7 @@ export function secretValues(data, path = "") {
   return out;
 }
 const noSecrets = (data, check, file, f) => {
-  for (const p of secretValues(data)) f.push({ check, file, message: `${p} står med verdi. En hemmelighet står som ${REF}, og verdien ligger i hvelvet` });
+  for (const p of secretValues(data)) f.push({ check, file, message: `${p} står med verdi. En hemmelighet står aldri i repoet; den ligger i hvelvet` });
 };
 
 export function solutionStatus(root, navn) {
@@ -294,11 +287,8 @@ export function checkPersonaer(root) {
       continue;
     }
     for (const k of ["navn", "rolle"]) if (!text(y[k])) f.push({ check: "persona", file: rel, message: `${k} mangler` });
-    if (y.hemmeligheter != null) {
-      if (!isMap(y.hemmeligheter)) f.push({ check: "persona", file: rel, message: "hemmeligheter er et kart fra navnet til referansen" });
-      else for (const [k, v] of Object.entries(y.hemmeligheter)) if (!isRef(v)) f.push({ check: "persona", file: rel, message: `hemmeligheter.${k} ${whyNotRef(v)}` });
-    }
-    noSecrets(y, "persona", rel, f);
+    if (y.hemmeligheter != null) f.push({ check: "persona", file: rel, message: "hemmeligheter står ikke i en persona: personen logger inn selv, og passordet ligger der testidentiteten forvaltes" });
+    else noSecrets(y, "persona", rel, f);
   }
   return f;
 }

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { buildQuery, parseArgs, run, settings, QUERY_PATH } from "./documaster.mjs";
 
 const SECRET = "dm-hemmelig-verdi";
-const data = { version: 2, documaster: { apiUrl: "https://arkiv.test.example:8083/", tokenUrl: "https://idp.test.example/token", clientId: "klient-test", scope: "openid", hemmeligheter: { "client-secret": { $env: "DOCUMASTER_CLIENT_SECRET", kilde: "azure-keyvault:kv-kunde/documaster-client-secret" } } } };
+const data = { version: 2, hvelv: "kv-kunde", documaster: { apiUrl: "https://arkiv.test.example:8083/", tokenUrl: "https://idp.test.example/token", clientId: "klient-test", scope: "openid" } };
 const config = { data };
 const hemmelighet = () => SECRET;
 
@@ -62,17 +62,17 @@ test("token og spørring: client_credentials, POST mot query, og ingen hemmeligh
   assert.doesNotMatch(all, /tok-abcdefghijkl/);
 });
 
-test("ikke-2xx gir exit 1, og en hemmelighet som ikke kan hentes, sies med referansen", async () => {
+test("ikke-2xx gir exit 1, og en nøkkel som ikke kan hentes, sies med navnet", async () => {
   const { fetchImpl } = fake(() => new Response(JSON.stringify({ message: "No service was found" }), { status: 404, headers: { "content-type": "application/json" } }));
   let c = capture();
   assert.equal(await run(["mappe", "1"], { config, fetchImpl, hemmelighet, ...c }), 1);
   assert.match(c.lines.out.join("\n"), /→ 404/);
   c = capture();
-  const nei = (r) => {
-    throw new Error(`Fikk ikke hentet ${r.sted} fra hvelvet (${r.kilde}): ERROR: Please run 'az login'`);
+  const nei = (d, navn) => {
+    throw new Error(`Fikk ikke hentet nøkkelen ${navn} fra ${d.hvelv}: ERROR: Please run 'az login'`);
   };
   assert.equal(await run(["token"], { config, fetchImpl, hemmelighet: nei, ...c }), 1);
-  assert.match(c.lines.err.join("\n"), /client-secret fra hvelvet \(azure-keyvault:kv-kunde\/documaster-client-secret\)/);
+  assert.match(c.lines.err.join("\n"), /nøkkelen documaster--client-secret fra kv-kunde/);
 });
 
 test("et HTML-svar med 200 er en feil: apiUrl peker på nettsiden", async () => {

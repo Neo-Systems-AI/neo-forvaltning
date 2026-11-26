@@ -105,19 +105,23 @@ export function checkSkillRefs(root, plugins, files) {
 }
 
 // Nøkkelfila sier hva pluginen leser fra .claude/neo.config.json: `neo: true` når den snakker med Neo (miljøene og
-// MCP-serveren per miljø), `neoApi: true` når den gjør det med skript og maskinklienten i stedet for MCP, nøklene relativt til pluginens del, og referansene til hvelvet den trenger under
-// <system>.hemmeligheter. Bare nøkler: hva som kopieres inn i pluginen, avledes av importene.
+// MCP-serveren per miljø), `neoApi: true` når den gjør det med skript og maskinklienten i stedet for MCP, nøklene
+// relativt til pluginens del (`keys`), og nøklene i hvelvet den trenger, med de faste navnene (`nokler`). Bare det:
+// hva som kopieres inn i pluginen, avledes av importene.
 export function checkKeys(root, p, keys) {
   const f = [];
   const kf = `plugins/${p}/neo-config.keys.json`;
   if (keys.plugin !== p) f.push({ check: "config", file: kf, message: `plugin er «${keys.plugin}», mappa er «${p}»` });
-  const extra = Object.keys(keys).filter((k) => !["plugin", "neo", "neoApi", "keys", "hemmeligheter"].includes(k));
-  if (extra.length) f.push({ check: "config", file: kf, message: `Nøkkelfila beskriver bare nøkler (neo, neoApi, keys, hemmeligheter), ikke ${extra.join(", ")}` });
+  const extra = Object.keys(keys).filter((k) => !["plugin", "neo", "neoApi", "keys", "nokler"].includes(k));
+  if (extra.length) f.push({ check: "config", file: kf, message: `Nøkkelfila beskriver bare nøkler (neo, neoApi, keys, nokler), ikke ${extra.join(", ")}` });
   if (keys.neoApi !== undefined && (keys.neoApi !== true || keys.neo !== true)) f.push({ check: "config", file: kf, message: "neoApi er true når pluginen kaller Neo med maskinklienten, og da er neo også true" });
   if (keys.neo !== undefined && keys.neo !== true) f.push({ check: "config", file: kf, message: "neo er true når pluginen snakker med Neo, ellers står den ikke" });
   if (!Array.isArray(keys.keys)) f.push({ check: "config", file: kf, message: "keys mangler (en tom liste når pluginen ikke leser noe)" });
   for (const k of keys.keys ?? []) if (!k.path || !k.doc) f.push({ check: "config", file: kf, message: `Hver nøkkel har path og doc: ${JSON.stringify(k)}` });
-  for (const h of keys.hemmeligheter ?? []) if (!/^[a-z]+\.hemmeligheter\.[\w<>-]+$/.test(String(h.path ?? "")) || !h.doc) f.push({ check: "config", file: kf, message: `Hver hemmelighet har path (<system>.hemmeligheter.<navn>) og doc: ${JSON.stringify(h)}` });
+  for (const n of keys.nokler ?? []) {
+    const ok = /^[a-z0-9]+(-[a-z0-9]+)*--([a-z0-9]|<klient>|<miljø>)+(-([a-z0-9]+|<klient>|<miljø>))*$/.test(String(n.navn ?? "")) && n.doc && Object.keys(n).every((k) => ["navn", "doc", "valgfri", "fil"].includes(k));
+    if (!ok) f.push({ check: "config", file: kf, message: `Hver nøkkel i hvelvet har navn (<system>--<navn>, med <klient> eller <miljø> der det varierer) og doc, og ellers bare valgfri og fil: ${JSON.stringify(n)}` });
+  }
   return f;
 }
 

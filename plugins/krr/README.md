@@ -19,7 +19,7 @@ eller `produksjon` (kontaktregisteret.no). Oppslaget går mot `POST /rest/v1/per
 **Klienten hentes fra `maskinporten`-delen** (`maskinporten.klienter.<klient>`), ikke fra egne nøkler her: klienten,
 nøkkelen og scopet står ett sted, og tokenet for klienten i Maskinporten-pluginen prøver nøyaktig den klienten
 KRR-oppslaget bruker. Klienten trenger `krr:global/kontaktinformasjon.read` i `scopes`. Pluginen `maskinporten`
-trenger ikke være installert; bare delen i config-fila, med nøkkelen under `maskinporten.hemmeligheter`.
+trenger ikke være installert; bare delen i config-fila, og nøkkelen `maskinporten--<klient>-nokkel` i hvelvet.
 
 ## Det kunden må ha selv
 

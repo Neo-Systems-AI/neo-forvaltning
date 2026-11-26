@@ -16,24 +16,24 @@ under gjelder én registrering i kundens Entra ID.
 
 Bestill et eget testarkiv med egne arkivdeler hos Documaster. Testene skal ikke gå mot arkivet i drift.
 
-Ferdig når testarkivet finnes, og adressen til API-et står i hvelvet som `documaster-api-url`.
+Ferdig når testarkivet finnes, og adressen til API-et står i hvelvet som `documaster--api-url`.
 
 ### Finn app-ID-URI-en til Documaster
 
 Finn app-ID-URI-en til Documaster-appen i kundens Entra ID. Den gir scopet for tjenestekontoen: app-ID-URI-en
-etterfulgt av `/.default`. Legg scopet i hvelvet som `documaster-scope`.
+etterfulgt av `/.default`. Legg scopet i hvelvet som `documaster--scope`.
 
-Ferdig når `documaster-scope` står i hvelvet.
+Ferdig når `documaster--scope` står i hvelvet.
 
 ### Lag app-registreringen
 
 1. Lag én app-registrering i Entra ID.
-2. Lag én client secret. Legg den i hvelvet som `documaster-client-secret`, og sett utløpsdatoen på hemmeligheten i
+2. Lag én client secret. Legg den i hvelvet som `documaster--client-secret`, og sett utløpsdatoen på hemmeligheten i
    hvelvet.
 3. Legg på tillatelsene for innloggingen: `openid`, `profile`, `email` og `offline_access`.
 4. Legg redirect-adressen fra forvalteren inn under Web.
 
-Ferdig når `documaster-client-id` og `documaster-client-secret` står i hvelvet, og redirect-adressen er lagt inn.
+Ferdig når `documaster--client-id` og `documaster--client-secret` står i hvelvet, og redirect-adressen er lagt inn.
 
 ### Gi Documaster klient-ID-en
 
@@ -63,12 +63,12 @@ Ferdig når kunden har bekreftet strukturen overfor forvalteren.
 
 | Navn | Verdien |
 |---|---|
-| `documaster-api-url` | Adressen til API-et, ikke nettsiden |
-| `documaster-client-id` | Application (client) ID til app-registreringen |
-| `documaster-client-secret` | Client secret, med utløpsdato |
-| `documaster-scope` | App-ID-URI-en til Documaster etterfulgt av `/.default` |
+| `documaster--api-url` | Adressen til API-et, ikke nettsiden |
+| `documaster--client-id` | Application (client) ID til app-registreringen |
+| `documaster--client-secret` | Client secret, med utløpsdato |
+| `documaster--scope` | App-ID-URI-en til Documaster etterfulgt av `/.default` |
 
-Tenant-ID-en er `entra-tenant-id`, se [Entra ID](../../entra/docs/entra.md#det-som-legges-i-hvelvet).
+Tenant-ID-en er `entra--tenant-id`, se [Entra ID](../../entra/docs/entra.md#det-som-legges-i-hvelvet).
 
 ## Det forvalteren gjør i Neo
 

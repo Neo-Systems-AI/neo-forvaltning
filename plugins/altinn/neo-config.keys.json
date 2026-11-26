@@ -19,11 +19,11 @@
       "doc": "Appene kunden har i Altinn, som <org>/<app>. Med én app trengs ikke --app i lese-kallene"
     }
   ],
-  "hemmeligheter": [
+  "nokler": [
     {
-      "path": "altinn.hemmeligheter.subscription-key",
+      "navn": "altinn--subscription-key",
       "valgfri": true,
-      "doc": "Ocp-Apim-Subscription-Key, bare når kunden har fått en"
+      "doc": "Ocp-Apim-Subscription-Key, bare når kunden har fått en fra Altinn"
     }
   ]
 }

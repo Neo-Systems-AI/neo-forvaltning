@@ -22,10 +22,10 @@
       "doc": "Scopet i token-kallet: openid mot Documasters IdP, api://<app-id>/.default mot Entra ID"
     }
   ],
-  "hemmeligheter": [
+  "nokler": [
     {
-      "path": "documaster.hemmeligheter.client-secret",
-      "doc": "Hemmeligheten til klienten"
+      "navn": "documaster--client-secret",
+      "doc": "Hemmeligheten til klienten, fra kundens identitetsleverandør for Documaster"
     }
   ]
 }

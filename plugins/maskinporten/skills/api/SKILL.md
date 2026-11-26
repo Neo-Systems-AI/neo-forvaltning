@@ -23,7 +23,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/maskinporten.mjs" token <klient> [--scope "<
 - Avslaget kommer fram som Maskinporten ga det: status, `error` og `error_description`.
 
 Klientene står i `.claude/neo.config.json` under `maskinporten.klienter`. Nøkkelen hentes fra hvelvet for kjøringen;
-får skriptet den ikke, sier det referansen, og personen logger inn med `az login` eller ber om tilgang.
+får skriptet den ikke, sier det navnet på nøkkelen, og personen logger inn med `az login` eller ber om tilgang.
 
 ## Reglene
 

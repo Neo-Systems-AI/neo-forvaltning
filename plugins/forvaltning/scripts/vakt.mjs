@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Vakten for hemmelighetene (PreToolUse): agenten henter aldri en verdi fra hvelvet selv, og leser aldri en fil med
-// hemmeligheter. Skriptene som trenger en verdi, henter den selv for kjøringen og skriver den aldri ut. Vakten er en dytt
+// Vakten for nøklene (PreToolUse): agenten henter eller legger aldri inn en verdi i hvelvet selv, og leser aldri en fil
+// med hemmeligheter. Skriptene som trenger en verdi, henter den selv for kjøringen og skriver den aldri ut. Vakten er en dytt
 // mot uhell, ikke en sperre: med personens innlogging kan et skript agenten skriver selv, nå hvelvet. Det er personen
 // som ser over agenten, som er sperren.
 import { readFileSync, realpathSync } from "node:fs";
@@ -8,7 +8,8 @@ import { fileURLToPath } from "node:url";
 
 const SECRET_PATH = /(^|[\s"'/=])(\.env(\.[\w.-]+)?(?=$|[\s"'])|\.keys\/)/;
 const SHOWS = /\b(cat|less|more|head|tail|bat|grep|rg|awk|sed|cp|base64|xxd|od|strings|source|\.)\s/;
-const FETCH = /\bkeyvault\s+secret\s+(show|download|backup)\b|\bop\s+read\b|\bop\s+item\s+get\b/;
+const FETCH = /\bkeyvault\s+secret\s+(show|download|backup|set|restore)\b|\bop\s+read\b|\bop\s+item\s+get\b/;
+const FILL = /nokler\.mjs["']?\s+(fyll|sett)\b/;
 
 export function decide(input) {
   const tool = input?.tool_name;
@@ -18,7 +19,8 @@ export function decide(input) {
   }
   if (tool === "Bash") {
     const cmd = String(ti.command ?? "");
-    if (FETCH.test(cmd) && !/attributes\.enabled/.test(cmd)) return "Agenten henter aldri en verdi fra hvelvet selv. Skriptene som trenger den, henter den for kjøringen. Bruk /forvaltning:hemmeligheter for å se hva repoet viser til og om du når det (bare navn).";
+    if (FILL.test(cmd)) return "Nøklene legges inn av et menneske, med sin egen innlogging: be personen kjøre nokler.mjs fyll i en terminal. Agenten kjører bare sjekk.";
+    if (FETCH.test(cmd) && !/attributes\.enabled/.test(cmd)) return "Agenten henter eller legger aldri inn en verdi i hvelvet selv. Skriptene som trenger den, henter den for kjøringen. Bruk /forvaltning:nokler for å se hva som trengs og om det står i hvelvet (bare navn).";
     if (SECRET_PATH.test(cmd) && SHOWS.test(cmd)) return "Kommandoen ville vist en fil med hemmeligheter. Hemmelighetene ligger i hvelvet, og skriptene henter dem selv.";
     if (/(^|[;&|]\s*)(printenv|env|set)\s*($|[;&|])/.test(cmd)) return "Et bart printenv/env/set skriver ut hele miljøet, med hemmelighetene. Spør etter navnet i stedet.";
   }

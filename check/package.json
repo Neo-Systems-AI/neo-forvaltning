@@ -1,6 +1,6 @@
 {
   "name": "neo-sjekk",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Sjekken av et kunderepo eller et repo for standardløsninger laget fra neo-forvaltning-mal. Bygges til én fil uten avhengigheter i plugins/forvaltning/scripts/sjekk.mjs.",
   "private": true,
   "type": "module",

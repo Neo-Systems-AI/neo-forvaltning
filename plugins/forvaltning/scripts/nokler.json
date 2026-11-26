@@ -19,11 +19,11 @@
         "doc": "Appene kunden har i Altinn, som <org>/<app>. Med én app trengs ikke --app i lese-kallene"
       }
     ],
-    "hemmeligheter": [
+    "nokler": [
       {
-        "path": "altinn.hemmeligheter.subscription-key",
+        "navn": "altinn--subscription-key",
         "valgfri": true,
-        "doc": "Ocp-Apim-Subscription-Key, bare når kunden har fått en"
+        "doc": "Ocp-Apim-Subscription-Key, bare når kunden har fått en fra Altinn"
       }
     ]
   },
@@ -60,10 +60,10 @@
         "doc": "Scopet i token-kallet: openid mot Documasters IdP, api://<app-id>/.default mot Entra ID"
       }
     ],
-    "hemmeligheter": [
+    "nokler": [
       {
-        "path": "documaster.hemmeligheter.client-secret",
-        "doc": "Hemmeligheten til klienten"
+        "navn": "documaster--client-secret",
+        "doc": "Hemmeligheten til klienten, fra kundens identitetsleverandør for Documaster"
       }
     ]
   },
@@ -112,16 +112,16 @@
         "doc": "Rollen i Fiks register som gir hjemmel og bestemmer hvilke opplysninger oppslaget får"
       }
     ],
-    "hemmeligheter": [
+    "nokler": [
       {
-        "path": "fiks.hemmeligheter.integrasjon-passord",
+        "navn": "fiks--integrasjon-passord",
         "valgfri": true,
-        "doc": "Integrasjonens servicepassord (headeren IntegrasjonPassord), for SvarUt og Folkeregisteret"
+        "doc": "Integrasjonens servicepassord (headeren IntegrasjonPassord), fra Fiks forvaltning, for SvarUt og Folkeregisteret"
       },
       {
-        "path": "fiks.hemmeligheter.svarinn-passord",
+        "navn": "fiks--svarinn-passord",
         "valgfri": true,
-        "doc": "Service-passordet til SvarInn-mottakersystemet"
+        "doc": "Service-passordet til SvarInn-mottakersystemet, fra Fiks forvaltning"
       }
     ]
   },
@@ -143,6 +143,12 @@
         "path": "reportsDir",
         "fallback": "reports",
         "doc": "Planer og rapporter"
+      }
+    ],
+    "nokler": [
+      {
+        "navn": "neo--<miljø>-klient",
+        "doc": "Hemmeligheten til maskinklienten i sandkassen (Neo → API-klienter → Ny API-klient, slaget «Maskin»). Neo viser den én gang"
       }
     ]
   },
@@ -174,11 +180,11 @@
         "doc": "Klientene med navn: { <navn>: { clientId, kid, scopes } }. Altinn, Fiks og KRR viser til en klient med navnet. Uten kid brukes thumbprinten av nøkkelen"
       }
     ],
-    "hemmeligheter": [
+    "nokler": [
       {
-        "path": "maskinporten.hemmeligheter.<klient>-nokkel",
-        "perKlient": true,
-        "doc": "Den private nøkkelen (PEM) til hver klient, med fil: true"
+        "navn": "maskinporten--<klient>-nokkel",
+        "fil": true,
+        "doc": "Den private nøkkelen (PEM) til hver klient i maskinporten.klienter, fra selvbetjeningen i Maskinporten"
       }
     ]
   },
@@ -200,6 +206,12 @@
         "path": "off",
         "fallback": [],
         "doc": "Reglene i mønstrene som er slått av i dette repoet, med id"
+      }
+    ],
+    "nokler": [
+      {
+        "navn": "neo--<miljø>-klient",
+        "doc": "Hemmeligheten til maskinklienten i sandkassen (Neo → API-klienter → Ny API-klient, slaget «Maskin»). Neo viser den én gang"
       }
     ]
   }
