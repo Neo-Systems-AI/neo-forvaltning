@@ -26,7 +26,7 @@ fødselsnumre og organisasjonsnumre er oppdiktede eller fra testmiljøene (Tenor
 
 Testbrukerne, én fil per persona i `test/personaer/`, med rolle og team i Neo og de eksterne identitetene de trenger:
 testbrukere i Altinn (tt02) og ID-porten (Tenor), test-organisasjonsnumre, og testkontoer i arkivet og Entra. Passord og
-nøkler står bare som referanser til hvelvet, under `hemmeligheter`. Personaene er testdata, ikke konfig. Samme persona
+nøkler står ikke i personaen; personen logger inn selv. Personaene er testdata, ikke konfig. Samme persona
 brukes i alle løsningene; lag en ny bare når en rolle mangler. Et team eller en rolle personaen trenger, og som ikke
 finnes i Neo, setter et menneske opp der.
 

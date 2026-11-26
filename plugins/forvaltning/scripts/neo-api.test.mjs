@@ -6,13 +6,13 @@ import { apiSettings, neoApi, neoToken, NeoApiError } from "./lib/neo-api.mjs";
 const FAKE = ["ikke", "ekte", "verdi"].join("-");
 const config = (apiClient) => ({
   version: 1,
+  hvelv: "kv-test",
   neo: {
     environments: ["sandkasse"],
     defaultEnv: "sandkasse",
     byEnv: { sandkasse: { mcpServer: "neo-sandkasse", url: "https://neo.example/", apiClient } },
   },
 });
-const ref = { $env: "NEO_TEST_KLIENT_HEMMELIGHET", kilde: "azure-keyvault:kv/neo" };
 
 const response = (status, body) => ({
   status,
@@ -21,17 +21,18 @@ const response = (status, body) => ({
   text: async () => JSON.stringify(body),
 });
 
-test("innstillingene: adressen uten skråstrek til slutt, og hemmeligheten bare som referanse", () => {
-  const s = apiSettings(config({ clientId: "klient-1", clientSecret: ref }));
-  assert.deepEqual(s, { miljo: "sandkasse", url: "https://neo.example", clientId: "klient-1", clientSecret: ref });
+test("innstillingene: adressen uten skråstrek til slutt, og hemmeligheten er nøkkelen neo--<miljø>-klient, ikke i fila", () => {
+  const data = config({ clientId: "klient-1" });
+  const s = apiSettings(data);
+  assert.deepEqual(s, { miljo: "sandkasse", url: "https://neo.example", clientId: "klient-1", nokkel: "neo--sandkasse-klient", data });
   assert.throws(() => apiSettings(config(undefined)), /apiClient er ikke satt/);
-  assert.throws(() => apiSettings(config({ clientId: "klient-1", clientSecret: FAKE })), /skal være en referanse/);
-  assert.throws(() => apiSettings(config({ clientSecret: ref })), /clientId er ikke satt/);
+  assert.throws(() => apiSettings(config({ clientId: "klient-1", clientSecret: FAKE })), /clientSecret skal ikke stå i fila: hemmeligheten er nøkkelen neo--sandkasse-klient/);
+  assert.throws(() => apiSettings(config({})), /clientId er ikke satt/);
 });
 
 test("tokenet: client_credentials med Basic, og en avvisning sier Neo sitt svar uten hemmeligheten", async () => {
-  process.env.NEO_TEST_KLIENT_HEMMELIGHET = FAKE;
-  const s = apiSettings(config({ clientId: "klient-1", clientSecret: ref }));
+  process.env.NEO_SANDKASSE_KLIENT = FAKE;
+  const s = apiSettings(config({ clientId: "klient-1" }));
   let sent;
   const ok = await neoToken(s, {
     fetchImpl: async (url, init) => {
@@ -51,8 +52,8 @@ test("tokenet: client_credentials med Basic, og en avvisning sier Neo sitt svar 
 });
 
 test("et kall med tokenet, og en ikke-2xx blir NeoApiError med status", async () => {
-  process.env.NEO_TEST_KLIENT_HEMMELIGHET = FAKE;
-  const s = apiSettings(config({ clientId: "klient-1", clientSecret: ref }));
+  process.env.NEO_SANDKASSE_KLIENT = FAKE;
+  const s = apiSettings(config({ clientId: "klient-1" }));
   const seen = [];
   const api = neoApi(s, {
     fetchImpl: async (url, init) => {

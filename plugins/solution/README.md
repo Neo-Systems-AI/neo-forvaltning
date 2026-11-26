@@ -52,7 +52,7 @@ snapshots/<miljø>/            det som kjører i sandkassen og produksjonen, fra
 reports/                      planene fra Neo
 integrasjoner/<system>/       hos-kunden.md, og artefaktene systemet trenger
 test/personaer/               testbrukerne, felles for alle løsningene
-.claude/neo.config.json       miljøene i Neo og én del per plugin, med referansene til hvelvet
+.claude/neo.config.json       miljøene i Neo, hvelvet, og én del per plugin. Ingen hemmeligheter
 ```
 
 - **Mappene har navn, ikke tall.** Rekkefølgen står i løypa.

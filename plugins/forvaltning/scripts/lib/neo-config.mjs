@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Config-fila i kunderepoet, `.claude/neo.config.json`: én fil alle pluginene leser. Den har en felles del for Neo
 // (`neo`: miljøene, standardmiljøet og MCP-serveren og adressen per miljø) og én del per plugin med pluginens navn.
-// Ingen hemmeligheter: under `<system>.hemmeligheter` står bare referansene til hvelvet (se hemmeligheter.mjs).
+// Ingen hemmeligheter: `hvelv` sier hvilket hvelv nøklene ligger i, og navnene er faste (se nokler.mjs).
 //
 //   {
 //     "version": 1,

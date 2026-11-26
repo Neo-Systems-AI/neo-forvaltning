@@ -15,11 +15,11 @@ const PEM = privateKey.export({ type: "pkcs8", format: "pem" });
 
 const data = {
   version: 2,
+  hvelv: "kv-kunde",
   fiks: { miljo: "test", klient: "fiks", integrasjon: "integrasjon-1", svarutKonto: "konto-1", svarinnMottakersystem: "mottaker-1", folkeregisterRolle: "rolle-1" },
-  maskinporten: { miljo: "test", klienter: { fiks: { clientId: "klient-1" } }, hemmeligheter: { "fiks-nokkel": { $env: "NOKKEL", kilde: "azure-keyvault:hvelv/nokkel", fil: true } } },
+  maskinporten: { miljo: "test", klienter: { fiks: { clientId: "klient-1" } } },
 };
-data.fiks.hemmeligheter = { "integrasjon-passord": { $env: "INTEGRASJON", kilde: "azure-keyvault:hvelv/integrasjon" }, "svarinn-passord": { $env: "SVARINN", kilde: "azure-keyvault:hvelv/svarinn" } };
-const hemmelighet = (r) => ({ "azure-keyvault:hvelv/integrasjon": PASSORD["integrasjon-passord"], "azure-keyvault:hvelv/svarinn": PASSORD["svarinn-passord"], "azure-keyvault:hvelv/nokkel": PEM })[r.kilde];
+const hemmelighet = (d, navn) => ({ "fiks--integrasjon-passord": PASSORD["integrasjon-passord"], "fiks--svarinn-passord": PASSORD["svarinn-passord"], "maskinporten--fiks-nokkel": PEM })[navn];
 
 // Maskinporten og Fiks uten nettverk. Svaret fra Fiks gjentar hemmelighetene kallet brukte, og fødselsnummeret, så
 // sladdingen prøves. Bare det kallet hentet fra hvelvet, kjenner skriptet, og bare det kan sladdes.
@@ -102,14 +102,14 @@ test("et svar som ikke er 2xx gir exit 1 og forklaringen på 401, fortsatt sladd
   NO_LEAK(text);
 });
 
-test("en hemmelighet som ikke kan hentes, sier referansen, og intet kall går", async () => {
+test("en nøkkel som ikke kan hentes, sies med navnet, og intet kall går", async () => {
   const f = fake();
-  const nei = (r) => {
-    throw new Error(`Fikk ikke hentet ${r.sted} fra hvelvet (${r.kilde}): ERROR: Please run 'az login'`);
+  const nei = (d, navn) => {
+    throw new Error(`Fikk ikke hentet nøkkelen ${navn} fra ${d.hvelv}: ERROR: Please run 'az login'`);
   };
   const { code, text } = await exec(["svarinn", "liste"], f, data, nei);
   assert.equal(code, 1);
-  assert.match(text, /fiks.hemmeligheter.svarinn-passord fra hvelvet \(azure-keyvault:hvelv\/svarinn\)/);
+  assert.match(text, /nøkkelen fiks--svarinn-passord fra kv-kunde/);
   assert.equal(f.calls.length, 0);
 });
 

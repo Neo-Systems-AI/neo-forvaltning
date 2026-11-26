@@ -65,7 +65,7 @@ Ferdig når hver app svarer i tt02, og i produksjon når den skal i drift.
 ## Det som legges i hvelvet
 
 Klient-ID-ene til Altinn-klienten, se [Maskinporten](../../maskinporten/docs/maskinporten.md#det-som-legges-i-hvelvet):
-`maskinporten-altinn-test-client-id` og `maskinporten-altinn-prod-client-id`.
+`maskinporten--altinn-test-client-id` og `maskinporten--altinn-prod-client-id`.
 
 ## Det forvalteren gjør i Neo
 

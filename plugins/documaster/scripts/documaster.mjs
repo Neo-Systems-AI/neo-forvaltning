@@ -13,13 +13,13 @@
 //   node documaster.mjs sok --type <Noark-type> [--query "felt = @p"] [--param @p=verdi …] [--limit n]
 //
 // Config: `documaster` i .claude/neo.config.json (apiUrl, tokenUrl, clientId, scope): instansen repoet arbeider mot.
-// Hemmeligheten er referansen documaster.hemmeligheter.client-secret i config-fila, hentet fra hvelvet for kjøringen.
+// Hemmeligheten er nøkkelen documaster--client-secret, hentet fra hvelvet for kjøringen.
 // Exit: 0 svar 2xx · 1 feil eller ikke-2xx · 2 feil bruk.
 import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./lib/argumenter.mjs";
 import { load, need } from "./lib/neo-config.mjs";
-import { ref, secret } from "./lib/hemmeligheter.mjs";
+import { nokkel } from "./lib/nokler.mjs";
 import { call, redact, report } from "./lib/http.mjs";
 
 export const QUERY_PATH = "/rms/api/public/noark5/v1/query";
@@ -135,14 +135,14 @@ export async function query(s, body, { accessToken, fetchImpl = fetch }) {
 }
 
 // Hele kjøringen, med config, fetch og hvelvet utenfra så den kan testes. Skriver til out/err og gir exit-koden.
-export async function run(argv, { config, fetchImpl = fetch, hemmelighet = secret, out = console.log, err = console.error } = {}) {
+export async function run(argv, { config, fetchImpl = fetch, hemmelighet = nokkel, out = console.log, err = console.error } = {}) {
   let body;
   const secrets = [];
   try {
     body = buildQuery(parseArgs(argv));
     const { data } = config ?? load();
     const s = settings(data);
-    const clientSecret = hemmelighet(ref(data, "documaster", "client-secret"));
+    const clientSecret = hemmelighet(data, "documaster--client-secret");
     secrets.push(clientSecret);
     const t = await getToken(s, clientSecret, { fetchImpl });
     secrets.push(t.accessToken);

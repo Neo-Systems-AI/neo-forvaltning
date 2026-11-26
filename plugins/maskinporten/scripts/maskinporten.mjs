@@ -6,13 +6,13 @@
 //   node maskinporten.mjs token <klient> [--scope "<scope> …"] [--consumer-org <orgnr>]
 //
 // Klientene står i `.claude/neo.config.json` under `maskinporten.klienter.<navn>` (clientId, kid, scopes), for miljøet
-// i `maskinporten.miljo`. Nøkkelen er referansen `maskinporten.hemmeligheter.<navn>-nokkel`, hentet fra
+// i `maskinporten.miljo`. Nøkkelen er `maskinporten--<navn>-nokkel` i hvelvet, hentet fra
 // hvelvet for kjøringen. Exit: 0 svar · 1 feil eller avslag · 2 feil bruk.
 import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./lib/argumenter.mjs";
 import { load, miljo } from "./lib/neo-config.mjs";
-import { secret } from "./lib/hemmeligheter.mjs";
+import { nokkel } from "./lib/nokler.mjs";
 import { call, redact, report } from "./lib/http.mjs";
 import { HOSTS, tokenFor } from "./lib/maskinporten.mjs";
 
@@ -31,7 +31,7 @@ export function claims(jwt) {
 }
 
 // Kjører kommandoen og gir exit-koden. `config` ({ data, root }), `fetchImpl` og `hemmelighet` sendes inn i testene.
-export async function main(argv, { fetchImpl = fetch, config, hemmelighet = secret, out = console.log, err = console.error, now = Date.now } = {}) {
+export async function main(argv, { fetchImpl = fetch, config, hemmelighet = nokkel, out = console.log, err = console.error, now = Date.now } = {}) {
   const secrets = [];
   try {
     const args = parse(argv, { verdier: ["miljo", "scope", "consumer-org"] });

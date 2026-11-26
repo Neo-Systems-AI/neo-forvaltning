@@ -9,7 +9,7 @@ Oppsettet i Neo som filer i et repo, endret med PR og godkjent av kunden. Brukes
 | `forvaltning:snapshot` | Henter sandkassens oppsett som filer Neo skriver | nei |
 | `forvaltning:plan` | Neo prøver alle filene samlet i sandkassen uten å lagre, og sier hva hver vil gjøre, til PR-en | nei |
 | `forvaltning:gjennomfor` | Gjør en godkjent plan i sandkassen, fil for fil | ja, i sandkassen |
-| `forvaltning:hemmeligheter` | Hvilke hemmeligheter som trengs, hvor de ligger, og om de er satt (bare navn) | nei |
+| `forvaltning:nokler` | Nøklene pluginene trenger i hvelvet, om de står der, og den ene kommandoen som legger dem inn | nei |
 | `forvaltning:env` | Hva hver plugin som er på, trenger i config-fila, og hva som mangler | nei |
 
 Snapshot, plan og gjennomføring går med `scripts/konfig.mjs`, som kaller Neo sitt API (`/api/config/*`) med en
@@ -21,19 +21,20 @@ her. Produksjonen endres bare ved promotering i Neo, og forhåndsvisningen der v
 Skriptene i `scripts/` er deterministiske og har ingen avhengigheter:
 
 - `konfig.mjs` er kommandoen: `token`, `miljo`, `export`, `plan` (alle filene, eller `--fil` for én) og `apply`.
-- `lib/neo-api.mjs` (fra `shared/`) henter token med maskinklienten og kaller Neo. Hemmeligheten hentes fra
-  hvelvet for kjøringen, eller fra variabelen når den er satt (i CI), aldri fra config-fila.
+- `lib/neo-api.mjs` (fra `shared/`) henter token med maskinklienten og kaller Neo. Hemmeligheten er nøkkelen
+  `neo--<miljø>-klient`, hentet fra hvelvet for kjøringen, eller fra variabelen når den er satt (i CI).
 - `skriv-eksport.mjs` legger eksporten ut som filer, fjerner det Neo ikke lenger har, og skriver `ikke-med.md`.
 - `planrapport.mjs` setter sammen planen av Neo sine svar, og sjekker før gjennomføringen at planen er den som ble
   godkjent.
-- `vis-hemmeligheter.mjs` viser referansene i config-fila og om personen når dem i hvelvet, bare med navn.
-- `vakt.mjs` er en hook som stopper agenten fra å hente en verdi fra hvelvet selv og fra å lese filer med
+- `nokler.mjs` viser nøklene pluginene som er på, trenger, og om de står i hvelvet (`sjekk`), og legger inn det som
+  mangler (`fyll`) eller bytter én (`sett`). `fyll` og `sett` kjøres av et menneske.
+- `vakt.mjs` er en hook som stopper agenten fra å hente eller legge inn en verdi i hvelvet selv og fra å lese filer med
   hemmeligheter. Den er en dytt mot uhell, ikke en sperre.
 
 Repoet og config-fila:
 
 - `sjekk.mjs` er sjekken av repoet: strukturen for typen i `kunde.yaml`, kildene på endringen, påstandene, kravene og
-  `blir`, at filene i `oppsett/` og `snapshots/` er Neos filer, at hemmelighetene bare står som referanser, personaene,
+  `blir`, at filene i `oppsett/` og `snapshots/` er Neos filer, at ingen hemmeligheter står i repoet, personaene,
   testene og avvikene i `design/`. Den er bygget fra `check/` i dette repoet, og malens CI henter den samme fila i en
   låst versjon. Innholdet i konfigfilene vurderer Neo i planen.
 - `check-setup.mjs` viser hva hver plugin som er på, trenger i `.claude/neo.config.json`, og hva som mangler.
@@ -46,4 +47,4 @@ node scripts/sjekk.mjs hos-kunden                                         # list
 node scripts/sjekk.mjs --versjon
 ```
 
-Formen på en referanse til hvelvet og navnene der står i [`docs/hvelvet.md`](docs/hvelvet.md).
+Nøklene, navnene og hvelvet står i [`docs/hvelvet.md`](docs/hvelvet.md).

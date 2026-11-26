@@ -70,7 +70,7 @@ test("strukturen: konfigen i oppsett/ i roten, mappene har navn, ikke tall, og d
     "felles/kilder: Et repo for standardløsninger har ingen kunde å forstå, så felles/ har ikke kilder eller forstaelse",
     `felles/oppsett: ${oppsett}`,
     "integrasjoner/README.md: Lista over det kunden må gjøre, lages av sjekken (sjekk.mjs hos-kunden) og committes ikke. Ta den bort",
-    "integrasjoner/altinn/hemmeligheter.yaml: Referansene til hvelvet står i .claude/neo.config.json under altinn.hemmeligheter, ved siden av oppsettet av systemet. Flytt dem dit og ta bort fila",
+    "integrasjoner/altinn/hemmeligheter.yaml: Nøklene ligger bare i hvelvet, med faste navn som pluginene bestemmer, og config-fila sier bare hvilket hvelv (hvelv). Ta den bort, og legg nøkkelen inn med /forvaltning:nokler",
     "integrasjoner/altinn/neo.yaml: neo.yaml har ingen form i Neo ennå. Ta den bort",
     "integrasjoner/altinn/notat.txt: En integrasjon har hos-kunden.md, og artefaktene systemet trenger i en egen mappe",
     "losninger/parkering/2-forstaelse: Mappene har navn, ikke tall: 2-forstaelse heter forstaelse",
@@ -88,25 +88,26 @@ test("strukturen: konfigen i oppsett/ i roten, mappene har navn, ikke tall, og d
   rmSync(root, { recursive: true });
 });
 
-test("config-fila: version 1 med sandkasse og produksjon under neo.byEnv, og hemmelighetene bare som referanser", () => {
+test("config-fila: version 1 med sandkasse og produksjon under neo.byEnv, hvelvet, og ingen hemmeligheter eller referanser", () => {
   const root = repo({
     ...GOOD(),
     ".claude/neo.config.json": JSON.stringify({
       version: 2,
-      neo: { url: "https://neo.test", org: "o", mcpServer: "neo-dev", environments: ["sandkasse", "test"], byEnv: { sandkasse: { url: "https://<neo-adresse>", apiClient: { clientId: "<klient-id>", clientSecret: { $env: "NEO_K", kilde: "azure-keyvault:<hvelv>/<navn>" } } }, annen: {} } },
-      fiks: { passord: "hemmelig", nokkel: { $env: "X" }, hemmeligheter: { ok: { $env: "OK", kilde: "azure-keyvault:kv/ok" }, fil: { $env: "FIL", kilde: "azure-keyvault:kv/fil", fil: true }, verdi: "abc123", env: { $env: "X", kilde: "azure-keyvault:kv/b" }, annet: { kilde: "1password:x" } } },
-      altinn: { hemmeligheter: "abc" },
-      documaster: { klient: { hemmeligheter: { x: { $env: "X", kilde: "azure-keyvault:kv/x" } } } },
+      hvelv: "<hvelv>",
+      neo: { url: "https://neo.test", org: "o", mcpServer: "neo-dev", environments: ["sandkasse", "test"], byEnv: { sandkasse: { url: "https://<neo-adresse>", apiClient: { clientId: "<klient-id>", clientSecret: { $env: "NEO_K", kilde: "azure-keyvault:kv/neo" } } }, annen: {} } },
+      fiks: { passord: "hemmelig", nokkel: { $env: "X" }, hemmeligheter: { ok: { $env: "OK", kilde: "azure-keyvault:kv/ok" } } },
+      documaster: { klient: { hemmeligheter: "abc" } },
+      oppsettDir: "oppsett",
     }),
   });
   const f = check(root);
   assert.deepEqual(msgs(f, "config", "fail"), [
-    ".claude/neo.config.json: altinn.hemmeligheter er et kart fra navnet til referansen",
-    ".claude/neo.config.json: fiks.hemmeligheter.annet må være { $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil), uten verdien",
-    ".claude/neo.config.json: fiks.hemmeligheter.verdi må være { $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil), uten verdien",
-    ".claude/neo.config.json: fiks.nokkel må være { $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil), uten verdien",
+    ".claude/neo.config.json: documaster.klient.hemmeligheter: Nøklene ligger bare i hvelvet, med faste navn som pluginene bestemmer, og config-fila sier bare hvilket hvelv (hvelv). Ta den bort, og legg nøkkelen inn med /forvaltning:nokler",
+    ".claude/neo.config.json: fiks.hemmeligheter: Nøklene ligger bare i hvelvet, med faste navn som pluginene bestemmer, og config-fila sier bare hvilket hvelv (hvelv). Ta den bort, og legg nøkkelen inn med /forvaltning:nokler",
+    ".claude/neo.config.json: fiks.nokkel er en referanse. Nøklene ligger bare i hvelvet, med faste navn som pluginene bestemmer, og config-fila sier bare hvilket hvelv (hvelv). Ta den bort, og legg nøkkelen inn med /forvaltning:nokler",
     ".claude/neo.config.json: fiks.passord står med verdi. Config-fila har ingen hemmeligheter",
     ".claude/neo.config.json: neo.byEnv.annen er ikke et miljø i neo.environments",
+    ".claude/neo.config.json: neo.byEnv.sandkasse.apiClient.clientSecret: Nøklene ligger bare i hvelvet, med faste navn som pluginene bestemmer, og config-fila sier bare hvilket hvelv (hvelv). Ta den bort, og legg nøkkelen inn med /forvaltning:nokler (neo--sandkasse-klient)",
     ".claude/neo.config.json: neo.environments har ikke produksjon. Miljøene er sandkasse og produksjon",
     ".claude/neo.config.json: neo.url, neo.org, neo.mcpServer står rett under neo. Miljøene står under neo.byEnv.<miljø> med mcpServer og url, og org-en er miljøet",
     ".claude/neo.config.json: version må være 1: versjon 2 hadde ett miljø (neo.url, neo.org, neo.mcpServer). Nå er det sandkasse og produksjon under neo.byEnv",
@@ -114,8 +115,8 @@ test("config-fila: version 1 med sandkasse og produksjon under neo.byEnv, og hem
   assert.deepEqual(msgs(f, "config", "warn"), [
     ".claude/neo.config.json: Adressen til Neo for sandkasse er ikke fylt ut (neo.byEnv.sandkasse.url)",
     ".claude/neo.config.json: Adressen til Neo for test er ikke fylt ut (neo.byEnv.test.url)",
+    ".claude/neo.config.json: Hvelvet er ikke fylt ut (hvelv): navnet på Key Vault-hvelvet nøklene ligger i",
     ".claude/neo.config.json: Maskinklienten for sandkasse er ikke fylt ut (neo.byEnv.sandkasse.apiClient). Skriptene i forvaltning trenger den",
-    ".claude/neo.config.json: neo.byEnv.sandkasse.apiClient.clientSecret: kilden er ikke fylt ut (azure-keyvault:<hvelv>/<navn>)",
   ]);
   rmSync(root, { recursive: true });
 });
@@ -237,7 +238,7 @@ test("avvikene i design/: en regel som finnes og grunnen, og fila i oppsett/ nå
   rmSync(root, { recursive: true });
 });
 
-test("integrasjonene, personaene og testcasene: ingen verdi, bare referanser", () => {
+test("integrasjonene, personaene og testcasene: ingen hemmeligheter", () => {
   const root = repo({
     ...GOOD(),
     "integrasjoner/altinn/app/oppsett.yaml": "klient:\n  secret: abc\n",
@@ -247,14 +248,14 @@ test("integrasjonene, personaene og testcasene: ingen verdi, bare referanser", (
   });
   const f = check(root);
   assert.deepEqual(msgs(f, "integrasjon").map((m) => m.replace(/^[^:]+: /, "")).sort(), [
-    "klient.secret står med verdi. En hemmelighet står som { $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil), og verdien ligger i hvelvet",
+    "klient.secret står med verdi. En hemmelighet står aldri i repoet; den ligger i hvelvet",
   ]);
-  assert.equal(msgs(f, "persona").length, 2);
+  assert.deepEqual(msgs(f, "persona"), ["test/personaer/leder.yaml: hemmeligheter står ikke i en persona: personen logger inn selv, og passordet ligger der testidentiteten forvaltes"]);
   assert.deepEqual(msgs(f, "test").map((m) => m.replace(/^[^:]+: /, "")).sort(), [
     "En test i test/ går gjennom flere løsninger: losninger må ha minst to",
     "Kravet borte finnes ikke i noen krav/",
     "Personaen ukjent finnes ikke (test/personaer/ukjent.yaml)",
-    "inn.password står med verdi. En hemmelighet står som { $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil), og verdien ligger i hvelvet",
+    "inn.password står med verdi. En hemmelighet står aldri i repoet; den ligger i hvelvet",
   ]);
   rmSync(root, { recursive: true });
 });

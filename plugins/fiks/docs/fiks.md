@@ -37,7 +37,7 @@ Ferdig når «Hent status» i Neo viser at `ks:fiks` er på klienten.
 I Fiks forvaltning:
 
 1. Sett opp organisasjonen.
-2. Lag en SvarUt-konto. Legg ID-en i hvelvet som `fiks-svarut-konto-ider`.
+2. Lag en SvarUt-konto. Legg ID-en i hvelvet som `fiks--svarut-konto-ider`.
 
 Ferdig når kontoen finnes, og ID-en står i hvelvet.
 
@@ -47,7 +47,7 @@ I Fiks forvaltning:
 
 1. Lag integrasjonen på SvarUt-kontoen, med kundens organisasjonsnummer som autorisert organisasjon og KS Fiks-klienten.
 2. Gi integrasjonen tilgang til å sende.
-3. Legg ID-en og passordet i hvelvet som `fiks-integrasjon-id` og `fiks-integrasjon-passord`.
+3. Legg ID-en og passordet i hvelvet som `fiks--integrasjon-id` og `fiks--integrasjon-passord`.
 
 Ferdig når integrasjonen kan sende fra kontoen, og verdiene står i hvelvet.
 
@@ -58,7 +58,7 @@ Under Fiks register i Fiks forvaltning:
 1. Sett opp Fiks folkeregister.
 2. Lag en rolle med hjemmel, og bare de opplysningene som trengs.
 3. Gi integrasjonen tilgang til rollen.
-4. Legg ID-en til rollen i hvelvet som `fiks-folkeregister-rolle-id`.
+4. Legg ID-en til rollen i hvelvet som `fiks--folkeregister-rolle-id`.
 
 Hvilke opplysninger rollen skal ha, avgjøres i arbeidsmøtene.
 
@@ -75,8 +75,8 @@ Ferdig når delegeringen står i Altinn.
 
 ### Bestill mottakersystemet for SvarInn
 
-1. Bestill et mottakersystem for SvarInn hos KS. Legg ID-en i hvelvet som `fiks-svarinn-mottakersystem-id`.
-2. Lag service-passordet. Legg det i hvelvet som `fiks-svarinn-service-passord`.
+1. Bestill et mottakersystem for SvarInn hos KS. Legg ID-en i hvelvet som `fiks--svarinn-mottakersystem-id`.
+2. Lag service-passordet. Legg det i hvelvet som `fiks--svarinn-passord`.
 3. Last opp sertifikatet Neo lager, på fanen Service.
 
 Ferdig når mottakersystemet har service-passordet og sertifikatet, og verdiene står i hvelvet.
@@ -98,15 +98,15 @@ Ferdig når alle fire er gjort.
 
 | Navn | Verdien | Hemmelig |
 |---|---|---|
-| `fiks-integrasjon-id` | ID-en til integrasjonen i Fiks forvaltning | Nei |
-| `fiks-integrasjon-passord` | Passordet til integrasjonen | Ja |
-| `fiks-svarut-konto-ider` | ID-ene til SvarUt-kontoene | Nei |
-| `fiks-folkeregister-rolle-id` | ID-en til rollen i Fiks register | Nei |
-| `fiks-svarinn-mottakersystem-id` | ID-en til mottakersystemet for SvarInn | Nei |
-| `fiks-svarinn-service-passord` | Service-passordet til mottakersystemet | Ja |
-| `fiks-svarinn-sertifikat` | Sertifikatet for mottak | Ja |
+| `fiks--integrasjon-id` | ID-en til integrasjonen i Fiks forvaltning | Nei |
+| `fiks--integrasjon-passord` | Passordet til integrasjonen | Ja |
+| `fiks--svarut-konto-ider` | ID-ene til SvarUt-kontoene | Nei |
+| `fiks--folkeregister-rolle-id` | ID-en til rollen i Fiks register | Nei |
+| `fiks--svarinn-mottakersystem-id` | ID-en til mottakersystemet for SvarInn | Nei |
+| `fiks--svarinn-passord` | Service-passordet til mottakersystemet | Ja |
+| `fiks--svarinn-sertifikat` | Sertifikatet for mottak | Ja |
 
-Klient-ID-ene til KS Fiks-klienten er `maskinporten-fiks-test-client-id` og `maskinporten-fiks-prod-client-id`, se
+Klient-ID-ene til KS Fiks-klienten er `maskinporten--fiks-test-client-id` og `maskinporten--fiks-prod-client-id`, se
 [Maskinporten](../../maskinporten/docs/maskinporten.md#det-som-legges-i-hvelvet).
 
 ## Det forvalteren gjør i Neo

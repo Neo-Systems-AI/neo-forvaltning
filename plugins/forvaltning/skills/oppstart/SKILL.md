@@ -40,14 +40,16 @@ Spør om det som mangler, ett tema om gangen, og vis hva du har før du skriver:
 2. **Hvem:** den som godkjenner endringer (navn og GitHub-bruker eller -team), og den som forvalter (kunden selv, Neo
    Systems, eller en partner med egen avtale).
 3. **Miljøene:** `sandkasse` og `produksjon`, og adressen til Neo for hvert.
-4. **Maskinklienten:** har org-admin laget en maskinklient i **sandkassen** (*API-klienter → Ny API-klient*, slaget
+4. **Hvelvet:** navnet på Key Vault-hvelvet nøklene skal ligge i: kundens for kundens systemer (oppgavene står i
+   `${CLAUDE_PLUGIN_ROOT}/docs/hvelvet.md`), og personen som legger dem inn, har tilgang til det.
+5. **Maskinklienten:** har org-admin laget en maskinklient i **sandkassen** (*API-klienter → Ny API-klient*, slaget
    «Maskin»)? Den trenger scopene for konfig: lese, endre og opprette for familiene i konfig-fila (sakstyper og flyter,
    felt, statussett, oppgavemal-sett, veivisere, relasjonsvisninger, behandlingsregler, maler, saksdatainstrukser og
-   -maler, hendelsestyper). Neo viser klient-ID-en og hemmeligheten én gang. Klient-ID-en er ikke en hemmelighet;
-   hemmeligheten legger admin i kundens hvelv, og den skal aldri stå i repoet eller i samtalen.
+   -maler, hendelsestyper). Neo viser klient-ID-en og hemmeligheten én gang. Klient-ID-en er ikke en hemmelighet.
+   Hemmeligheten legges i hvelvet som `neo--sandkasse-klient` når repoet sjekkes, og står aldri i repoet eller i samtalen.
    - Klienten er bundet til sandkassen, og plan og apply virker bare der, så den kan aldri skrive i produksjonen.
    - Revisjonen i Neo viser maskinklienten. Godkjenningen av en endring er PR-en.
-5. **Pluginene:** `forvaltning` og `solution` alltid. `monitoring` og `data` leser kjøringer og saker gjennom MCP med
+6. **Pluginene:** `forvaltning` og `solution` alltid. `monitoring` og `data` leser kjøringer og saker gjennom MCP med
    personens egen innlogging: bare når kunden vil det, og `data` leser personopplysninger. Pluginen for et system
    (`altinn`, `entra`, `documaster` …) når løsningene bruker systemet.
 
@@ -56,30 +58,24 @@ Spør om det som mangler, ett tema om gangen, og vis hva du har før du skriver:
 - **`kunde.yaml`:** `type`, `kunde` (navn og organisasjonsnummer), `godkjenner`, `forvalter`, og versjonene repoet er
   laget for under `verktoy` (malen fra `VERSION`, og `forvaltning`).
 - **`.github/CODEOWNERS`:** `*` til godkjenneren, så alt i repoet krever godkjenningen. Det er det GitHub håndhever.
-- **`.claude/neo.config.json`:** miljøene og maskinklienten, med hemmeligheten bare som referanse til kundens hvelv:
+- **`.claude/neo.config.json`:** hvelvet, miljøene og maskinklienten. Ingen hemmeligheter, heller ikke referanser:
 
   ```json
   {
     "version": 1,
+    "hvelv": "<hvelvet, for eksempel kv-kunde>",
     "neo": {
       "environments": ["sandkasse", "produksjon"],
       "defaultEnv": "sandkasse",
       "byEnv": {
-        "sandkasse": {
-          "url": "https://<adressen>",
-          "apiClient": {
-            "clientId": "<klient-id>",
-            "clientSecret": { "$env": "NEO_SANDKASSE_KLIENT_HEMMELIGHET", "kilde": "azure-keyvault:<hvelv>/<navn>" }
-          }
-        },
+        "sandkasse": { "url": "https://<adressen>", "apiClient": { "clientId": "<klient-id>" } },
         "produksjon": { "url": "https://<adressen>" }
       }
     }
   }
   ```
 
-  En del per plugin bare når pluginen trenger noe; sjekken av oppsettet sier hva. Referansene for et system kommer
-  under `<system>.hemmeligheter` når systemet tas i bruk.
+  En del per plugin bare når pluginen trenger noe; sjekken av oppsettet sier hva.
 - **`.claude/settings.json`:** `enabledPlugins` med `<plugin>@neo-forvaltning: true` for hver plugin som skal på.
 - **Bare når `monitoring` eller `data` er på:** `mcpServer` (`neo-<miljø>`) under `neo.byEnv.<miljø>`, og
   MCP-serveren med kommandoen fra Neo (*API-klienter → Koble til Claude*, slaget «Claude Code»):
@@ -93,8 +89,9 @@ Commit på en gren og åpne en PR.
 ## 4. Sjekk det
 
 1. Kjør sjekken av oppsettet (`/forvaltning:env`), og rett det den sier mangler, til den gir exit 0.
-2. Be personen logge inn med `az login` i tenanten til hvelvet, og se at referansene kan nås
-   (`/forvaltning:hemmeligheter`). Ingen verdi hentes til en fil.
+2. Be personen logge inn med `az login` i tenanten til hvelvet, og kjøre `nokler.mjs fyll` (`/forvaltning:nokler`)
+   i en terminal: den legger inn nøklene pluginene trenger, også maskinklientens, uten at verdien vises. Agenten
+   kjører bare sjekken etterpå.
 3. `node "${CLAUDE_PLUGIN_ROOT}/scripts/konfig.mjs" token`: maskinklienten får et token. Avviser Neo den, er klient-ID-en
    eller hemmeligheten feil, eller klienten er stengt.
 4. `/forvaltning:snapshot`, og se at det som kommer, er fra org-en du venter. En 403 betyr at klienten mangler et
@@ -109,5 +106,5 @@ Commit på en gren og åpne en PR.
 
 ## Regler
 
-- **Ingen hemmeligheter i noen fil.** Maskinklientens hemmelighet står bare som referanse til kundens hvelv.
+- **Ingen hemmeligheter i noen fil.** Nøklene ligger bare i hvelvet, med faste navn.
 - **Endre bare det som mangler.** Finnes en verdi, spør før den byttes.

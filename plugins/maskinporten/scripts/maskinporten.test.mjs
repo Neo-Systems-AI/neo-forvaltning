@@ -9,9 +9,12 @@ const PEM = privateKey.export({ type: "pkcs8", format: "pem" });
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
 const JWT = `${b64({ alg: "RS256" })}.${b64({ iss: "https://test.maskinporten.no/", client_id: "klient-test", consumer: { ID: "0192:999999999" }, scope: "krr:global/kontaktinformasjon.read", exp: 2000 })}.signatur-som-er-hemmelig`;
 
-const data = { version: 2, maskinporten: { miljo: "test", klienter: { krr: { clientId: "klient-test", scopes: ["krr:global/kontaktinformasjon.read"] }, fiks: { clientId: "klient-fiks" } }, hemmeligheter: { "krr-nokkel": { $env: "MP_KRR", kilde: "azure-keyvault:kv-kunde/mp-krr", fil: true }, "fiks-nokkel": { $env: "MP_FIKS", kilde: "azure-keyvault:kv-kunde/mp-fiks", fil: true } } } };
+const data = { version: 2, hvelv: "kv-kunde", maskinporten: { miljo: "test", klienter: { krr: { clientId: "klient-test", scopes: ["krr:global/kontaktinformasjon.read"] }, fiks: { clientId: "klient-fiks" } } } };
 const config = { data };
-const hemmelighet = () => PEM;
+const hemmelighet = (d, navn) => {
+  if (navn === "maskinporten--altinn-nokkel") throw new Error(`Fikk ikke hentet nøkkelen ${navn} fra ${d.hvelv}: SecretNotFound. Legg den inn med /forvaltning:nokler`);
+  return PEM;
+};
 const wk = () => new Response(JSON.stringify({ issuer: "https://test.maskinporten.no/", token_endpoint: "https://test.maskinporten.no/token" }), { headers: { "content-type": "application/json" } });
 const capture = () => {
   const lines = [];
@@ -48,12 +51,12 @@ test("avslaget fra Maskinporten kommer fram med error og error_description, og e
   assert.match(c.text(), /400 invalid_scope Scope krr:x not allowed/);
 });
 
-test("en nøkkel som ikke står under maskinporten.hemmeligheter, sies med stedet den skal stå", async () => {
+test("en nøkkel som ikke står i hvelvet, sies med det faste navnet", async () => {
   const c = capture();
   const d = structuredClone(data);
   d.maskinporten.klienter.altinn = { clientId: "a", scopes: ["x"] };
   assert.equal(await main(["token", "altinn"], { fetchImpl: async () => wk(), config: { data: d }, hemmelighet, ...c }), 1);
-  assert.match(c.text(), /maskinporten.hemmeligheter.altinn-nokkel står ikke i .claude\/neo.config.json/);
+  assert.match(c.text(), /nøkkelen maskinporten--altinn-nokkel fra kv-kunde: SecretNotFound/);
 });
 
 test("well-known viser issuer og token-endepunkt for miljøet, og en feil gir exit 1", async () => {

@@ -12,11 +12,11 @@
       "doc": "Klientene med navn: { <navn>: { clientId, kid, scopes } }. Altinn, Fiks og KRR viser til en klient med navnet. Uten kid brukes thumbprinten av nøkkelen"
     }
   ],
-  "hemmeligheter": [
+  "nokler": [
     {
-      "path": "maskinporten.hemmeligheter.<klient>-nokkel",
-      "perKlient": true,
-      "doc": "Den private nøkkelen (PEM) til hver klient, med fil: true"
+      "navn": "maskinporten--<klient>-nokkel",
+      "fil": true,
+      "doc": "Den private nøkkelen (PEM) til hver klient i maskinporten.klienter, fra selvbetjeningen i Maskinporten"
     }
   ]
 }

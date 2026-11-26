@@ -32,9 +32,10 @@ sitt i [Neo](https://neosystems.ai), og for den som lager Altinn-skjemaer.
 
 De som kaller Neo eller et eksternt system, leser én config-fil i kunderepoet, `.claude/neo.config.json`: miljøene i Neo
 (sandkassen og produksjonen, med adressen for hvert, maskinklienten i sandkassen og MCP-serveren for `monitoring` og
-`data`) og én del per plugin. Fila har ingen hemmeligheter: referansene til hvelvet står ved siden av
-oppsettet av systemet, under `<system>.hemmeligheter`, og skriptene henter verdien fra hvelvet for kjøringen,
-med personens egen innlogging. Ingen kopi lagres lokalt; i CI settes variabelen fra jobbens hemmeligheter. Fila er JSON, så ingen plugin trenger en YAML-leser for å kalle et system.
+`data`) og én del per plugin. Fila har ingen hemmeligheter: den sier bare hvilket hvelv
+nøklene ligger i (`hvelv`). Nøklene har faste navn som pluginene bestemmer (`fiks--integrasjon-passord`), legges inn med
+`forvaltning:nokler`, og skriptene henter dem for kjøringen med personens egen innlogging. Ingen kopi lagres lokalt; i
+CI har jobbens hemmeligheter de samme navnene. Fila er JSON, så ingen plugin trenger en YAML-leser for å kalle et system.
 
 **Dokumentasjonen** står i pluginen som bruker den (`plugins/<plugin>/docs/`), så den følger pluginens versjon.
 Inngangen er [`docs/`](./docs/README.md): mønstrene for god konfig og oppskriftene for integrasjonene.

@@ -32,10 +32,10 @@ Ferdig når samtykket er gitt, og appen ikke har noen e-posttillatelse som appli
 
 ### Lag client secret
 
-Lag én client secret på appen. Legg den i hvelvet som `exchange-client-secret`, og sett utløpsdatoen på hemmeligheten
+Lag én client secret på appen. Legg den i hvelvet som `exchange--client-secret`, og sett utløpsdatoen på hemmeligheten
 i hvelvet.
 
-Ferdig når hemmeligheten og utløpsdatoen står i hvelvet, sammen med `exchange-client-id`.
+Ferdig når hemmeligheten og utløpsdatoen står i hvelvet, sammen med `exchange--client-id`.
 
 ### Lag de felles postboksene
 
@@ -69,10 +69,10 @@ Ferdig når bare den første kommer inn i innboksen i Neo, med avsender, emne, t
 
 | Navn | Verdien |
 |---|---|
-| `exchange-client-id` | Application (client) ID til appen |
-| `exchange-client-secret` | Client secret, med utløpsdato |
+| `exchange--client-id` | Application (client) ID til appen |
+| `exchange--client-secret` | Client secret, med utløpsdato |
 
-Tenant-ID-en er `entra-tenant-id`, se [Entra ID](entra.md#det-som-legges-i-hvelvet).
+Tenant-ID-en er `entra--tenant-id`, se [Entra ID](entra.md#det-som-legges-i-hvelvet).
 
 ## Det forvalteren gjør i Neo
 

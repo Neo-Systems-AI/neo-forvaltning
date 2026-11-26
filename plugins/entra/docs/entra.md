@@ -44,11 +44,11 @@ Ferdig når gruppene står under Users and groups på appen, og kunden har gitt 
 
 ### Lag client secret
 
-Lag én client secret på appen. Legg den i hvelvet som `entra-sso-client-secret`, og sett utløpsdatoen på hemmeligheten
+Lag én client secret på appen. Legg den i hvelvet som `entra--sso-client-secret`, og sett utløpsdatoen på hemmeligheten
 i hvelvet.
 
-Ferdig når hemmeligheten og utløpsdatoen står i hvelvet, sammen med `entra-tenant-id`, `entra-sso-client-id` og
-`entra-domene`.
+Ferdig når hemmeligheten og utløpsdatoen står i hvelvet, sammen med `entra--tenant-id`, `entra--sso-client-id` og
+`entra--domene`.
 
 ### Legg inn redirect-adressen og TXT-posten
 
@@ -84,7 +84,7 @@ Ferdig når kortet viser at «Kun SSO» er på.
 
 ### Slå på provisjoneringen
 
-Forvalteren slår på SCIM i Neo, legger tokenet i hvelvet som `entra-scim-token` og gir Tenant URL.
+Forvalteren slår på SCIM i Neo, legger tokenet i hvelvet som `entra--scim-token` og gir Tenant URL.
 
 1. Under Provisioning på appen: sett den til «Automatic».
 2. Lim inn Tenant URL og tokenet fra hvelvet, og test tilkoblingen.
@@ -129,13 +129,13 @@ tilgangsreglene for dem, og deaktiverer dem når prosjektet er ferdig.
 
 | Navn | Verdien | Hvem |
 |---|---|---|
-| `entra-tenant-id` | Directory (tenant) ID | Kunden |
-| `entra-sso-client-id` | Application (client) ID til appen | Kunden |
-| `entra-sso-client-secret` | Client secret, med utløpsdato | Kunden |
-| `entra-domene` | Domenet de ansatte logger inn med | Kunden |
-| `entra-scim-token` | Tokenet for provisjoneringen | Forvalteren |
+| `entra--tenant-id` | Directory (tenant) ID | Kunden |
+| `entra--sso-client-id` | Application (client) ID til appen | Kunden |
+| `entra--sso-client-secret` | Client secret, med utløpsdato | Kunden |
+| `entra--domene` | Domenet de ansatte logger inn med | Kunden |
+| `entra--scim-token` | Tokenet for provisjoneringen | Forvalteren |
 
-`entra-tenant-id` brukes også av [Exchange Online](exchange.md) og [Documaster](../../documaster/docs/documaster.md).
+`entra--tenant-id` brukes også av [Exchange Online](exchange.md) og [Documaster](../../documaster/docs/documaster.md).
 
 ## Det forvalteren gjør i Neo
 

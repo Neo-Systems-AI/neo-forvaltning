@@ -52,10 +52,10 @@ Ferdig når «Hent status» i Neo ikke viser noen av de to feilene under [Slik p
 
 | Navn | Verdien |
 |---|---|
-| `maskinporten-<integrasjon>-test-client-id` | Klient-ID-en i testmiljøet |
-| `maskinporten-<integrasjon>-prod-client-id` | Klient-ID-en i produksjon |
+| `maskinporten--<integrasjon>-test-client-id` | Klient-ID-en i testmiljøet |
+| `maskinporten--<integrasjon>-prod-client-id` | Klient-ID-en i produksjon |
 
-`<integrasjon>` er `altinn`, `fiks` eller `krr`, for eksempel `maskinporten-fiks-prod-client-id`. Nøkkelen legges ikke
+`<integrasjon>` er `altinn`, `fiks` eller `krr`, for eksempel `maskinporten--fiks-prod-client-id`. Nøkkelen legges ikke
 i hvelvet: den private nøkkelen blir i Neo.
 
 ## Det forvalteren gjør i Neo

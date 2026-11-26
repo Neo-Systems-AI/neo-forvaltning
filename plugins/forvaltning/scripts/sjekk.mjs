@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Sjekken 2.1.0 for et repo laget fra neo-forvaltning-mal. GENERERT fra check/ i neo-forvaltning med
+// Sjekken 3.0.0 for et repo laget fra neo-forvaltning-mal. GENERERT fra check/ i neo-forvaltning med
 // `node check/build.mjs`: endres der, ikke her. Én fil uten avhengigheter (yaml 2.9.1 er bygget inn).
 import { createRequire as __createRequire } from "node:module";
 const require = __createRequire(import.meta.url);
@@ -7597,12 +7597,12 @@ import { join as join2 } from "node:path";
 var CHECKS = [
   { name: "kunde", about: "kunde.yaml har typen, kunden, godkjenneren, forvalteren og versjonene" },
   { name: "repo", about: "Repoet har mappene typen sier, og ingen andre: konfigen i oppsett/ i roten, snapshotene per milj\xF8, og ingen oppsett/ i en l\xF8sning eller i felles/" },
-  { name: "config", about: ".claude/neo.config.json er version 1 med milj\xF8ene sandkasse og produksjon, adressen og maskinklienten, og hemmelighetene bare som referanser ({ $env, kilde })" },
-  { name: "hemmeligheter", about: "Ingen hentede hemmeligheter (.env.local, .keys/) er committet" },
+  { name: "config", about: ".claude/neo.config.json er version 1 med milj\xF8ene sandkasse og produksjon, adressen, maskinklienten og hvelvet, og ingen hemmeligheter, heller ikke referanser" },
+  { name: "hemmeligheter", about: "Ingen filer med hemmeligheter (.env, .keys/) er committet" },
   { name: "godkjenner", about: ".github/CODEOWNERS nevner en ekte godkjenner" },
   { name: "losning", about: "Hver l\xF8sning har losning.yaml med form\xE5l, eier, status og integrasjonene, og hva den bygger p\xE5 n\xE5r den er ute av utkast" },
   { name: "integrasjon", about: "Ingen hemmelighet st\xE5r med verdi, og oppgavene hos kunden har status, hvem og det de venter p\xE5" },
-  { name: "persona", about: "Hver persona har navn og rolle, og hemmelighetene er referanser til hvelvet" },
+  { name: "persona", about: "Hver persona har navn og rolle, og ingen hemmeligheter: personen logger inn selv" },
   { name: "test", about: "Hver testcase har en beskrivelse og kravene den pr\xF8ver, testplanen har et punkt per krav, og hver runde heter etter datoen" }
 ];
 var TYPER = ["kunde", "standard"];
@@ -7610,10 +7610,7 @@ var STATUS_LOSNING = ["utkast", "i-test", "i-bruk", "avviklet"];
 var STATUS_OPPGAVE = ["ikke-startet", "i-gang", "ferdig"];
 var PERSONAER = "test/personaer";
 var SECRET_KEY = /(passord|password|secret|hemmelig|token|apikey|api_key|privatekey|private_key|nokkel|nøkkel|^key$|keypem)/i;
-var KILDE = /^(azure-keyvault:[A-Za-z0-9-]+\/[A-Za-z0-9-]+|1password:op:\/\/\S+|manuell)$/;
-var REF = "{ $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en n\xF8kkelfil)";
-var isRef = (v) => isMap(v) && /^[A-Z][A-Z0-9_]*$/.test(String(v.$env ?? "")) && KILDE.test(String(v.kilde ?? "")) && (v.fil === void 0 || typeof v.fil === "boolean") && Object.keys(v).every((k) => ["$env", "kilde", "fil"].includes(k));
-var whyNotRef = (v) => `m\xE5 v\xE6re ${REF}, uten verdien`;
+var NOKLER = "N\xF8klene ligger bare i hvelvet, med faste navn som pluginene bestemmer, og config-fila sier bare hvilket hvelv (hvelv). Ta den bort, og legg n\xF8kkelen inn med /forvaltning:nokler";
 var GAMMELT = {
   "repo.yaml": "Fila heter kunde.yaml, med type (kunde eller standard)",
   state: "Id-ene per milj\xF8 finnes ikke lenger: Neo skriver filene med n\xF8kler (forvaltning 0.2.0). Ta bort state/",
@@ -7683,7 +7680,7 @@ function checkLayout(root, type, envs = []) {
       const rel = `integrasjoner/${s}/${n}`;
       if (["hos-kunden.md", "README.md"].includes(n) || n.startsWith(".")) continue;
       if (n === "neo.yaml" || n === "miljoer") red(rel, `${n} har ingen form i Neo enn\xE5. Ta den bort`);
-      else if (n === "hemmeligheter.yaml") red(rel, `Referansene til hvelvet st\xE5r i .claude/neo.config.json under ${s}.hemmeligheter, ved siden av oppsettet av systemet. Flytt dem dit og ta bort fila`);
+      else if (n === "hemmeligheter.yaml") red(rel, NOKLER);
       else if (!dirs(root, `integrasjoner/${s}`).includes(n)) red(rel, "En integrasjon har hos-kunden.md, og artefaktene systemet trenger i en egen mappe");
     }
   }
@@ -7713,19 +7710,20 @@ function readConfig(root) {
     const v = isMap(neo.byEnv?.[env]) ? neo.byEnv[env] : {};
     if (!/^https:\/\/[^<>\s]+$/.test(String(v.url ?? ""))) f.push({ check: "config", level: "warn", file, message: `Adressen til Neo for ${env} er ikke fylt ut (neo.byEnv.${env}.url)` });
     if (v.apiClient !== void 0 && !/^[^<>\s]+$/.test(String(v.apiClient?.clientId ?? ""))) f.push({ check: "config", level: "warn", file, message: `Maskinklienten for ${env} er ikke fylt ut (neo.byEnv.${env}.apiClient). Skriptene i forvaltning trenger den` });
+    if (isMap(v.apiClient) && "clientSecret" in v.apiClient) f.push({ check: "config", file, message: `neo.byEnv.${env}.apiClient.clientSecret: ${NOKLER} (neo--${env}-klient)` });
   }
+  if (data.hvelv === void 0 || /<[^>]*>/.test(String(data.hvelv))) f.push({ check: "config", level: "warn", file, message: "Hvelvet er ikke fylt ut (hvelv): navnet p\xE5 Key Vault-hvelvet n\xF8klene ligger i" });
+  else if (typeof data.hvelv !== "string" || !/^[A-Za-z0-9-]{3,24}$/.test(data.hvelv)) f.push({ check: "config", file, message: `hvelv er navnet p\xE5 et Key Vault-hvelv (3\u201324 tegn: bokstaver, tall og bindestrek), ikke ${JSON.stringify(data.hvelv)}` });
   const walk2 = (x, path) => {
     if (!x || typeof x !== "object") return;
     if (!Array.isArray(x) && ("$env" in x || "kilde" in x)) {
-      if (/<[^>]*>/.test(String(x.kilde ?? "")) && isRef({ ...x, kilde: "azure-keyvault:a/b" })) f.push({ check: "config", level: "warn", file, message: `${path}: kilden er ikke fylt ut (${x.kilde})` });
-      else if (!isRef(x)) f.push({ check: "config", file, message: `${path} ${whyNotRef(x)}` });
+      if (!path.endsWith(".clientSecret")) f.push({ check: "config", file, message: `${path} er en referanse. ${NOKLER}` });
       return;
     }
     for (const [k, v] of Object.entries(x)) {
       const p = path ? `${path}.${k}` : k;
-      if (k === "hemmeligheter" && path && !path.includes(".")) {
-        if (!isMap(v)) f.push({ check: "config", file, message: `${p} er et kart fra navnet til referansen` });
-        else for (const [n, r] of Object.entries(v)) if (!isRef(r)) f.push({ check: "config", file, message: `${p}.${n} ${whyNotRef(r)}` });
+      if (k === "hemmeligheter") {
+        f.push({ check: "config", file, message: `${p}: ${NOKLER}` });
         continue;
       }
       if (SECRET_KEY.test(k) && v != null && typeof v !== "object" && !/Dir$|File$/i.test(k)) f.push({ check: "config", file, message: `${p} st\xE5r med verdi. Config-fila har ingen hemmeligheter` });
@@ -7752,7 +7750,6 @@ function checkCodeowners(root) {
 }
 function secretValues(data, path = "") {
   const out = [];
-  if (isRef(data)) return out;
   if (isMap(data) || Array.isArray(data)) {
     for (const [k, v] of Object.entries(data)) {
       const p = path ? `${path}.${k}` : k;
@@ -7763,7 +7760,7 @@ function secretValues(data, path = "") {
   return out;
 }
 var noSecrets = (data, check, file, f) => {
-  for (const p of secretValues(data)) f.push({ check, file, message: `${p} st\xE5r med verdi. En hemmelighet st\xE5r som ${REF}, og verdien ligger i hvelvet` });
+  for (const p of secretValues(data)) f.push({ check, file, message: `${p} st\xE5r med verdi. En hemmelighet st\xE5r aldri i repoet; den ligger i hvelvet` });
 };
 function solutionStatus(root, navn) {
   try {
@@ -7843,11 +7840,8 @@ function checkPersonaer(root) {
       continue;
     }
     for (const k of ["navn", "rolle"]) if (!text(y[k])) f.push({ check: "persona", file: rel, message: `${k} mangler` });
-    if (y.hemmeligheter != null) {
-      if (!isMap(y.hemmeligheter)) f.push({ check: "persona", file: rel, message: "hemmeligheter er et kart fra navnet til referansen" });
-      else for (const [k, v] of Object.entries(y.hemmeligheter)) if (!isRef(v)) f.push({ check: "persona", file: rel, message: `hemmeligheter.${k} ${whyNotRef(v)}` });
-    }
-    noSecrets(y, "persona", rel, f);
+    if (y.hemmeligheter != null) f.push({ check: "persona", file: rel, message: "hemmeligheter st\xE5r ikke i en persona: personen logger inn selv, og passordet ligger der testidentiteten forvaltes" });
+    else noSecrets(y, "persona", rel, f);
   }
   return f;
 }
@@ -8143,7 +8137,7 @@ function render(root) {
 
 // sjekk.mjs
 function version() {
-  if (true) return "2.1.0";
+  if (true) return "3.0.0";
   return JSON.parse(readFileSync8(join8(dirname2(fileURLToPath2(import.meta.url)), "package.json"), "utf8")).version;
 }
 var CHECKS6 = [...CHECKS, ...CHECKS2, ...CHECKS3, ...CHECKS4, ...CHECKS5];

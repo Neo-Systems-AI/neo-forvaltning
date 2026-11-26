@@ -29,7 +29,7 @@ test("nøkkelfila beskriver bare nøkler, og kopiene fra shared/ er de importene
   const msgs = run(root).filter((x) => x.check === "config").map((x) => `${x.file}: ${x.message}`).sort();
   assert.deepEqual(msgs, [
     "plugins/p/neo-config.keys.json: Hver nøkkel har path og doc: {\"path\":\"x\"}",
-    "plugins/p/neo-config.keys.json: Nøkkelfila beskriver bare nøkler (neo, neoApi, keys, hemmeligheter), ikke env",
+    "plugins/p/neo-config.keys.json: Nøkkelfila beskriver bare nøkler (neo, neoApi, keys, nokler), ikke env",
     "plugins/p/neo-config.keys.json: plugin er «q», mappa er «p»",
     "plugins/p/scripts/lib/a.mjs: Ikke lik shared/a.mjs. Kjør node scripts/sync-shared.mjs",
     "plugins/p/scripts/lib/b.mjs: Ikke lik shared/b.mjs. Kjør node scripts/sync-shared.mjs",
@@ -109,8 +109,8 @@ test("et skript som sammenligner process.argv[1] med seg selv uten å løse opp 
   assert.deepEqual(run(root).filter((x) => x.check === "inngang").map((x) => `${x.file}:${x.line}`), ["plugins/p/scripts/a.mjs:1", "plugins/p/scripts/b.mjs:1"]);
 });
 
-test("en hemmelighet i nøkkelfila er en sti under <system>.hemmeligheter", () => {
+test("en nøkkel i hvelvet har et fast navn (<system>--<navn>) og doc", () => {
   const root = repo();
-  writeFileSync(join(root, "plugins/p/neo-config.keys.json"), JSON.stringify({ plugin: "p", keys: [], hemmeligheter: [{ path: "p.hemmeligheter.a", doc: "d" }, { system: "p", navn: "b", doc: "d" }] }));
-  assert.deepEqual(run(root).map((x) => x.message), ['Hver hemmelighet har path (<system>.hemmeligheter.<navn>) og doc: {"system":"p","navn":"b","doc":"d"}']);
+  writeFileSync(join(root, "plugins/p/neo-config.keys.json"), JSON.stringify({ plugin: "p", keys: [], nokler: [{ navn: "p--a", doc: "d" }, { navn: "p--<klient>-nokkel", fil: true, doc: "d" }, { navn: "p.b", doc: "d" }] }));
+  assert.deepEqual(run(root).map((x) => x.message), ['Hver nøkkel i hvelvet har navn (<system>--<navn>, med <klient> eller <miljø> der det varierer) og doc, og ellers bare valgfri og fil: {"navn":"p.b","doc":"d"}']);
 });
