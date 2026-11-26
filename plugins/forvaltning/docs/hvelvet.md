@@ -18,7 +18,7 @@ testorganisasjonene og testidentitetene forvalteren bygger med.
 
 ## Referansene i repoet
 
-En referanse sier hva verdien heter lokalt (`$env`) og hvor den ligger (`kilde`). Verdien står aldri i en fil. For et
+En referanse sier hvor verdien ligger (`kilde`) og hva variabelen heter i CI (`$env`). Verdien står aldri i en fil. For et
 system står referansene ved siden av oppsettet av systemet i `.claude/neo.config.json`, under `<system>.hemmeligheter`,
 og for maskinklienten mot Neo under `neo.byEnv.sandkasse.apiClient.clientSecret`:
 
@@ -47,15 +47,15 @@ hemmeligheter:
 - **Hvor:** under `<system>.hemmeligheter` i config-fila for systemene, under `apiClient` for maskinklienten, og under
   `hemmeligheter` i hver persona. Navnet til venstre er det pluginen ser etter; README-en til hver plugin sier hvilke
   den trenger.
-- **`$env`:** navnet verdien har i `.env.local` lokalt, og i jobbens hemmeligheter i GitHub.
-- **`kilde`:** `azure-keyvault:<hvelv>/<navn>` er standarden. `1password:op://…` og `manuell` finnes for en kunde
-  uten Key Vault.
-- **`fil: true`:** verdien er en fil, for eksempel en nøkkel (PEM). Den hentes til `.keys/`, og `$env` peker på fila.
+- **`$env`:** navnet på variabelen. I en jobb i GitHub settes den fra jobbens hemmeligheter, og da brukes den.
+- **`kilde`:** `azure-keyvault:<hvelv>/<navn>` er standarden. `1password:op://…` og `manuell` (variabelen settes i
+  skallet) finnes for en kunde uten Key Vault.
+- **`fil: true`:** verdien er en fil, for eksempel en nøkkel (PEM). Den hentes som tekst.
 
-**Et menneske henter verdiene** fra hvelvet til `.env.local` og `.keys/` med sin egen innlogging
-(`hent-hemmeligheter.mjs --hent`), og skriptene leser dem derfra uten å skrive dem ut. Begge står i `.gitignore`, og
-agenten leser dem aldri: vakten i `forvaltning` stopper det. Hva som er satt, viser `hent-hemmeligheter.mjs --sjekk`,
-bare med navn. Personaenes referanser er for personen som logger inn; ingen skript henter dem.
+**Skriptene henter verdien fra hvelvet for kjøringen,** med personens egen innlogging (`az login`), én gang per
+kjøring. Verdien holdes i minnet, skrives aldri til disk og aldri ut, og er borte når skriptet er ferdig. Hva repoet
+viser til, og om du når det, viser `vis-hemmeligheter.mjs` i `forvaltning`; det spør bare om hemmeligheten finnes og er
+slått på. Personaenes referanser er for personen som logger inn; ingen skript henter dem.
 
 ## Oppgavene
 

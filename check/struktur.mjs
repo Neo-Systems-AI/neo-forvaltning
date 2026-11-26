@@ -27,7 +27,8 @@ export const PERSONAER = "test/personaer";
 export const SECRET_KEY = /(passord|password|secret|hemmelig|token|apikey|api_key|privatekey|private_key|nokkel|nøkkel|^key$|keypem)/i;
 
 // En referanse til en hemmelighet: { $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> }, og fil: true for en
-// nøkkelfil. `$env` er navnet verdien har i .env.local (hentet av et menneske) og i jobbens hemmeligheter i GitHub.
+// nøkkelfil. Skriptene henter verdien fra kilden for kjøringen; `$env` er variabelen som brukes i stedet når den er satt
+// (i jobbens hemmeligheter i GitHub).
 // Key Vault er standarden; 1Password og manuell finnes for en kunde uten.
 export const KILDE = /^(azure-keyvault:[A-Za-z0-9-]+\/[A-Za-z0-9-]+|1password:op:\/\/\S+|manuell)$/;
 export const REF = "{ $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil)";
@@ -168,8 +169,8 @@ export function readConfig(root) {
   return { data, envs, findings: f };
 }
 
-// Hemmelighetene et menneske har hentet (.env.local, .keys/), blant filene git følger. I CI er det det som er
-// committet; lokalt er en hentet .env.local ikke et funn før den legges til.
+// Filer med hemmeligheter (.env, .keys/) blant filene git følger. Ingen skript lager dem, men en person kan; i CI er
+// det det som er committet, og lokalt er en slik fil ikke et funn før den legges til.
 export function checkCommitted(root) {
   let files = [];
   try {

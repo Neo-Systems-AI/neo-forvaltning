@@ -79,6 +79,6 @@ i stedet for som et eget innslag:
   bare når feilsøket krever det.
 - **Innholdet i et data-element** kan ha personopplysninger. Hent det med `--innhold` bare når metadata ikke er nok,
   vis bare det som trengs, og skriv det aldri inn i repoet.
-- **Nøkkelen er kundens.** Skriptet leser den fra `.keys/`, der et menneske har hentet den fra kundens hvelv, og skriver den aldri ut.
+- **Nøkkelen er kundens.** Skriptet henter den fra kundens hvelv for kjøringen, og skriver den aldri ut.
 - **Produksjon** er et annet miljø med en annen klient, og et annet oppsett i config-fila. Bruk det bare når kunden har
   bedt om det.

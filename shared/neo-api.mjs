@@ -8,8 +8,9 @@
 //
 // Config: `neo.byEnv.<miljø>.url` (adressen til Neo) og `neo.byEnv.<miljø>.apiClient`:
 //   { "clientId": "…", "clientSecret": { "$env": "NEO_SANDKASSE_KLIENT_HEMMELIGHET", "kilde": "azure-keyvault:<hvelv>/<navn>" } }
-// Hemmeligheten står bare som referanse; et menneske henter verdien til .env.local (/forvaltning:hemmeligheter).
-import { value, secretValues } from "./hemmeligheter.mjs";
+// Hemmeligheten står bare som referanse. I CI settes variabelen fra jobbens hemmeligheter; ellers hentes verdien fra
+// hvelvet for kjøringen, med personens egen innlogging (hemmeligheter.mjs).
+import { secret as hemmelighet, secretValues } from "./hemmeligheter.mjs";
 import { call, redact } from "./http.mjs";
 
 const get = (o, path) => path.split(".").reduce((x, k) => (x && typeof x === "object" ? x[k] : undefined), o);
@@ -33,7 +34,7 @@ const basic = (user, password) => `Basic ${Buffer.from(`${user}:${password}`).to
 
 // Et token for maskinklienten. Feiler det, sies Neo sitt svar, aldri hemmeligheten.
 export async function neoToken(s, { fetchImpl = fetch } = {}) {
-  const secret = value(s.clientSecret);
+  const secret = hemmelighet(s.clientSecret);
   const res = await call(`${s.url}/api/auth/oauth2/token`, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded", accept: "application/json", authorization: basic(s.clientId, secret) },

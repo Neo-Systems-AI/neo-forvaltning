@@ -34,8 +34,7 @@ I `.claude/neo.config.json` i kundens repo, for instansen repoet arbeider mot:
 
 - **`apiUrl` er API-et, ikke nettsiden.** API-et svarer på port 8083; nettsiden på `/v2/` svarer 200 med HTML på alle
   stier, så en feil adresse ser ut som et vellykket kall. Skriptet stopper på et HTML-svar.
-- **Hemmeligheten** leses fra `.env.local`, der et menneske har hentet den fra kundens hvelv
-  (`/forvaltning:hemmeligheter`).
+- **Hemmeligheten** hentes fra hvelvet for kjøringen, med personens egen innlogging, og lagres aldri lokalt.
 
 ## Kallene
 

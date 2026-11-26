@@ -46,6 +46,6 @@ Utskriften er metoden, adressen, status og tid, så svaret. Exit 1 når Fiks ikk
   Produksjon er ekte forsendelser og ekte personer: bruk den bare når kunden har bedt om det.
 - **Personopplysninger:** fødselsnummer maskeres i utskriften (seks første sifre og `*****`). Navn og adresse fra
   Folkeregisteret kommer ut som de er: gjengi bare det feilsøket trenger, og skriv det aldri i en fil i repoet.
-- **Hemmelighetene** leses fra `.env.local`, der et menneske har hentet dem fra kundens hvelv, og sladdes fra alt som skrives ut. Får skriptet en ikke, sier
+- **Hemmelighetene** hentes fra kundens hvelv for kjøringen, og sladdes fra alt som skrives ut. Får skriptet en ikke, sier
   det referansen.
 - **Config:** mangler en nøkkel, sier skriptet hvilken; den settes under `fiks` i `.claude/neo.config.json`.

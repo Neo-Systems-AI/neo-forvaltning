@@ -93,8 +93,8 @@ Commit på en gren og åpne en PR.
 ## 4. Sjekk det
 
 1. Kjør sjekken av oppsettet (`/forvaltning:env`), og rett det den sier mangler, til den gir exit 0.
-2. Be personen hente hemmeligheten til `.env.local` (`/forvaltning:hemmeligheter`; et menneske kjører hentingen, aldri
-   agenten).
+2. Be personen logge inn med `az login` i tenanten til hvelvet, og se at referansene kan nås
+   (`/forvaltning:hemmeligheter`). Ingen verdi hentes til en fil.
 3. `node "${CLAUDE_PLUGIN_ROOT}/scripts/konfig.mjs" token`: maskinklienten får et token. Avviser Neo den, er klient-ID-en
    eller hemmeligheten feil, eller klienten er stengt.
 4. `/forvaltning:snapshot`, og se at det som kommer, er fra org-en du venter. En 403 betyr at klienten mangler et

@@ -18,7 +18,6 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { join, relative } from "node:path";
 
 import { load, resolve } from "./lib/neo-config.mjs";
-import { loadEnvLocal } from "./lib/hemmeligheter.mjs";
 import { apiSettings, neoApi, neoToken, NeoApiError } from "./lib/neo-api.mjs";
 import { write } from "./skriv-eksport.mjs";
 import { differences, markdown, summary } from "./planrapport.mjs";
@@ -106,7 +105,6 @@ const parse = (argv) => {
 export async function main(argv, { log = console.log, err = console.error } = {}) {
   const { command, miljo, fil } = parse(argv);
   if (!["token", "miljo", "export", "plan", "apply"].includes(command)) throw new Usage("Bruk: node konfig.mjs token | miljo | export | plan [--fil <sti>] | apply  [--miljo <miljø>]");
-  loadEnvLocal();
   let data;
   try {
     ({ data } = load());

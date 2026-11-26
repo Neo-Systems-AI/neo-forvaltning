@@ -32,8 +32,8 @@ navnet (`altinn.klient`, `fiks.klient`, `krr.klient`), så Maskinporten-pluginen
 - **`miljo`:** miljøet klientene er registrert i, `test` eller `produksjon`. Et system i et annet miljø enn klientene
   stopper med en feil, så test og produksjon aldri blandes.
 - **Nøkkelen** til hver klient er referansen `<navn>-nokkel` under `hemmeligheter`, med `fil: true`: en PEM i
-  hvelvet. Et menneske henter den til `.keys/` (`/forvaltning:hemmeligheter`), og skriptet leser den
-  derfra uten å skrive den ut.
+  hvelvet. Skriptet henter den for kjøringen, med personens egen innlogging, holder den i minnet og
+  skriver den aldri ut.
 - **Uten `kid`** brukes thumbprinten av nøkkelen (RFC 7638), slik selvbetjeningen gjør.
 
 ## Det kunden må ha selv

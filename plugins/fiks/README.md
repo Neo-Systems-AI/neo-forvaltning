@@ -29,8 +29,7 @@ pluginen `maskinporten`). Id-ene er ikke hemmelige:
 }
 ```
 
-Passordene står som referanser under `hemmeligheter`, og leses fra `.env.local`, der et menneske har hentet dem
-fra kundens hvelv (`/forvaltning:hemmeligheter`).
+Passordene står som referanser under `hemmeligheter`, og hentes fra hvelvet for kjøringen.
 
 ## Det kunden må ha selv
 

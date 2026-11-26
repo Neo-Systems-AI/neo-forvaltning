@@ -15,7 +15,7 @@
 //   --vis-person              vis fødselsnumrene i svaret; uten den er de skjult
 //
 // Config: `altinn` i .claude/neo.config.json: miljo (tt02 eller produksjon), klient (en klient i
-// maskinporten.klienter, med tjenesteeier-scopes), org og apps. Nøkkelen til klienten leses fra .keys/, der et menneske har hentet den fra hvelvet.
+// maskinporten.klienter, med tjenesteeier-scopes), org og apps. Nøkkelen til klienten hentes fra hvelvet for kjøringen.
 // Har kunden en Ocp-Apim-Subscription-Key, er referansen altinn.hemmeligheter.subscription-key.
 // Exit: 0 svar 2xx · 1 feil eller ikke-2xx · 2 feil bruk.
 import { realpathSync } from "node:fs";

@@ -12,7 +12,6 @@ import { mkdirSync, writeFileSync, realpathSync } from "node:fs";
 import { join } from "node:path";
 
 import { load } from "./lib/neo-config.mjs";
-import { loadEnvLocal } from "./lib/hemmeligheter.mjs";
 import { apiSettings, neoApi } from "./lib/neo-api.mjs";
 
 // Filnavnet `rules.mjs` leser, og kallet som gir det.
@@ -38,7 +37,6 @@ if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToP
     console.error("Bruk: node uttrekk.mjs <mappe> [--miljo <miljø>]");
     process.exit(2);
   }
-  loadEnvLocal();
   try {
     const { data } = load();
     const s = apiSettings(data, miljo);

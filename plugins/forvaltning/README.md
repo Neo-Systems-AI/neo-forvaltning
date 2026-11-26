@@ -21,14 +21,14 @@ her. Produksjonen endres bare ved promotering i Neo, og forhåndsvisningen der v
 Skriptene i `scripts/` er deterministiske og har ingen avhengigheter:
 
 - `konfig.mjs` er kommandoen: `token`, `miljo`, `export`, `plan` (alle filene, eller `--fil` for én) og `apply`.
-- `lib/neo-api.mjs` (fra `shared/`) henter token med maskinklienten og kaller Neo. Hemmeligheten leses fra
-  miljøet eller `.env.local`, aldri fra config-fila.
+- `lib/neo-api.mjs` (fra `shared/`) henter token med maskinklienten og kaller Neo. Hemmeligheten hentes fra
+  hvelvet for kjøringen, eller fra variabelen når den er satt (i CI), aldri fra config-fila.
 - `skriv-eksport.mjs` legger eksporten ut som filer, fjerner det Neo ikke lenger har, og skriver `ikke-med.md`.
 - `planrapport.mjs` setter sammen planen av Neo sine svar, og sjekker før gjennomføringen at planen er den som ble
   godkjent.
-- `hent-hemmeligheter.mjs` henter hemmelighetene fra kundens hvelv (Azure Key Vault, 1Password, eller manuelt) til
-  `.env.local` og `.keys/`. Et menneske kjører hentingen.
-- `vakt.mjs` er en hook som stopper agenten fra å lese `.env.local` og `.keys/`, og fra å kjøre hentingen.
+- `vis-hemmeligheter.mjs` viser referansene i config-fila og om personen når dem i hvelvet, bare med navn.
+- `vakt.mjs` er en hook som stopper agenten fra å hente en verdi fra hvelvet selv og fra å lese filer med
+  hemmeligheter. Den er en dytt mot uhell, ikke en sperre.
 
 Repoet og config-fila:
 

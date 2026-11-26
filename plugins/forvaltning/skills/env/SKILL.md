@@ -24,6 +24,6 @@ Rett det som mangler, og kjør på nytt til den gir exit 0. Om hemmelighetene er
 
 ## Regler
 
-- **Fila har ingen hemmeligheter.** En hemmelighet står bare som referanse til kundens hvelv, og hentes til
-  `.env.local` av et menneske (`/forvaltning:hemmeligheter`).
+- **Fila har ingen hemmeligheter.** En hemmelighet står bare som referanse til hvelvet, og skriptene henter verdien
+  for kjøringen. Om du når dem, viser `/forvaltning:hemmeligheter`.
 - **Mangler fila**, kjør `/forvaltning:oppstart`, eller kopier `.claude/neo.config.json` fra `neo-forvaltning-mal`.

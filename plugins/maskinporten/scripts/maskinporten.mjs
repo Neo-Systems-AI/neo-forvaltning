@@ -7,7 +7,7 @@
 //
 // Klientene står i `.claude/neo.config.json` under `maskinporten.klienter.<navn>` (clientId, kid, scopes), for miljøet
 // i `maskinporten.miljo`. Nøkkelen er referansen `maskinporten.hemmeligheter.<navn>-nokkel`, hentet fra
-// `.keys/`, der et menneske har hentet den fra hvelvet. Exit: 0 svar · 1 feil eller avslag · 2 feil bruk.
+// hvelvet for kjøringen. Exit: 0 svar · 1 feil eller avslag · 2 feil bruk.
 import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./lib/argumenter.mjs";
