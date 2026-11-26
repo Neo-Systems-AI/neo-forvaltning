@@ -7,7 +7,7 @@ Oppsettet i Neo som filer i et repo, endret med PR og godkjent av kunden. Brukes
 |---|---|---|
 | `forvaltning:oppstart` | Setter opp repoet og maskinklienten, eller skrur på en plugin til | nei |
 | `forvaltning:snapshot` | Henter sandkassens oppsett som filer Neo skriver | nei |
-| `forvaltning:plan` | Neo prøver hver fil i sandkassen uten å lagre, og sier hva den vil gjøre, til PR-en | nei |
+| `forvaltning:plan` | Neo prøver alle filene samlet i sandkassen uten å lagre, og sier hva hver vil gjøre, til PR-en | nei |
 | `forvaltning:gjennomfor` | Gjør en godkjent plan i sandkassen, fil for fil | ja, i sandkassen |
 | `forvaltning:hemmeligheter` | Hvilke hemmeligheter som trengs, hvor de ligger, og om de er satt (bare navn) | nei |
 | `forvaltning:env` | Viser config-fila slik pluginen leser den | nei |
@@ -24,7 +24,6 @@ Skriptene i `scripts/` er deterministiske og har ingen avhengigheter:
 - `lib/neo-api.mjs` (fra `shared/neo-kall/`) henter token med maskinklienten og kaller Neo. Hemmeligheten leses fra
   miljøet eller `.env.local`, aldri fra config-fila.
 - `skriv-eksport.mjs` legger eksporten ut som filer, fjerner det Neo ikke lenger har, og skriver `ikke-med.md`.
-- `rekkefolge.mjs` sorterer filene i oppsettet i rekkefølgen fra manifestet.
 - `planrapport.mjs` setter sammen planen av Neo sine svar, og sjekker før gjennomføringen at planen er den som ble
   godkjent.
 - `hent-hemmeligheter.mjs` henter hemmelighetene fra kundens hvelv (Azure Key Vault, 1Password, eller manuelt) til

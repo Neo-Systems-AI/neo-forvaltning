@@ -4,7 +4,6 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { checkPath, unwrap, write } from "./skriv-eksport.mjs";
-import { loadManifest, order } from "./rekkefolge.mjs";
 import { differences, markdown, summary } from "./planrapport.mjs";
 
 const tmp = () => mkdtempSync(join(tmpdir(), "forvaltning-"));
@@ -52,38 +51,6 @@ test("en sti ut av mappa avvises", () => {
   assert.ok(checkPath("case-types/x.json"));
   assert.equal(checkPath("case-types/byggesak.yaml"), null);
   assert.throws(() => write(svar([{ path: "../ut.yaml", text: "x" }]), tmp()), /ikke en relativ sti/);
-});
-
-const manifest = {
-  kinds: [
-    { kind: "caseType", directory: "case-types" },
-    { kind: "taskStatusGroup", directory: "task-status-groups" },
-    { kind: "workflow", directory: "workflows" },
-  ],
-  applyOrder: ["taskStatusGroup", "caseType", "workflow"],
-};
-
-test("rekkefølgen er manifestets, alfabetisk innenfor en type", () => {
-  assert.deepEqual(order(["workflows/a.yaml", "case-types/b.yaml", "case-types/a.yaml", "task-status-groups/z.yaml"], manifest), [
-    "task-status-groups/z.yaml",
-    "case-types/a.yaml",
-    "case-types/b.yaml",
-    "workflows/a.yaml",
-  ]);
-});
-
-test("en fil i en mappe Neo ikke kjenner, er en feil", () => {
-  assert.throws(() => order(["maler/x.yaml"], manifest), /maler\/x\.yaml/);
-});
-
-test("manifestet hentes fra adressen", async () => {
-  let asked;
-  const fake = async (url) => {
-    asked = url;
-    return { ok: true, json: async () => manifest };
-  };
-  assert.deepEqual(await loadManifest("https://neo.example/", fake), manifest);
-  assert.equal(asked, "https://neo.example/api/config/schema");
 });
 
 const plans = [

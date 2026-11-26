@@ -23,7 +23,8 @@ description: Gjennomfører en godkjent plan i Neo sin sandkasse med ett skript o
    Skriptet gjør dette, og stopper ved første avvik:
    - lager planen på nytt og sjekker den mot `<reportsDir>/plan-<miljø>.json`, den godkjente. Er den ikke den samme,
      er sandkassen eller filene endret siden godkjenningen, og ingenting skrives;
-   - skriver hver fil som er ny eller endret, i rekkefølgen fra Neo sitt manifest, med planen for akkurat den fila;
+   - skriver hver fil som er ny eller endret, i rekkefølgen planen har, med hashen planen ga fila. Hashen gjelder
+     sandkassen slik den er når filene før er skrevet, så en fil som peker på et objekt en annen fil lager, går;
    - skriver et oppgavemal-sett med steg som venter på en sakstype, én gang til når sakstypene er skrevet.
 2. Exit 1: si hva som er skrevet (skriptet lister det) og hvorfor det stoppet:
    - **Planen er ikke den som ble godkjent:** lag planen på nytt (`/forvaltning:plan`) og få den godkjent.
