@@ -148,7 +148,9 @@ export function readConfig(root) {
   const walk = (x, path) => {
     if (!x || typeof x !== "object") return;
     if (!Array.isArray(x) && ("$env" in x || "kilde" in x)) {
-      if (!isRef(x)) f.push({ check: "config", file, message: `${path} ${whyNotRef(x)}` });
+      // En plassholder fra malen (<hvelv>/<navn>) er ikke fylt ut ennå: gult, ikke en feil i formen.
+      if (/<[^>]*>/.test(String(x.kilde ?? "")) && isRef({ ...x, kilde: "azure-keyvault:a/b" })) f.push({ check: "config", level: "warn", file, message: `${path}: kilden er ikke fylt ut (${x.kilde})` });
+      else if (!isRef(x)) f.push({ check: "config", file, message: `${path} ${whyNotRef(x)}` });
       return;
     }
     for (const [k, v] of Object.entries(x)) {

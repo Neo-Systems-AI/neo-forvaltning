@@ -7717,7 +7717,8 @@ function readConfig(root) {
   const walk2 = (x, path) => {
     if (!x || typeof x !== "object") return;
     if (!Array.isArray(x) && ("$env" in x || "kilde" in x)) {
-      if (!isRef(x)) f.push({ check: "config", file, message: `${path} ${whyNotRef(x)}` });
+      if (/<[^>]*>/.test(String(x.kilde ?? "")) && isRef({ ...x, kilde: "azure-keyvault:a/b" })) f.push({ check: "config", level: "warn", file, message: `${path}: kilden er ikke fylt ut (${x.kilde})` });
+      else if (!isRef(x)) f.push({ check: "config", file, message: `${path} ${whyNotRef(x)}` });
       return;
     }
     for (const [k, v] of Object.entries(x)) {

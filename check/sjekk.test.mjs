@@ -93,7 +93,7 @@ test("config-fila: version 1 med sandkasse og produksjon under neo.byEnv, og hem
     ...GOOD(),
     ".claude/neo.config.json": JSON.stringify({
       version: 2,
-      neo: { url: "https://neo.test", org: "o", mcpServer: "neo-dev", environments: ["sandkasse", "test"], byEnv: { sandkasse: { url: "https://<neo-adresse>", apiClient: { clientId: "<klient-id>" } }, annen: {} } },
+      neo: { url: "https://neo.test", org: "o", mcpServer: "neo-dev", environments: ["sandkasse", "test"], byEnv: { sandkasse: { url: "https://<neo-adresse>", apiClient: { clientId: "<klient-id>", clientSecret: { $env: "NEO_K", kilde: "azure-keyvault:<hvelv>/<navn>" } } }, annen: {} } },
       fiks: { passord: "hemmelig", nokkel: { $env: "X" }, hemmeligheter: { ok: { $env: "OK", kilde: "azure-keyvault:kv/ok" }, fil: { $env: "FIL", kilde: "azure-keyvault:kv/fil", fil: true }, verdi: "abc123", env: { $env: "X", kilde: "azure-keyvault:kv/b" }, annet: { kilde: "1password:x" } } },
       altinn: { hemmeligheter: "abc" },
       documaster: { klient: { hemmeligheter: { x: { $env: "X", kilde: "azure-keyvault:kv/x" } } } },
@@ -115,6 +115,7 @@ test("config-fila: version 1 med sandkasse og produksjon under neo.byEnv, og hem
     ".claude/neo.config.json: Adressen til Neo for sandkasse er ikke fylt ut (neo.byEnv.sandkasse.url)",
     ".claude/neo.config.json: Adressen til Neo for test er ikke fylt ut (neo.byEnv.test.url)",
     ".claude/neo.config.json: Maskinklienten for sandkasse er ikke fylt ut (neo.byEnv.sandkasse.apiClient). Skriptene i forvaltning trenger den",
+    ".claude/neo.config.json: neo.byEnv.sandkasse.apiClient.clientSecret: kilden er ikke fylt ut (azure-keyvault:<hvelv>/<navn>)",
   ]);
   rmSync(root, { recursive: true });
 });
