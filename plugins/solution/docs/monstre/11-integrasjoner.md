@@ -5,10 +5,10 @@ Integrasjonene kobler saken til systemene rundt den: Altinn tar imot søknaden o
 tar imot og sender e-post. I Neo er alt dette flyter med integrasjonsnoder, satt opp mot kundens integrasjoner.
 
 Reglene her gjelder hvordan integrasjonene brukes i oppsettet: flytene, feltene og journalføringen. Hvordan hvert system
-settes opp hos kunden, står i [integrasjonene](../integrasjoner/README.md): [Altinn](../integrasjoner/altinn.md),
-[Maskinporten](../integrasjoner/maskinporten.md), [Documaster](../integrasjoner/documaster.md),
-[KS Fiks](../integrasjoner/fiks.md), [Kontakt- og reservasjonsregisteret](../integrasjoner/krr.md) og
-[Exchange Online](../integrasjoner/exchange.md).
+settes opp hos kunden, står i [integrasjonene](../../../../docs/README.md): [Altinn](../../../altinn/docs/altinn.md),
+[Maskinporten](../../../maskinporten/docs/maskinporten.md), [Documaster](../../../documaster/docs/documaster.md),
+[KS Fiks](../../../fiks/docs/fiks.md), [Kontakt- og reservasjonsregisteret](../../../krr/docs/krr.md) og
+[Exchange Online](../../../entra/docs/exchange.md).
 
 Det som sendes ut, er beviset for plikten (`09-maler.md#brevet-er-beviset`): én PDF går til mottakeren, til saken og
 til arkivet. Ingen node leser partens foretrukne kanal eller reservasjonen i KRR; flyten velger kanalen.
@@ -52,7 +52,7 @@ opphav: forslag
 - **Gjør:** Skriv ned, for hver app: app-id-en (`<org>/<app>`), datatypen med skjemadataen, datatypene for PDF-en og
   vedleggene, maskinverdiene i hvert valg, feltene som forhåndsutfylles, og om instansen skal skjules i innboksen. Sjekk
   at appen sender hendelser og at tjenesteeieren har rettighetene Neo trenger
-  ([Altinn](../integrasjoner/altinn.md)). Opprett abonnementet på appen under integrasjonen i Neo.
+  ([Altinn](../../../altinn/docs/altinn.md)). Opprett abonnementet på appen under integrasjonen i Neo.
 - **Ikke gjør:** Ikke bygg flyten mot en app som ikke er publisert med hendelser på. Ikke la flyten gjette på stier i
   datamodellen; velg feltene fra appens skjema i panelet.
 - **Hvorfor:** En ny app sender ingen hendelser før det slås på, og Neo abonnerer ikke av seg selv: saken blir bare aldri
@@ -485,7 +485,7 @@ opphav: skrevet
 
 - **Gjør:** Ta i bruk «Enhetsregisteret», «Kontakt- og reservasjonsregisteret» og «Folkeregisteret» som Løsninger, etter
   hva kunden trenger. Enhetsregisteret trenger ingen integrasjon; KRR og Folkeregisteret krever at kunden har satt opp
-  tilgangen ([Kontakt- og reservasjonsregisteret](../integrasjoner/krr.md), [KS Fiks](../integrasjoner/fiks.md)).
+  tilgangen ([Kontakt- og reservasjonsregisteret](../../../krr/docs/krr.md), [KS Fiks](../../../fiks/docs/fiks.md)).
 - **Ikke gjør:** Ikke kopier registerflytene inn i sakstypens egen Løsning. Ikke regn med at en sending sjekker KRR av seg
   selv.
 - **Hvorfor:** Kunden tar i bruk det den trenger og får oppdateringene. KRR leses bare når en flyt gjør oppslaget.
@@ -500,7 +500,7 @@ opphav: skrevet
 ```
 
 - **Gjør:** Legg inn kundens Maskinporten-klienter i Neo, og la Altinn, KS Fiks og KRR velge hver sin
-  ([Maskinporten](../integrasjoner/maskinporten.md)). Kjør «Hent status» på klienten eller «Verifiser» på integrasjonen
+  ([Maskinporten](../../../maskinporten/docs/maskinporten.md)). Kjør «Hent status» på klienten eller «Verifiser» på integrasjonen
   etter at kunden har lagt til et scope. Bind hver Altinn- og Documaster-node til integrasjonen den skal bruke. Slett
   Altinn-abonnementene før integrasjonen fjernes.
 - **Ikke gjør:** Ikke regn med at en node finner «den eneste» integrasjonen. Ikke fjern integrasjonen med abonnementene
@@ -518,7 +518,7 @@ krever: [10-skjema-og-innboks.md#innboks-for-det-ustrukturerte]
 opphav: skrevet
 ```
 
-- **Gjør:** Koble kundens felles postboks (postmottaket) til organisasjonen ([Exchange Online](../integrasjoner/exchange.md)).
+- **Gjør:** Koble kundens felles postboks (postmottaket) til organisasjonen ([Exchange Online](../../../entra/docs/exchange.md)).
   La personlige postbokser være for det saksbehandleren selv eier.
 - **Ikke gjør:** Ikke la henvendelser som hører til saksbehandlingen komme inn bare til en personlig postboks.
 - **Hvorfor:** En henvendelse fra en personlig postboks ser bare eieren. Den felles postboksen er organisasjonens.
@@ -535,7 +535,7 @@ opphav: skrevet
 ```
 
 - **Gjør:** Sørg for at kunden har gitt Neo rett til å sende fra de felles postboksene, og bare dem
-  ([Exchange Online](../integrasjoner/exchange.md)). Slå på «Kan sende» på postboksen, og velg den som standard avsender,
+  ([Exchange Online](../../../entra/docs/exchange.md)). Slå på «Kan sende» på postboksen, og velg den som standard avsender,
   før den første flyten med «E-post» og før saker tildeles.
 - **Ikke gjør:** Ikke slå av «Kan sende» på standard avsender uten å velge en ny.
 - **Hvorfor:** Det finnes ingen reserveavsender. Uten standard avsender stopper e-post med standard avsender, og alle

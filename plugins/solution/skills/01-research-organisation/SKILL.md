@@ -9,8 +9,10 @@ Det som gjelder hele kunden, researches én gang og brukes av alle løsningene: 
 hvordan kunden skriver, hvem kunden har med å gjøre, systemene rundt, og sakene på tvers. En løsning som bygges uten
 dette, gjetter.
 
-**Inn:** `kunde.yaml` (hvem kunden er). **Ut:** kildene og forståelsen i `virksomheten/`. Formen på begge står i
-repoets regler for mappene (`.claude/rules/`).
+**Inn:** `kunde.yaml` (hvem kunden er, og hvem som godkjenner og forvalter). **Ut:** kildene i `felles/kilder/` og
+forståelsen i `felles/forstaelse/`. Formen på begge står i repoets regler for mappene (`.claude/rules/`). Et repo for
+standardløsninger (`type: standard` i `kunde.yaml`) har ingen kunde å forstå, og ingen `felles/kilder/` eller
+`felles/forstaelse/`; da gjelder ikke denne.
 
 ## De fem dimensjonene
 
@@ -31,13 +33,19 @@ Den samme lista brukes for hver kunde, så det som mangler, synes som en tom sek
    (rutiner, maler, brev de har sendt). Spør kunden etter det som ikke er offentlig, i én samlet liste.
 2. **Lagre hver kilde uendret,** med opphavet: lenke, utgiver, datoen dokumentet har, og datoen det ble lest. En lagret
    kilde endres aldri; en ny versjon får en ny id. Personopplysninger i en kilde lagres ikke; ta et utdrag uten dem.
+   En kilde som ikke skulle vært lagret, trekkes tilbake med grunnen i registeret, og fila tas bort.
 3. **Skriv forståelsen per dimensjon.** Hver påstand viser til kilden den kommer fra. Står det samme i to dimensjoner,
    står det ett sted, og den andre viser dit.
 4. **Skriv det kildene ikke svarer på,** per dimensjon, som spørsmål til kunden. Ikke fyll hullet med det som er
    vanlig hos andre.
 5. **Kontrollér mot kildene.** En egen agent, som ikke skrev forståelsen, leser hver påstand mot den lagrede kilden og
    lister avvikene: påstander kilden ikke sier, er tolket for langt, eller mangler kilde. Rett dem, eller legg dem fram.
-6. **Kjør repoets sjekk** til den er grønn: kildene uendret og i registeret, og hver påstand med en kilde som finnes.
+6. **Kjør sjekken av repoet** (`check` i `.claude/method.json`, fra roten) til den er grønn: kildene uendret og i
+   registeret, og hver påstand med en kilde som finnes.
+
+   ```bash
+   sh -c "$(node -p 'require("./.claude/method.json").check')"
+   ```
 
 ## Personen avgjør
 

@@ -1,6 +1,6 @@
 ---
 name: 07-write-tests
-description: Skriver testene for en løsning fra kravene - testcasene (syntetiske saker med det som skal skje), personaene som tester, og testplanen for en runde i UI - med reisen fra start til mål per persona, et punkt per krav, det som beviser hvert punkt, situasjonene der opplevelsen kan svikte, og hypotesene. Testene kjøres senere. Bruk når konfigen er bygget, og når testplanen skal skrives om etter en runde.
+description: Skriver testene for en løsning fra kravene - testcasene (syntetiske saker med det som skal skje), personaene som tester, lista over det et menneske lager i sandkassen før runden, og testplanen for en runde i UI - med reisen fra start til mål per persona, et punkt per krav, det som beviser hvert punkt, situasjonene der opplevelsen kan svikte, og hypotesene. Testene kjøres senere. Bruk når konfigen er bygget, og når testplanen skal skrives om etter en runde.
 ---
 
 # Testene
@@ -8,8 +8,8 @@ description: Skriver testene for en løsning fra kravene - testcasene (syntetisk
 Testen er første gang løsningen møter et menneske. Den viser at kravene holder i Neo, slik saksbehandleren møter dem,
 og den leter etter stedene der det blir kronglete. Testplanen skrives så en annen kan kjøre runden uten å spørre.
 
-**Inn:** kravene, designet, konfigen og forrige runde når den finnes. **Ut:** testcasene, testplanen og personaene, i
-`6-test/` i løsningen og personaene i `organisasjon/team-og-roller/`. Formen står i repoets regler (`.claude/rules/`).
+**Inn:** kravene, designet, konfigen og forrige runde når den finnes. **Ut:** testcasene og testplanen i `test/` i
+løsningen, og personaene i `test/personaer/` i roten. Formen står i repoets regler (`.claude/rules/`).
 
 ## Testcasene
 
@@ -24,15 +24,25 @@ fødselsnumre og organisasjonsnumre er oppdiktede eller fra testmiljøene (Tenor
 
 ## Personaene
 
-Testbrukerne, med rolle og team i Neo og de eksterne identitetene de trenger: testbrukere i Altinn og ID-porten,
-testorganisasjoner, og testkontoer i arkivet og Entra. Passord og nøkler står bare som referanser til hvelvet. Samme
-persona brukes i alle løsningene; lag en ny bare når en rolle mangler.
+Testbrukerne, én fil per persona i `test/personaer/`, med rolle og team i Neo og de eksterne identitetene de trenger:
+testbrukere i Altinn (tt02) og ID-porten (Tenor), test-organisasjonsnumre, og testkontoer i arkivet og Entra. Passord og
+nøkler står bare som referanser til hvelvet, under `hemmeligheter`. Personaene er testdata, ikke konfig. Samme persona
+brukes i alle løsningene; lag en ny bare når en rolle mangler. Et team eller en rolle personaen trenger, og som ikke
+finnes i Neo, setter et menneske opp der.
+
+## Det et menneske lager i sandkassen
+
+Neo har ikke et API for å legge inn testcaser eller lage brukere, så et menneske gjør det i sandkassen før runden.
+Skriv lista øverst i riggen i testplanen, så det er ett steg og ikke et gjett: hver testcase som skal legges inn (fila,
+kanalen den kommer inn gjennom, og hva den skal ha når den er inne), og hver persona som skal finnes (rollen, teamet og
+identitetene). Et punkt er ferdig når det er sjekket i Neo, ikke når noen har sagt det er gjort.
 
 ## Testplanen
 
 - **Øverst:** akseptkriteriet for runden, versjonen av konfigen den er skrevet mot (commiten), og hva den *ikke*
   beviser.
-- **Riggen:** punktene som gjør runden klar og lik hver gang: konfigen i miljøet er lik repoet, testcasene er lagt inn,
+- **Riggen:** punktene som gjør runden klar og lik hver gang: lista over det et menneske lager i sandkassen, konfigen i
+  miljøet er lik repoet, testcasene er lagt inn,
   personaene kan logge inn med riktig rolle, integrasjonene svarer, og hva som overvåkes. Hvert punkt er en sjekk med et
   bevis, ikke en påstand.
 - **Reisene:** én seksjon per persona, med reisen fra start til mål som en tabell (steget, det personaen gjør, det som

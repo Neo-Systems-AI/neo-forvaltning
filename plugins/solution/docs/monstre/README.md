@@ -64,15 +64,19 @@ sjekkes: maskinelt                # bare når skriptet sjekker regelen
   oppdages ellers først når konfigen er bygget.
 - **Opphavet:** `skrevet` står i produktdokumentasjonen, `praksis` går igjen i konfig som er i bruk, og `forslag` er en
   anbefaling som ikke er prøvd i bruk ennå.
-- **Id-en står fast.** Andre regler, sporingen i en løsning og funn fra en gjennomgang viser til den.
+- **Id-en står fast.** Andre regler, avvikene i designet og funn fra en gjennomgang viser til den.
 
 ## Det som sjekkes maskinelt
 
-Noen regler kan sjekkes på konfigen slik den kjører, uten skjønn: et navn brukt to ganger, en beskrivelse som mangler,
-et KI-forslag uten kriterium, en flyt som ikke er aktivert. De har `sjekkes: maskinelt`, og skriptet
-[`rules.mjs`](../../plugins/solution/scripts/rules.mjs) i pluginen `solution` sjekker dem med samme id, så et funn alltid viser til regelen her. Skriptet sjekker
-bare den delen av regelen som kan avgjøres uten skjønn; resten leses. Testene i repoet stopper en sjekk uten regel, og
-en regel som sier at den sjekkes, uten sjekk.
+Noen regler kan sjekkes på konfigen slik den kjører i et miljø, uten skjønn: et navn brukt to ganger, en beskrivelse
+som mangler, et KI-forslag uten kriterium, en flyt som ikke er aktivert. De har `sjekkes: maskinelt`, og
+[`scripts/rules.mjs`](../../scripts/rules.mjs) i pluginen `solution` sjekker dem på uttrekket fra Neo med samme id, så
+et funn alltid viser til regelen her. Sjekken avgjør bare den delen av regelen som kan avgjøres
+uten skjønn; resten leses. Testene i repoet stopper en sjekk uten regel, og en regel som sier at den sjekkes, uten
+sjekk.
+
+**Et avvik med vilje** står i `design/` i løsningen (eller i `felles/design/`) med regelens id og grunnen, og sjekken
+melder det ikke på nytt. Et avvik som viser til en regel som ikke finnes her, er rødt.
 
 ## Bidra
 

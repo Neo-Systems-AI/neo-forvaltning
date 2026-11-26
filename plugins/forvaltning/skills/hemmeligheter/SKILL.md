@@ -1,40 +1,32 @@
 ---
 name: hemmeligheter
-description: Viser hvilke hemmeligheter kallene mot de eksterne systemene trenger (Maskinporten-nøkler, passord til SvarInn og andre), hvor hver av dem ligger i kundens hvelv, og om de er satt lokalt. Bare navn, aldri verdier. Sier hvordan et menneske henter dem.
+description: Viser hvilke hemmeligheter repoet viser til (nøklene og passordene til integrasjonene, og testidentitetene til personaene), hvor referansen til hver står, hvor verdien ligger i hvelvet, og om personen når den med sin egen innlogging. Bare referansene, aldri verdier.
 ---
 
 # Hemmelighetene
 
-Kunden eier hemmelighetene: Maskinporten-klientene, nøklene, virksomhetssertifikatet og passordene til systemene. De
-ligger i kundens hvelv. Config-fila sier bare hvor hver av dem ligger, aldri verdien:
+Verdien ligger i Azure Key Vault, i hvelvet til den som eier den. Repoet har bare referansen, der den brukes: under
+`<system>.hemmeligheter` i `.claude/neo.config.json`, og under `hemmeligheter` i personaene i `test/personaer/`.
+Skriptene henter verdien fra hvelvet ved hvert kall, med personens egen innlogging, så ingen verdi ligger lagret på
+disk. Formen på en referanse og navnene i hvelvet står i `${CLAUDE_PLUGIN_ROOT}/docs/hvelvet.md`.
 
-```json
-"passord": { "$env": "FIKS_SVARINN_PASSORD", "kilde": "azure-keyvault:<hvelv>/<navn>" }
-```
-
-`"fil": true` betyr at verdien er en nøkkelfil; den hentes til `.keys/`.
-
-## Se hva som er satt
+## Se hva som står, og om du når det
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/hent-hemmeligheter.mjs" --sjekk
+node "${CLAUDE_PLUGIN_ROOT}/scripts/vis-hemmeligheter.mjs"
 ```
 
-Tabellen viser navnet, hvor i config-fila det står, kilden, og om det er satt. Aldri verdien.
+Tabellen viser hvor referansen står, kilden i hvelvet, om den er en fil, og om personen når den: skriptet spør bare om
+hemmeligheten finnes og er slått på, aldri etter verdien. Med `--uten-az` vises bare referansene.
 
-## Hente dem
+- **«Nei: Please run 'az login'»:** be personen logge inn med `az login`, i tenanten til hvelvet.
+- **«Nei: Forbidden»:** personen har ikke tilgang til hvelvet. Kunden gir den (rollen står i oppskriften for hvelvet).
+- **❌ ikke en referanse:** en verdi står der referansen skulle stått. Ta den ut av fila, og be eieren bytte den: den er
+  ikke hemmelig lenger. Er den committet, ligger den i historikken: byttet er det som hjelper.
 
-Hentingen gjøres av **et menneske**, med sin egen innlogging mot kundens hvelv (`az login`). Agenten kjører den aldri,
-og leser aldri `.env.local` eller `.keys/`; vakten i pluginen stopper det. Be personen kjøre:
+## Regler
 
-```bash
-node <plugin-mappa>/scripts/hent-hemmeligheter.mjs --hent
-```
-
-Verdiene skrives til `.env.local` og `.keys/` med tilgang bare for eieren (600). Begge står i `.gitignore`, og `check`
-i kunderepoet stopper dem om de likevel blir lagt til.
-
-## Når vi forvalter for kunden
-
-Vi bruker kundens hvelv med en personlig tilgang kunden har gitt og kan trekke tilbake. Ingenting kopieres til oss.
-Testorganisasjonene vi bruker når vi bygger, hører ikke hjemme i kundens repo.
+- **Aldri en verdi** i chatten, en fil, et notat eller en commit. Skriptene som trenger en verdi, henter den selv.
+- **Bare Key Vault.** En annen kilde er en feil i referansen.
+- **Kundens verdier ligger i kundens hvelv,** med en personlig tilgang kunden har gitt og kan trekke tilbake. Ingenting
+  kopieres til oss. Testidentitetene vi bygger med, ligger i vårt hvelv.

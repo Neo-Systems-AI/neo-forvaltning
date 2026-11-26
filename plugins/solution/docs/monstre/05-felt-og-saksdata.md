@@ -48,7 +48,7 @@ opphav: skrevet
 - **Gjør:** Lag et saksfelt bare når du kan peke på leseren og hva den gjør: sakslista eller en lagret visning (vise,
   filtrere, sortere, telle), en betingelse i veiviseren, en flettekode i et brev (`{{case:<feltnavn>}}`), Innsikt
   (telle, summere), «Finn sak» i en flyt, en kolonne i relasjonstabellen eller et felt i relasjonsvisningen, eller
-  variantfeltet som velger oppgavene. Skriv leseren i sporingen til kravene. Slå sammen felt i kilden som utelukker
+  variantfeltet som velger oppgavene. Skriv leseren i designet. Slå sammen felt i kilden som utelukker
   hverandre, til ett.
 - **Ikke gjør:** Ikke lag et felt for hver opplysning i søknaden, for hvordan skjemaet ble fylt ut, for appens hjelpefelt
   eller for arkivkonvolutten. Ikke legg en verdi bare i saksdata og regn med at sakslista, veiviseren, brevet eller
@@ -77,7 +77,7 @@ krever: [05-felt-og-saksdata.md#et-felt-har-en-leser]
 opphav: skrevet
 ```
 
-- **Gjør:** Bestem én skriver for hvert felt, og skriv den i sporingen til kravene:
+- **Gjør:** Bestem én skriver for hvert felt, og skriv den i designet:
   - **flyten**, når verdien står som et faktum i saksdata eller i skjemasvaret: «Hent saksdata» og så «Sett saksfelt».
     Er verdien en sum eller en andel av tall i saken, regner flyten den ut med «Regn ut» først
     (`07-flyt.md#flyt-regn-ut`). Utfallet settes fra skjemaet til handlingen som fatter vedtaket.

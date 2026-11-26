@@ -1,53 +1,84 @@
 # solution
 
 Å designe og bygge en løsning i Neo: fra en idé eller en kunngjøring til konfig som er testet i UI og gitt til kunden.
-Løpet er skillene under, i rekkefølge. Hver skill gjør ett ledd og vet ikke om de andre; løpet står bare her.
+Løypa er skillene under, i rekkefølge. Hver skill gjør ett ledd og vet ikke om de andre; løypa står bare her. Veien
+inn og ut av Neo (snapshot, plan og gjennomføring), oppstarten av repoet, config-fila og hemmelighetene står i
+pluginen [`forvaltning`](../forvaltning/README.md).
 
-## Løpet
+## Løypa
 
 | # | Skill | Spørsmålet | Fra → til | Personen avgjør |
 |---|---|---|---|---|
-| 01 | `solution:01-research-organisation` | Hvem er kunden, og hva gjelder på tvers? | `kunde.yaml` → `virksomheten/` | Spørsmålene til kunden |
-| 02 | `solution:02-research-process` | Hvordan går prosessen, og hva sier hjemmelen? | En idé eller en kunngjøring → `1-kilder` og `2-forstaelse`, kontrollert mot kildene av en egen agent | Avvikene i forståelsen |
-| 03 | `solution:03-write-requirements` | Hva må holde? | Forståelsen → `3-krav` | Kravene |
-| 04 | `solution:04-choose-design` | Hvilke valg gjør vi? | Kravene → `4-design`: hva løsningen bygger på, variantene, og hva som er felles i `organisasjon/` | Designvalgene |
-| 05 | `solution:05-build-config` | Hvordan ser konfigen ut? | Krav, design og mønstrene → `5-oppsett` og `organisasjon/`, med sporingen | — |
-| 06 | *kommer* | Er det i sandkassen eller staging? | Konfigen → testmiljøet | — |
-| 07 | `solution:07-write-tests` | Hva skal prøves i UI? | Kravene → testcasene, testplanen og personaene | — |
-| 08 | `solution:08-run-ui-test` | Holder det i UI? | Testplanen → en runde med funn, og observasjonene ordrett | Observasjonene |
-| 09 | `solution:09-triage-findings` | Hva retter vi, og hvor? | Funnene → konfig (tilbake til 05) eller produkt (et ønske til Neo) | Hva som er konfig, og hva som er produkt |
-| 10 | *kommer* | Er det klart til bruk? | Løsningen → i bruk hos kunden | Publiseringen |
+| — | `forvaltning:oppstart` | Er repoet klart? | Malen → et repo på GHE, med sandkassen og produksjonen | Typen og kunden |
+| 01 | `solution:01-research-organisation` | Hvem er kunden? | → `felles/kilder` og `felles/forstaelse` (bare et kunderepo) | Spørsmålene til kunden |
+| 02 | `solution:02-research-process` | Hvordan går prosessen, og hva sier hjemmelen? | En idé → `kilder` og `forstaelse` | Avvikene i forståelsen |
+| 03 | `solution:03-write-requirements` | Hva må holde? | → `krav` | Kravene |
+| 04 | `solution:04-choose-design` | Hvilke valg gjør vi? | → `design`, og det felles i `felles/` | Designvalgene |
+| 05 | `solution:05-build-config` | Hvordan ser konfigen ut? | Krav, design og mønstrene → `oppsett/` i roten, i rekkefølgen Neo gir, og `blir` på kravene | — |
+| 06 | `forvaltning:plan`, så `forvaltning:gjennomfor` | Er det i sandkassen? | `oppsett/` → planen fra Neo i PR-en → etter merge, fil for fil i sandkassen, og snapshotet etterpå (`forvaltning:snapshot`) | Godkjenningen av PR-en |
+| 07 | `solution:07-write-tests` | Hva skal prøves i UI? | → testcasene, testplanen og personaene | — |
+| 08 | `solution:08-run-ui-test` | Holder det i UI? | → en runde med funn | Observasjonene |
+| 09 | `solution:09-triage-findings` | Hva retter vi, og hvor? | Funnene → konfig (tilbake til 05) eller et ønske til Neo | Konfig eller produkt |
 
-01 tas én gang per kunde; resten per løsning. 08 og 09 går i runder, med 05 og 07 imellom, til funnene er tatt. 06 og 10
-er å få konfigen inn i Neo og ut til bruk; til de finnes, gjøres det med verktøyene i repoet.
+01 tas én gang per kunde, og ikke i et repo for standardløsninger; resten per løsning. 08 og 09 går i runder, med 05,
+06 og 07 imellom, til funnene er tatt. Promoteringen fra sandkassen til produksjonen gjør kundens org-admin i Neo.
+Publiseringen av en løsning står ikke i løypa før Neo har den.
 
-**Ved siden av løpet:**
+**07–09 har sitt hjem her.** Testene for konfig i Neo skrives, kjøres og sorteres med disse skillene; det finnes ingen
+egen kopi andre steder. Testcasene og personaene lages i sandkassen av et menneske, til Neo har et API for det; 07
+skriver lista over hva som skal lages.
+
+**Ved siden av løypa:**
 
 | Skill | Når |
 |---|---|
-| `solution:review-config` | Konfigen i et miljø gjennomgått mot mønstrene, med tiltak. Før overleveringen, når et oppsett tas over, eller jevnlig |
+| `solution:review-config` | Konfigen slik den kjører i et miljø, gjennomgått mot mønstrene, med tiltak |
 | `solution:hand-over-to-customer` | Den testede løsningen gitt til kunden i én PR kunden godkjenner |
-| `solution:env` | Config-fila slik pluginen leser den |
 
-## Hvor det står
+## Repoet
 
-Skillene bruker strukturen i kunderepoet fra malen [`neo-forvaltning-mal`](https://github.com/Neo-Systems-AI/neo-forvaltning-mal):
-`virksomheten/` for det som gjelder hele kunden, `losninger/<løsning>/` med de seks leddene, `organisasjon/` for
-konfigen utenfor løsningene, og `integrasjoner/<system>/`. Formen på hver mappe står i repoets regler (`.claude/rules/`),
-og repoets sjekk holder den.
+Skillene bruker strukturen fra malen [`neo-forvaltning-mal`](https://github.com/Neo-Systems-AI/neo-forvaltning-mal).
+Formen på hver mappe står i repoets regler (`.claude/rules/`), og sjekken holder den.
 
-Mønstrene for god konfig og oppskriftene for integrasjonene står i [`docs/`](../../docs) i dette repoet.
-`scripts/docs.mjs` finner dem for skillene, i samme versjon som pluginen kom fra.
+```text
+kunde.yaml                    typen (kunde eller standard), kunden, godkjenneren, forvalteren og versjonene
+felles/                       det som gjelder hele org-en, med de samme leddene som en løsning
+  kilder/ forstaelse/         det som gjelder hele kunden (bare i et kunderepo)
+  krav/ design/               det som er felles for flere løsninger
+losninger/<losning>/          losning.yaml, kilder/, forstaelse/, krav/, design/, test/
+oppsett/                      konfigen i Neos format, én fil per objekt, slik Neo eksporterer den
+  manuelt/                    det Neo ikke skriver som fil ennå, beskrevet for hånd
+snapshots/<miljø>/            det som kjører i sandkassen og produksjonen, fra Neo
+reports/                      planene fra Neo
+integrasjoner/<system>/       hos-kunden.md, og artefaktene systemet trenger
+test/personaer/               testbrukerne, felles for alle løsningene
+.claude/neo.config.json       miljøene i Neo og én del per plugin, med referansene til hvelvet
+```
+
+- **Mappene har navn, ikke tall.** Rekkefølgen står i løypa.
+- **Konfigen står i `oppsett/` i roten,** som Neo eksporterer den. En løsning og `felles/` har ingen egen `oppsett/`.
+- **Et krav sier selv hva det ble** (`blir`): en fil i `oppsett/` (`fil: oppsett/case-types/<nøkkel>.yaml`), et steg et
+  menneske gjør i Neo, eller et ønske til Neo, de to siste med `hvorfor`. Det finnes ingen egen sporingsfil.
+- **Et avvik fra mønstrene** står i `design/` med regelens id og grunnen (`avvik`, `grunn`), og meldes ikke på nytt.
+- **Konfigen er Neos format, uendret:** én fil per objekt i `oppsett/<mappa for typen>/`. Om innholdet er gyldig,
+  avgjør Neo i planen; sjekken av repoet ser bare at filene er Neos filer.
 
 ## Skriptene
 
 | Skript | Hva |
 |---|---|
-| `scripts/rules.mjs` | Reglene i mønstrene som kan sjekkes maskinelt, kjørt på konfigen slik den kjører i et miljø. Hver regel har samme id som i mønstrene |
-| `scripts/docs.mjs` | Stien til `docs/monstre` eller `docs/integrasjoner` |
+| `scripts/rules.mjs` | Reglene i mønstrene som kan sjekkes maskinelt, på uttrekket fra Neo (`list_case_types`, `list_custom_fields`, `list_workflows`) |
+| `scripts/docs.mjs` | Hvor mønstrene står i pluginen |
+
+## Dokumentasjonen
+
+| Fil | Hva |
+|---|---|
+| [`docs/monstre/`](docs/monstre/README.md) | Mønstrene for god konfig: grunnreglene, og reglene per flate med beslutningstabellene |
+| [`docs/esignering.md`](docs/esignering.md) | eSignering hos Digdir |
 
 ## Config
 
-| Nøkkel | Hva |
-|---|---|
-| `solution.off` | Reglene som er slått av i dette repoet, med id |
+| Nøkkel | Standard | Hva |
+|---|---|---|
+| `solution.off` | `[]` | Reglene i mønstrene som er slått av i dette repoet, med id |

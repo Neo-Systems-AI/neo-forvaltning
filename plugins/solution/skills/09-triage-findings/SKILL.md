@@ -38,8 +38,9 @@ for den som står i skjermen.
 
 - **Konfig:** rettingen i konfigen, med kravene og mønstrene den berører. Den bygges og testes på nytt.
 - **Ønske til Neo:** skrevet så Neo kan gjenskape det uten oss: stegene, det som skulle skje, det som skjedde, beviset,
-  og kravet det hindrer. Ingen personopplysninger, og ingen kundedata utover det som trengs. Kravet får «ønske til Neo»
-  som det det blir, til produktet har det.
+  og kravet det hindrer. Ingen personopplysninger, og ingen kundedata utover det som trengs. Ønsket står som et funn i
+  runden, merket som ønske til Neo, og går til den som forvalter (i `kunde.yaml`), som tar det videre til Neo. Kravet
+  får ønsket som det det ble (`blir: { onske, hvorfor }`), til produktet har det.
 - **Test:** rettingen i testplanen eller testcasen.
 
 Under pakkene: sammenhengene (hvilke pakker henger sammen eller må komme i en rekkefølge), og det personen avgjør.
