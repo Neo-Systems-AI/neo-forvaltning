@@ -49,9 +49,14 @@ Neo skriver filene selv (`export_config`). Formen, nøklene og pekerne er Neo si
 
 ## Det som ikke er med ennå
 
-`ikke-med.md` sier hva, per objekt. Typer Neo ikke skriver som fil ennå (behandlingsregler, maler, tagger og flere),
-styres i Neo og beskrives for hånd i `oppsett/manuelt/`. Når Neo tar dem med, kommer de med i neste snapshot av seg
-selv.
+`ikke-med.md` sier hva, per objekt. Det Neo ikke skriver som fil ennå (for eksempel skjemaer, lagrede visninger,
+saksnummeret, Innsikt og flyter som sender fra en postboks eller bruker en integrasjon), styres i Neo og beskrives for
+hånd i `oppsett/manuelt/`. Når Neo tar det med, kommer det med i neste snapshot av seg selv.
 
-Er svaret for stort for Claude Code (en organisasjon med mange flyter), kan grensen heves med miljøvariabelen
-`MAX_MCP_OUTPUT_TOKENS` før Claude Code startes.
+## Store organisasjoner
+
+Svaret fra `export_config` går gjennom modellen før det lagres i steg 1: hele oppsettet som tekst, og en flyt alene
+kan være flere hundre KB. Det koster kontekst, og over grensen Claude Code har for svaret fra et MCP-verktøy, kommer det
+ikke fram i sin helhet. Kommer svaret avkortet, eller sier Claude Code at det er for stort, stopp: et avkortet svar
+er ikke et snapshot. Det varige svaret er en jobb som henter med en maskinklient uten modellen imellom; til den finnes,
+ta snapshotet i en ny økt med lite annet i konteksten.

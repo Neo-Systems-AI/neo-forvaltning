@@ -47,6 +47,6 @@ description: Gjennomfører en godkjent plan i Neo sin sandkasse, én fil om gang
 
 ## Det som gjøres utenom
 
-- Det som står i `ikke-med.md` i snapshotet og i `oppsett/manuelt/` (maler, instrukser, tagger og annet Neo ikke
-  skriver som fil ennå), gjøres i Neo, og snapshotet etterpå viser at det er gjort.
+- Det som står i `ikke-med.md` i snapshotet og i `oppsett/manuelt/` (det Neo ikke skriver som fil ennå), gjøres i
+  Neo, og snapshotet etterpå viser at det er gjort.
 - Gjennomføringen gjøres av en person. En jobb i GitHub som gjør den etter godkjenningen, kommer senere.
