@@ -44,13 +44,12 @@ Neo skriver filene selv (`export_config`). Formen, nøklene og pekerne er Neo si
 
 ## Sandkassen og produksjonen
 
-`export_config` virker i begge. Filene er like når oppsettet er likt, fordi Neo skriver dem uten id-er: `git diff
---no-index <snapshotDir>/sandkasse <snapshotDir>/produksjon` viser hva som ikke er promotert ennå.
+Snapshotet tas av sandkassen. Hva som skiller den fra produksjonen, viser forhåndsvisningen av promoteringen i Neo.
 
 ## Det som ikke er med ennå
 
 `ikke-med.md` sier hva, per objekt. Det Neo ikke skriver som fil ennå (for eksempel skjemaer, lagrede visninger,
-saksnummeret, Innsikt og flyter som sender fra en postboks eller bruker en integrasjon), styres i Neo og beskrives for
+saksnummeret, Innsikt og flyter som tildeler til et bestemt medlem), styres i Neo og beskrives for
 hånd i `oppsett/manuelt/`. Når Neo tar det med, kommer det med i neste snapshot av seg selv.
 
 ## Store organisasjoner

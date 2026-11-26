@@ -36,20 +36,10 @@ description: Gjennomfører en godkjent plan i Neo sin sandkasse, én fil om gang
    `apply_config` for den fila på nytt.
 5. Snapshot av sandkassen (`/forvaltning:snapshot sandkasse`). Filene som ble gjennomført, er nå like i
    `oppsett/` og i snapshotet.
-6. Sjekk at produksjonen har miljøet flytene er bundet til. Integrasjonene og postboksene følger ikke med
-   promoteringen; produksjonen må ha sine egne med samme navn og adresse.
-
-   ```bash
-   node "${CLAUDE_PLUGIN_ROOT}/scripts/miljo-nokler.mjs" <oppsettDir>
-   ```
-
-   Er lista ikke tom, kall `check_config_refs` med `refs`: lista, gjennom MCP-serveren for **produksjonen**
-   (`neo-config.mjs --miljo produksjon`). Det er en lesing og endrer ingenting. Hvert token som ikke er `found`, er
-   noe kunden må sette opp i produksjonen før promoteringen («integrasjonen DOCUMASTER «Arkiv» finnes ikke»). Ellers
-   blir noden stående uten integrasjon og feiler først når den kjører.
-7. Før en rad i `beslutninger.md`: dato, hva, hvem som godkjente (PR-en), hvem som gjennomførte.
-8. Si til kunden at endringen ligger i sandkassen og kan promoteres, hva som bør testes før det, og hva som mangler i
-   produksjonen fra steg 6.
+6. Før en rad i `beslutninger.md`: dato, hva, hvem som godkjente (PR-en), hvem som gjennomførte.
+7. Si til kunden at endringen ligger i sandkassen og kan promoteres, og hva som bør testes før det. Forhåndsvisningen
+   av promoteringen i Neo viser om produksjonen mangler en integrasjon eller postboks en flyt er bundet til (et gap
+   på flyten): den settes opp i produksjonen, med samme navn og adresse, før promoteringen.
 
 ## Det Neo gjør med hver fil
 
