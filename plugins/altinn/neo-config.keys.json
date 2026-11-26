@@ -21,8 +21,7 @@
   ],
   "hemmeligheter": [
     {
-      "system": "altinn",
-      "navn": "subscription-key",
+      "path": "altinn.hemmeligheter.subscription-key",
       "valgfri": true,
       "doc": "Ocp-Apim-Subscription-Key, bare når kunden har fått en"
     }

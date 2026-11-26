@@ -100,3 +100,18 @@ test("en skill som viser til en annen skill, eller har en dato, stoppes", () => 
   assert.match(msgs[0], /^1: Viser til \/p:b/);
   assert.match(msgs[1], /^3: En dato/);
 });
+
+test("et skript som sammenligner process.argv[1] med seg selv uten å løse opp symlenkene, stoppes", () => {
+  const root = repo();
+  mkdirSync(join(root, "plugins/p/scripts"), { recursive: true });
+  writeFileSync(join(root, "plugins/p/scripts/a.mjs"), "if (process.argv[1] === fileURLToPath(import.meta.url)) main();\n");
+  writeFileSync(join(root, "plugins/p/scripts/b.mjs"), "if (import.meta.url === `file://${process.argv[1]}`) main();\n");
+  writeFileSync(join(root, "plugins/p/scripts/c.mjs"), "if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) main();\n");
+  assert.deepEqual(run(root).filter((x) => x.check === "inngang").map((x) => `${x.file}:${x.line}`), ["plugins/p/scripts/a.mjs:1", "plugins/p/scripts/b.mjs:1"]);
+});
+
+test("en hemmelighet i nøkkelfila er en sti under <system>.hemmeligheter", () => {
+  const root = repo();
+  writeFileSync(join(root, "plugins/p/neo-config.keys.json"), JSON.stringify({ plugin: "p", keys: [], hemmeligheter: [{ path: "p.hemmeligheter.a", doc: "d" }, { system: "p", navn: "b", doc: "d" }] }));
+  assert.deepEqual(run(root).map((x) => x.message), ['Hver hemmelighet har path (<system>.hemmeligheter.<navn>) og doc: {"system":"p","navn":"b","doc":"d"}']);
+});

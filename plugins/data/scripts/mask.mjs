@@ -4,7 +4,7 @@
 // står (saksnumre og beløp skal ikke forsvinne).
 //
 //   node mask.mjs < svar.json      eller      node mask.mjs <fil>
-import { readFileSync } from "node:fs";
+import { readFileSync, realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { maskFnr } from "./lib/fnr.mjs";
 
@@ -17,4 +17,4 @@ export function mask(text) {
     });
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) process.stdout.write(mask(readFileSync(process.argv[2] ?? 0, "utf8")));
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) process.stdout.write(mask(readFileSync(process.argv[2] ?? 0, "utf8")));

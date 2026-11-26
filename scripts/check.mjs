@@ -4,7 +4,8 @@
 // sammendraget, også de grønne, og hvert funn er en merknad på fila.
 //
 //   node scripts/check.mjs [--annotate] [--summary] [--root <dir>]
-import { appendFileSync, existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { appendFileSync, existsSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { dirname, join, relative } from "node:path";
 import { plan } from "./sync-shared.mjs";
 
@@ -16,6 +17,7 @@ export const CHECKS = [
   { name: "public", about: "Ingenting internt eller om en kunde: interne verter, repoer og stier" },
   { name: "config", about: "Hver plugin har neo-config.keys.json med nøklene den leser, og kopiene fra shared/ er de importene krever, like shared/" },
   { name: "docs", about: "Lenkene i docs/ og i pluginenes docs/ peker på filer og overskrifter som finnes, og hver regel i mønstrene det vises til, finnes" },
+  { name: "inngang", about: "Et skript som kjøres direkte, løser opp stiene før det sammenligner process.argv[1] med seg selv, så det kjører også gjennom en symlenke" },
   { name: "skills", about: "En skill viser ikke til en annen skill og har ingen datoer, og hver henvisning til en skill (/plugin:skill) i en fil viser til en som finnes" },
 ];
 
@@ -105,8 +107,8 @@ export function checkSkillRefs(root, plugins, files) {
   return f;
 }
 
-// Nøkkelfila sier hva pluginen leser fra .claude/neo.config.json, og hvilke referanser den trenger i
-// integrasjoner/<system>/hemmeligheter.yaml. Bare nøkler: hva som kopieres inn i pluginen, avledes av importene.
+// Nøkkelfila sier hva pluginen leser fra .claude/neo.config.json, også referansene til hvelvet den trenger under
+// <system>.hemmeligheter. Bare nøkler: hva som kopieres inn i pluginen, avledes av importene.
 export function checkKeys(root, p, keys) {
   const f = [];
   const kf = `plugins/${p}/neo-config.keys.json`;
@@ -115,7 +117,22 @@ export function checkKeys(root, p, keys) {
   if (extra.length) f.push({ check: "config", file: kf, message: `Nøkkelfila beskriver bare nøkler (keys, hemmeligheter), ikke ${extra.join(", ")}` });
   if (!Array.isArray(keys.keys)) f.push({ check: "config", file: kf, message: "keys mangler (en tom liste når pluginen ikke leser noe)" });
   for (const k of keys.keys ?? []) if (!k.path || !k.doc) f.push({ check: "config", file: kf, message: `Hver nøkkel har path og doc: ${JSON.stringify(k)}` });
-  for (const h of keys.hemmeligheter ?? []) if (!h.system || !h.navn || !h.doc) f.push({ check: "config", file: kf, message: `Hver hemmelighet har system, navn og doc: ${JSON.stringify(h)}` });
+  for (const h of keys.hemmeligheter ?? []) if (!/^[a-z]+\.hemmeligheter\.[\w<>-]+$/.test(String(h.path ?? "")) || !h.doc) f.push({ check: "config", file: kf, message: `Hver hemmelighet har path (<system>.hemmeligheter.<navn>) og doc: ${JSON.stringify(h)}` });
+  return f;
+}
+
+// Inngangen i et skript: «er det meg som kjøres?». process.argv[1] er stien slik den ble gitt, import.meta.url er
+// stien med symlenkene løst opp. Gjennom en symlenke (som mktemp -d på macOS) blir de ulike, og skriptet gjør ingenting
+// og gir exit 0 uten utskrift. Begge sider løses opp med realpathSync.
+export function checkEntry(root, files) {
+  const f = [];
+  for (const file of files) {
+    const rel = relative(root, file);
+    if (!rel.endsWith(".mjs") || rel.startsWith("check/node_modules/") || rel === "scripts/check.mjs" || rel === "scripts/check.test.mjs") continue;
+    readFileSync(file, "utf8").split("\n").forEach((line, i) => {
+      if (!/^\s*\/\//.test(line) && /process\.argv\[1\]/.test(line) && /import\.meta\.url|\bself\b/.test(line) && !/realpathSync\(process\.argv\[1\]\)/.test(line)) f.push({ check: "inngang", file: rel, line: i + 1, message: "Sammenligner process.argv[1] med stien til skriptet uten å løse opp symlenkene. Gjennom en symlenke kjører da ingenting, med exit 0. Bruk realpathSync på begge sider" });
+    });
+  }
   return f;
 }
 
@@ -207,6 +224,7 @@ export function run(root) {
     }
   }
   f.push(...checkSkillRefs(root, plugins, walk(root)));
+  f.push(...checkEntry(root, walk(root)));
   f.push(...checkDocs(root));
   f.push(...checkSkills(root, plugins));
   return f.map((x) => ({ level: "fail", ...x }));
@@ -223,7 +241,7 @@ export function summary(findings) {
   return `## Repoet\n\n| Sjekk | Hva den sjekker | Resultat |\n|---|---|---|\n${rows.join("\n")}\n${details}`;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   const args = process.argv.slice(2);
   const root = args.includes("--root") ? args[args.indexOf("--root") + 1] : process.cwd();
   const findings = run(root);

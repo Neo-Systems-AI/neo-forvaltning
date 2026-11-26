@@ -24,8 +24,7 @@
   ],
   "hemmeligheter": [
     {
-      "system": "documaster",
-      "navn": "client-secret",
+      "path": "documaster.hemmeligheter.client-secret",
       "doc": "Hemmeligheten til klienten"
     }
   ]

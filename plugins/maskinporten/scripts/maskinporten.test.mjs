@@ -1,22 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { generateKeyPairSync } from "node:crypto";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { claims, main } from "./maskinporten.mjs";
 
 const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
 const PEM = privateKey.export({ type: "pkcs8", format: "pem" });
-const root = mkdtempSync(join(tmpdir(), "mp-"));
-mkdirSync(join(root, "integrasjoner/maskinporten"), { recursive: true });
-writeFileSync(join(root, "integrasjoner/maskinporten/hemmeligheter.yaml"), "krr-nokkel: { kilde: azure-keyvault:kv-kunde/mp-krr, fil: true }\nfiks-nokkel: { kilde: azure-keyvault:kv-kunde/mp-fiks, fil: true }\n");
 
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
 const JWT = `${b64({ alg: "RS256" })}.${b64({ iss: "https://test.maskinporten.no/", client_id: "klient-test", consumer: { ID: "0192:999999999" }, scope: "krr:global/kontaktinformasjon.read", exp: 2000 })}.signatur-som-er-hemmelig`;
 
-const data = { version: 2, maskinporten: { miljo: "test", klienter: { krr: { clientId: "klient-test", scopes: ["krr:global/kontaktinformasjon.read"] }, fiks: { clientId: "klient-fiks" } } } };
-const config = { data, root };
+const data = { version: 2, maskinporten: { miljo: "test", klienter: { krr: { clientId: "klient-test", scopes: ["krr:global/kontaktinformasjon.read"] }, fiks: { clientId: "klient-fiks" } }, hemmeligheter: { "krr-nokkel": { kilde: "azure-keyvault:kv-kunde/mp-krr", fil: true }, "fiks-nokkel": { kilde: "azure-keyvault:kv-kunde/mp-fiks", fil: true } } } };
+const config = { data };
 const hemmelighet = () => PEM;
 const wk = () => new Response(JSON.stringify({ issuer: "https://test.maskinporten.no/", token_endpoint: "https://test.maskinporten.no/token" }), { headers: { "content-type": "application/json" } });
 const capture = () => {
@@ -54,12 +48,12 @@ test("avslaget fra Maskinporten kommer fram med error og error_description, og e
   assert.match(c.text(), /400 invalid_scope Scope krr:x not allowed/);
 });
 
-test("en nøkkel som ikke står i hemmeligheter.yaml, sies med stedet den skal stå", async () => {
+test("en nøkkel som ikke står under maskinporten.hemmeligheter, sies med stedet den skal stå", async () => {
   const c = capture();
   const d = structuredClone(data);
   d.maskinporten.klienter.altinn = { clientId: "a", scopes: ["x"] };
-  assert.equal(await main(["token", "altinn"], { fetchImpl: async () => wk(), config: { data: d, root }, hemmelighet, ...c }), 1);
-  assert.match(c.text(), /altinn-nokkel står ikke i integrasjoner\/maskinporten\/hemmeligheter.yaml/);
+  assert.equal(await main(["token", "altinn"], { fetchImpl: async () => wk(), config: { data: d }, hemmelighet, ...c }), 1);
+  assert.match(c.text(), /maskinporten.hemmeligheter.altinn-nokkel står ikke i .claude\/neo.config.json/);
 });
 
 test("well-known viser issuer og token-endepunkt for miljøet, og en feil gir exit 1", async () => {

@@ -1,6 +1,6 @@
 // YAML leses med pakken `yaml`, den samme leseren Neo bruker for konfigfilene, med låst versjon i package.json. En
-// nøkkel som står to ganger i samme kart, er en feil. Feilen sier linjen. Bygget til `shared/yaml.mjs`, så pluginene
-// leser YAML på samme måte som sjekken.
+// nøkkel som står to ganger i samme kart, er en feil. Feilen sier linjen. Bare sjekken leser YAML; config-fila
+// pluginene leser, er JSON.
 import { parse } from "yaml";
 
 export function parseYaml(text) {

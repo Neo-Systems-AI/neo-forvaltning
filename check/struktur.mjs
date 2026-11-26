@@ -7,10 +7,10 @@ import { dirs, entries, isMap, items, list, places, readYaml, text, yamlFiles } 
 
 export const CHECKS = [
   { name: "repo", about: "repo.yaml har typen, eieren og forvalteren, og repoet har mappene typen sier, og ingen andre" },
-  { name: "config", about: ".claude/neo.config.json har adressen, org-en og MCP-serveren i Neo, og ingen hemmelighet eller referanse" },
+  { name: "config", about: ".claude/neo.config.json har adressen, org-en og MCP-serveren i Neo, og hemmelighetene bare som referanser til hvelvet under <system>.hemmeligheter" },
   { name: "godkjenner", about: ".github/CODEOWNERS nevner en ekte godkjenner" },
   { name: "losning", about: "Hver løsning har losning.yaml med formål, eier, status og integrasjonene, og hva den bygger på når den er ute av utkast" },
-  { name: "integrasjon", about: "Hemmelighetene er referanser til hvelvet, og oppgavene hos kunden har status, hvem og det de venter på" },
+  { name: "integrasjon", about: "Ingen hemmelighet står med verdi, og oppgavene hos kunden har status, hvem og det de venter på" },
   { name: "persona", about: "Hver persona har navn og rolle, og hemmelighetene er referanser til hvelvet" },
   { name: "test", about: "Hver testcase har en beskrivelse og kravene den prøver, og kravene finnes" },
 ];
@@ -78,16 +78,17 @@ export function checkLayout(root, type) {
   for (const s of dirs(root, "integrasjoner")) {
     for (const n of entries(root, `integrasjoner/${s}`)) {
       const rel = `integrasjoner/${s}/${n}`;
-      if (["hos-kunden.md", "hemmeligheter.yaml", "README.md"].includes(n) || n.startsWith(".")) continue;
+      if (["hos-kunden.md", "README.md"].includes(n) || n.startsWith(".")) continue;
       if (n === "neo.yaml" || n === "miljoer") red(rel, `${n} har ingen form i Neo ennå. Ta den bort`);
-      else if (!dirs(root, `integrasjoner/${s}`).includes(n)) red(rel, "En integrasjon har hos-kunden.md, hemmeligheter.yaml, og artefaktene systemet trenger i en egen mappe");
+      else if (n === "hemmeligheter.yaml") red(rel, `Referansene til hvelvet står i .claude/neo.config.json under ${s}.hemmeligheter, ved siden av oppsettet av systemet. Flytt dem dit og ta bort fila`);
+      else if (!dirs(root, `integrasjoner/${s}`).includes(n)) red(rel, "En integrasjon har hos-kunden.md, og artefaktene systemet trenger i en egen mappe");
     }
   }
   return f;
 }
 
-// Config-fila pluginene leser: adressen, org-en og MCP-serveren i Neo. Ett miljø. Aldri en hemmelighet, og ingen
-// referanser: de står i integrasjoner/<system>/hemmeligheter.yaml.
+// Config-fila pluginene leser: adressen, org-en og MCP-serveren i Neo. Ett miljø. Aldri en hemmelighet: under
+// <system>.hemmeligheter står referansene til hvelvet, ved siden av oppsettet av systemet, og ingen andre steder.
 export function readConfig(root) {
   const file = ".claude/neo.config.json";
   if (!existsSync(join(root, file))) return { findings: [{ check: "config", file, message: "Mangler. Pluginene leser den; /solution:set-up-repo lager den" }] };
@@ -107,11 +108,16 @@ export function readConfig(root) {
   const walk = (x, path) => {
     if (!x || typeof x !== "object") return;
     if (!Array.isArray(x) && ("$env" in x || "kilde" in x)) {
-      f.push({ check: "config", file, message: `${path} er en referanse til en hemmelighet. Referansene står i integrasjoner/<system>/hemmeligheter.yaml, ikke her` });
+      f.push({ check: "config", file, message: `${path} er en referanse til en hemmelighet. Referansene står under <system>.hemmeligheter, ved siden av oppsettet av systemet` });
       return;
     }
     for (const [k, v] of Object.entries(x)) {
       const p = path ? `${path}.${k}` : k;
+      if (k === "hemmeligheter" && path && !path.includes(".")) {
+        if (!isMap(v)) f.push({ check: "config", file, message: `${p} er et kart fra navnet til referansen` });
+        else for (const [n, r] of Object.entries(v)) if (!isRef(r)) f.push({ check: "config", file, message: `${p}.${n} ${whyNotRef(r)}` });
+        continue;
+      }
       if (SECRET_KEY.test(k) && v != null && typeof v !== "object") f.push({ check: "config", file, message: `${p} står med verdi. Config-fila har ingen hemmeligheter` });
       walk(v, p);
     }
@@ -195,15 +201,7 @@ export function tasks(root) {
 export function checkIntegrasjoner(root) {
   const f = [];
   for (const system of dirs(root, "integrasjoner")) {
-    const sec = `integrasjoner/${system}/hemmeligheter.yaml`;
-    if (existsSync(join(root, sec))) {
-      const y = readYaml(root, sec, "integrasjon", f);
-      if (y != null) {
-        if (!isMap(y)) f.push({ check: "integrasjon", file: sec, message: "Fila er et kart fra navnet på hemmeligheten til referansen" });
-        else for (const [k, v] of Object.entries(y)) if (!isRef(v)) f.push({ check: "integrasjon", file: sec, message: `${k} ${whyNotRef(v)}` });
-      }
-    }
-    for (const rel of yamlFiles(root, `integrasjoner/${system}`).filter((x) => x !== sec)) {
+    for (const rel of yamlFiles(root, `integrasjoner/${system}`).filter((x) => x !== `integrasjoner/${system}/hemmeligheter.yaml`)) {
       const y = readYaml(root, rel, "integrasjon", f);
       if (y !== undefined) noSecrets(y, "integrasjon", rel, f);
     }
@@ -226,6 +224,32 @@ export function checkIntegrasjoner(root) {
 }
 
 export const personas = (root) => yamlFiles(root, PERSONAER).map((rel) => ({ rel, id: rel.split("/").pop().replace(/\.ya?ml$/, "") }));
+
+// Referansene i personaene, med hvor de står: til visningen av hemmelighetene i solution, som ikke har en egen
+// YAML-leser. Det som ikke kan leses eller ikke er en referanse, er et problem; verdien vises aldri.
+export function personaRefs(root) {
+  const list = [];
+  const problems = [];
+  for (const { rel } of personas(root)) {
+    const f = [];
+    const y = readYaml(root, rel, "persona", f);
+    if (y === undefined) {
+      problems.push({ sted: rel, why: f.map((x) => x.message).join("; ") });
+      continue;
+    }
+    const h = isMap(y) ? y.hemmeligheter : undefined;
+    if (h == null) continue;
+    if (!isMap(h)) {
+      problems.push({ sted: rel, why: "hemmeligheter er et kart fra navnet til referansen" });
+      continue;
+    }
+    for (const [navn, r] of Object.entries(h)) {
+      if (isRef(r)) list.push({ ...r, sted: `${rel}#${navn}` });
+      else problems.push({ sted: `${rel}#${navn}`, why: `ikke en referanse (${REF}). Står verdien her, ta den ut, legg den i hvelvet og bytt den` });
+    }
+  }
+  return { list, problems };
+}
 
 export function checkPersonaer(root) {
   const f = [];

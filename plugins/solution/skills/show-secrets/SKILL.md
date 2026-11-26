@@ -5,8 +5,8 @@ description: Viser hvilke hemmeligheter repoet viser til (nøklene og passordene
 
 # Hemmelighetene
 
-Verdien ligger i Azure Key Vault, i hvelvet til den som eier den. Repoet har bare referansen, der den brukes:
-`integrasjoner/<system>/hemmeligheter.yaml` og `hemmeligheter` i personaene i `test/personaer/`. Skriptene henter
+Verdien ligger i Azure Key Vault, i hvelvet til den som eier den. Repoet har bare referansen, der den brukes: under
+`<system>.hemmeligheter` i `.claude/neo.config.json`, og under `hemmeligheter` i personaene i `test/personaer/`. Skriptene henter
 verdien fra hvelvet ved hvert kall, med personens egen innlogging, så ingen verdi ligger lagret på disk. Formen på en
 referanse og navnene i hvelvet står i `${CLAUDE_PLUGIN_ROOT}/docs/hvelvet.md`.
 
@@ -22,7 +22,7 @@ hemmeligheten finnes og er slått på, aldri etter verdien. Med `--uten-az` vise
 - **«Nei: Please run 'az login'»:** be personen logge inn med `az login`, i tenanten til hvelvet.
 - **«Nei: Forbidden»:** personen har ikke tilgang til hvelvet. Kunden gir den (rollen står i oppskriften for hvelvet).
 - **❌ ikke en referanse:** en verdi står der referansen skulle stått. Ta den ut av fila, og be eieren bytte den: den er
-  ikke hemmelig lenger.
+  ikke hemmelig lenger. Er den committet, ligger den i historikken: byttet er det som hjelper.
 
 ## Regler
 

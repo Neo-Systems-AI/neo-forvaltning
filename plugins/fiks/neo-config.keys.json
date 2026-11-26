@@ -31,14 +31,12 @@
   ],
   "hemmeligheter": [
     {
-      "system": "fiks",
-      "navn": "integrasjon-passord",
+      "path": "fiks.hemmeligheter.integrasjon-passord",
       "valgfri": true,
       "doc": "Integrasjonens servicepassord (headeren IntegrasjonPassord), for SvarUt og Folkeregisteret"
     },
     {
-      "system": "fiks",
-      "navn": "svarinn-passord",
+      "path": "fiks.hemmeligheter.svarinn-passord",
       "valgfri": true,
       "doc": "Service-passordet til SvarInn-mottakersystemet"
     }

@@ -29,9 +29,9 @@ sitt i [Neo](https://neosystems.ai), og for den som lager Altinn-skjemaer.
 | [`entra`](./plugins/entra) | Microsoft-tenanten: SSO og SCIM med Entra ID, og en felles postboks fra Exchange Online |
 
 De som kaller Neo eller et eksternt system, leser én config-fil i kunderepoet, `.claude/neo.config.json`: Neo (adressen,
-org-en og MCP-serveren) og én del per plugin. Fila har ingen hemmeligheter og ingen referanser. Referansene til
-hvelvet står i `integrasjoner/<system>/hemmeligheter.yaml`, og skriptene henter verdien fra hvelvet ved hvert kall,
-med personens egen innlogging.
+org-en og MCP-serveren) og én del per plugin. Fila har ingen hemmeligheter: referansene til hvelvet står ved siden av
+oppsettet av systemet, under `<system>.hemmeligheter`, og skriptene henter verdien fra hvelvet ved hvert kall, med
+personens egen innlogging. Fila er JSON, så ingen plugin trenger en YAML-leser for å kalle et system.
 
 **Dokumentasjonen** står i pluginen som bruker den (`plugins/<plugin>/docs/`), så den følger pluginens versjon.
 Inngangen er [`docs/`](./docs/README.md): mønstrene for god konfig og oppskriftene for integrasjonene.

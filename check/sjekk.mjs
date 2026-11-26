@@ -12,7 +12,7 @@
 // --base er det endringen sammenlignes med for kildene (standard origin/main). Exit: 0 grønt (gult kan finnes),
 // 1 rødt, 2 feil bruk.
 import { execFileSync } from "node:child_process";
-import { appendFileSync, readFileSync } from "node:fs";
+import { appendFileSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { places } from "./les.mjs";
@@ -28,6 +28,9 @@ export function version() {
   if (typeof __VERSJON__ !== "undefined") return __VERSJON__;
   return JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "package.json"), "utf8")).version;
 }
+
+// Referansene i personaene, til visningen av hemmelighetene i solution: den bruker YAML-leseren til sjekken.
+export const personaRefs = struktur.personaRefs;
 
 export const CHECKS = [...struktur.CHECKS, ...kilder.CHECKS, ...krav.CHECKS, ...oppsett.CHECKS, ...regler.CHECKS];
 
@@ -160,5 +163,4 @@ export async function main(argv, { out = console.log, err = console.error, fetch
   }
 }
 
-const self = fileURLToPath(import.meta.url);
-if (process.argv[1] === self) process.exitCode = await main(process.argv.slice(2));
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) process.exitCode = await main(process.argv.slice(2));

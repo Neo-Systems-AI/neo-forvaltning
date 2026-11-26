@@ -1,0 +1,8 @@
+# Generert kode: diffen viser det som er skrevet for hånd, og CI stopper en generert fil som ikke er fersk.
+# Sjekken, bygget fra check/ med node check/build.mjs.
+plugins/solution/scripts/sjekk.mjs linguist-generated=true
+# Kopiene av shared/ som node scripts/sync-shared.mjs lager, og nøkkelfilene samlet.
+plugins/*/scripts/lib/*.mjs linguist-generated=true
+plugins/solution/scripts/nokler.json linguist-generated=true
+# Lockfila til sjekken.
+check/package-lock.json linguist-generated=true

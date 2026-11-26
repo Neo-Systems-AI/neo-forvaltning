@@ -9,6 +9,7 @@
 // v1 er standard: den gir én rad per nummer, også IKKE_REGISTRERT. v2 utelater personer som ikke finnes, så et tomt
 // v2-svar kan ikke skilles fra «ikke funnet». v1 sjekker heller ikke kontrollsifrene; et nummer med feil
 // kontrollsiffer gir IKKE_REGISTRERT, som en person som ikke finnes. Derfor sier skriptet fra om kontrollsifrene selv.
+import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./lib/argumenter.mjs";
 import { load, miljo, need } from "./lib/config.mjs";
@@ -44,13 +45,13 @@ export async function main(argv, { fetchImpl = fetch, config, hemmelighet = secr
     if (ugyldige.length) throw new Usage(`Et fødselsnummer er 11 sifre: ${ugyldige.join(", ")}`);
     if (ids.length > MAX_PER_CALL) throw new Usage(`KRR tar høyst ${MAX_PER_CALL} personer per kall`);
 
-    const { data, root } = config ?? load();
+    const { data } = config ?? load();
     const env = miljo(data, "krr", undefined, HOSTS);
     const navn = need(data, "krr.klient", "navnet på Maskinporten-klienten under maskinporten.klienter");
     say(out, `Miljø: ${env} (${HOSTS[env]}), klient: ${navn}`);
     for (const id of ids.filter((id) => !gyldigFnr(id))) say(err, `MERK: ${id} har ugyldige kontrollsifre (sendes likevel; v1 svarer IKKE_REGISTRERT, v2 svarer 400)`);
 
-    const t = await tokenFor({ data, root, navn, miljo: env, scopes: undefined, fetchImpl, hemmelighet, secrets }).catch((e) => {
+    const t = await tokenFor({ data, navn, miljo: env, scopes: undefined, fetchImpl, hemmelighet, secrets }).catch((e) => {
       if (/Ingen scopes/.test(e.message)) throw new Error(`${e.message}. KRR trenger ${SCOPE}`);
       throw e;
     });
@@ -72,4 +73,4 @@ export async function main(argv, { fetchImpl = fetch, config, hemmelighet = secr
   }
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) process.exitCode = await main(process.argv.slice(2));
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) process.exitCode = await main(process.argv.slice(2));

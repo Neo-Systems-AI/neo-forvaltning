@@ -47,10 +47,10 @@ repo.yaml                     typen (kunde eller standard), eieren og forvaltere
 felles/                       det som gjelder hele org-en, med de samme leddene som en løsning
   kilder/ forstaelse/         det som gjelder hele kunden (bare i et kunderepo)
   krav/ design/ oppsett/      det som er felles for flere løsninger
-integrasjoner/<system>/       hos-kunden.md, hemmeligheter.yaml, og artefaktene systemet trenger
+integrasjoner/<system>/       hos-kunden.md, og artefaktene systemet trenger
 losninger/<losning>/          losning.yaml, kilder/, forstaelse/, krav/, design/, oppsett/, test/
 test/personaer/               testbrukerne, felles for alle løsningene
-.claude/neo.config.json       Neo (url, org, mcpServer) og én del per plugin; ingen hemmeligheter
+.claude/neo.config.json       Neo (url, org, mcpServer) og én del per plugin, med referansene til hvelvet
 ```
 
 - **Mappene har navn, ikke tall.** Rekkefølgen står i løypa.
@@ -66,8 +66,8 @@ test/personaer/               testbrukerne, felles for alle løsningene
 | Skript | Hva |
 |---|---|
 | `scripts/sjekk.mjs` | Sjekken av repoet: strukturen for typen, kildene på endringen, påstandene, kravene og `blir`, konfigfilene mot skjemaet fra Neo, samme objekt to steder, og mønstrene. Bygget fra `check/` i dette repoet; endres der |
-| `scripts/check-setup.mjs` | Hva hver plugin som er på, trenger i config-fila og i `hemmeligheter.yaml`, og hva som mangler |
-| `scripts/vis-hemmeligheter.mjs` | Referansene til hvelvet, og om personen når dem. Aldri verdier |
+| `scripts/check-setup.mjs` | Hva hver plugin som er på, trenger i config-fila, også referansene under `<system>.hemmeligheter`, og hva som mangler |
+| `scripts/vis-hemmeligheter.mjs` | Referansene til hvelvet i config-fila og i personaene, og om personen når dem. Aldri verdier |
 | `scripts/lib/config.mjs` | Neo for repoet: adressen, org-en, MCP-serveren og om den står i `.mcp.json` |
 
 ```bash

@@ -8,6 +8,7 @@
 //
 // Miljøet er --miljo, ellers `enhetsregisteret.miljo` i config-fila; uten noen av dem stopper skriptet og sier det.
 // Uten orgnr brukes `enhetsregisteret.orgnr`. `test` er Brønnøysundregistrenes testmiljø med oppdiktede data.
+import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./lib/argumenter.mjs";
 import { get, load, miljo } from "./lib/config.mjs";
@@ -71,4 +72,4 @@ export async function main(argv, { fetchImpl = fetch, config, out = console.log,
   }
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) process.exitCode = await main(process.argv.slice(2));
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) process.exitCode = await main(process.argv.slice(2));

@@ -14,7 +14,7 @@ Kunden eier instansen, klienten og hemmeligheten. Vi eier koden.
 - **En klient med client credentials** mot instansen: klient-ID, hemmelighet, token-adresse og scope. Documaster setter
   den opp, enten i sin egen IdP (scope `openid`) eller i kundens Entra ID (scope `api://<app-id>/.default`).
   Klienten trenger bare lesetilgang til arkivdelene feilsøket gjelder.
-- **Hemmeligheten i kundens nøkkelhvelv.** Referansen står i `integrasjoner/documaster/hemmeligheter.yaml` i kunderepoet. Hele oppsettet hos kunden står i [`docs/documaster.md`](./docs/documaster.md).
+- **Hemmeligheten i kundens nøkkelhvelv.** Referansen står under `documaster.hemmeligheter` i config-fila i kunderepoet. Hele oppsettet hos kunden står i [`docs/documaster.md`](./docs/documaster.md).
 
 ## Oppsett
 
@@ -25,14 +25,11 @@ I `.claude/neo.config.json` i kundens repo, for instansen repoet arbeider mot:
   "apiUrl": "https://<instans>:8083",
   "tokenUrl": "https://<idp>/token",
   "clientId": "<klient-id>",
-  "scope": "openid"
+  "scope": "openid",
+  "hemmeligheter": {
+    "client-secret": { "kilde": "azure-keyvault:<hvelv>/documaster-client-secret" }
+  }
 }
-```
-
-Og hemmeligheten i `integrasjoner/documaster/hemmeligheter.yaml`:
-
-```yaml
-client-secret: { kilde: azure-keyvault:<hvelv>/documaster-client-secret }
 ```
 
 - **`apiUrl` er API-et, ikke nettsiden.** API-et svarer på port 8083; nettsiden på `/v2/` svarer 200 med HTML på alle

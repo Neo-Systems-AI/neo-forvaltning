@@ -1,9 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { generateKeyPairSync } from "node:crypto";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { gyldigFnr } from "./lib/fnr.mjs";
 import { COMMANDS, main } from "./fiks.mjs";
 
@@ -19,13 +16,9 @@ const PEM = privateKey.export({ type: "pkcs8", format: "pem" });
 const data = {
   version: 2,
   fiks: { miljo: "test", klient: "fiks", integrasjon: "integrasjon-1", svarutKonto: "konto-1", svarinnMottakersystem: "mottaker-1", folkeregisterRolle: "rolle-1" },
-  maskinporten: { miljo: "test", klienter: { fiks: { clientId: "klient-1" } } },
+  maskinporten: { miljo: "test", klienter: { fiks: { clientId: "klient-1" } }, hemmeligheter: { "fiks-nokkel": { kilde: "azure-keyvault:hvelv/nokkel", fil: true } } },
 };
-const root = mkdtempSync(join(tmpdir(), "fiks-"));
-for (const [d, t] of [["fiks", "integrasjon-passord: { kilde: azure-keyvault:hvelv/integrasjon }\nsvarinn-passord: { kilde: azure-keyvault:hvelv/svarinn }\n"], ["maskinporten", "fiks-nokkel: { kilde: azure-keyvault:hvelv/nokkel, fil: true }\n"]]) {
-  mkdirSync(join(root, "integrasjoner", d), { recursive: true });
-  writeFileSync(join(root, "integrasjoner", d, "hemmeligheter.yaml"), t);
-}
+data.fiks.hemmeligheter = { "integrasjon-passord": { kilde: "azure-keyvault:hvelv/integrasjon" }, "svarinn-passord": { kilde: "azure-keyvault:hvelv/svarinn" } };
 const hemmelighet = (r) => ({ "azure-keyvault:hvelv/integrasjon": PASSORD["integrasjon-passord"], "azure-keyvault:hvelv/svarinn": PASSORD["svarinn-passord"], "azure-keyvault:hvelv/nokkel": PEM })[r.kilde];
 
 // Maskinporten og Fiks uten nettverk. Svaret fra Fiks gjentar hemmelighetene kallet brukte, og fødselsnummeret, så
@@ -44,7 +37,7 @@ function fake({ status = 200, body } = {}) {
 
 async function exec(argv, f, cfg = data, h = hemmelighet) {
   const lines = [];
-  const code = await main(argv, { config: { data: cfg, root }, fetchImpl: f.fetchImpl, hemmelighet: h, out: (s) => lines.push(s), err: (s) => lines.push(s) });
+  const code = await main(argv, { config: { data: cfg }, fetchImpl: f.fetchImpl, hemmelighet: h, out: (s) => lines.push(s), err: (s) => lines.push(s) });
   return { code, text: lines.join("\n") };
 }
 
@@ -116,7 +109,7 @@ test("en hemmelighet som ikke kan hentes, sier referansen, og intet kall går", 
   };
   const { code, text } = await exec(["svarinn", "liste"], f, data, nei);
   assert.equal(code, 1);
-  assert.match(text, /integrasjoner\/fiks\/hemmeligheter.yaml#svarinn-passord fra hvelvet \(azure-keyvault:hvelv\/svarinn\)/);
+  assert.match(text, /fiks.hemmeligheter.svarinn-passord fra hvelvet \(azure-keyvault:hvelv\/svarinn\)/);
   assert.equal(f.calls.length, 0);
 });
 

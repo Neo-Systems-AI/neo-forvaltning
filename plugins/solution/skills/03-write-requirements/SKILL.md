@@ -8,7 +8,7 @@ description: Skriver kravene til en løsning fra forståelsen - ett krav per vil
 Kravene sier hva som må holde, ikke hvordan. De er det oppsettet bygges fra og testene sjekker, så et krav som mangler
 her, blir ikke bygget, og et krav som er feil, blir bygget feil.
 
-**Inn:** forståelsen i løsningen og i `felles/forstaelse/`. **Ut:** `krav/` i løsningen, som items, og det som er felles
+**Inn:** forståelsen i løsningen, og i `felles/forstaelse/` i et kunderepo. **Ut:** `krav/` i løsningen, som items, og det som er felles
 for flere løsninger i `felles/krav/`. Formen på et krav står i repoets regel for mappa (`.claude/rules/`).
 
 ## Et krav
@@ -41,6 +41,9 @@ for flere løsninger i `felles/krav/`. Formen på et krav står i repoets regel 
 - **Et krav fra hjemmelen tas aldri bort.** Det kan oppfylles på en annen måte enn i dag, men ikke forenkles vekk.
 - **Dagens prosess er ikke et krav.** At noe gjøres i dag, er en kilde til forståelsen, ikke en grunn til at det skal
   være slik.
+- **I et repo for standardløsninger** (`type: standard` i `repo.yaml`) finnes ingen kunde å forstå, så `felles/` har
+  ikke `kilder/` eller `forstaelse/`. Et krav i `felles/krav/` viser der til forståelsen i en løsning, for eksempel
+  `../losninger/<losning>/forstaelse/forlop.md`.
 - **Ingen krav uten kilde.** Det som er en god idé, men ikke står noe sted, legges fram som et forslag, ikke skrives som
   et krav.
 

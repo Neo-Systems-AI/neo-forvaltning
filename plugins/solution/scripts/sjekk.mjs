@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Sjekken 1.0.0 for et repo laget fra neo-forvaltning-mal. GENERERT fra check/ i neo-forvaltning med
+// Sjekken 1.1.0 for et repo laget fra neo-forvaltning-mal. GENERERT fra check/ i neo-forvaltning med
 // `node check/build.mjs`: endres der, ikke her. Én fil uten avhengigheter (yaml 2.9.1, ajv 8.20.0 er bygget inn).
 import { createRequire as __createRequire } from "node:module";
 const require = __createRequire(import.meta.url);
@@ -8496,12 +8496,12 @@ var require_util = __commonJS({
     }
     exports.alwaysValidSchema = alwaysValidSchema;
     function checkUnknownRules(it, schema = it.schema) {
-      const { opts, self: self2 } = it;
+      const { opts, self } = it;
       if (!opts.strictSchema)
         return;
       if (typeof schema === "boolean")
         return;
-      const rules = self2.RULES.keywords;
+      const rules = self.RULES.keywords;
       for (const key in schema) {
         if (!rules[key])
           checkStrictMode(it, `unknown keyword: "${key}"`);
@@ -8892,8 +8892,8 @@ var require_applicability = __commonJS({
     init_define_REGEL_IDER();
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.shouldUseRule = exports.shouldUseGroup = exports.schemaHasRulesForType = void 0;
-    function schemaHasRulesForType({ schema, self: self2 }, type) {
-      const group = self2.RULES.types[type];
+    function schemaHasRulesForType({ schema, self }, type) {
+      const group = self.RULES.types[type];
       return group && group !== true && shouldUseGroup(schema, group);
     }
     exports.schemaHasRulesForType = schemaHasRulesForType;
@@ -9362,7 +9362,7 @@ var require_keyword = __commonJS({
       return !schemaType.length || schemaType.some((st) => st === "array" ? Array.isArray(schema) : st === "object" ? schema && typeof schema == "object" && !Array.isArray(schema) : typeof schema == st || allowUndefined && typeof schema == "undefined");
     }
     exports.validSchemaType = validSchemaType;
-    function validateKeywordUsage({ schema, opts, self: self2, errSchemaPath }, def, keyword) {
+    function validateKeywordUsage({ schema, opts, self, errSchemaPath }, def, keyword) {
       if (Array.isArray(def.keyword) ? !def.keyword.includes(keyword) : def.keyword !== keyword) {
         throw new Error("ajv implementation error");
       }
@@ -9373,9 +9373,9 @@ var require_keyword = __commonJS({
       if (def.validateSchema) {
         const valid = def.validateSchema(schema[keyword]);
         if (!valid) {
-          const msg = `keyword "${keyword}" value is invalid at path "${errSchemaPath}": ` + self2.errorsText(def.validateSchema.errors);
+          const msg = `keyword "${keyword}" value is invalid at path "${errSchemaPath}": ` + self.errorsText(def.validateSchema.errors);
           if (opts.validateSchema === "log")
-            self2.logger.error(msg);
+            self.logger.error(msg);
           else
             throw new Error(msg);
         }
@@ -9847,11 +9847,11 @@ var require_validate = __commonJS({
       }
       (0, boolSchema_1.boolOrEmptySchema)(it, valid);
     }
-    function schemaCxtHasRules({ schema, self: self2 }) {
+    function schemaCxtHasRules({ schema, self }) {
       if (typeof schema == "boolean")
         return !schema;
       for (const key in schema)
-        if (self2.RULES.all[key])
+        if (self.RULES.all[key])
           return true;
       return false;
     }
@@ -9880,9 +9880,9 @@ var require_validate = __commonJS({
       schemaKeywords(it, types, !checkedTypes, errsCount);
     }
     function checkRefsAndKeywords(it) {
-      const { schema, errSchemaPath, opts, self: self2 } = it;
-      if (schema.$ref && opts.ignoreKeywordsWithRef && (0, util_1.schemaHasRulesButRef)(schema, self2.RULES)) {
-        self2.logger.warn(`$ref: keywords ignored in schema at path "${errSchemaPath}"`);
+      const { schema, errSchemaPath, opts, self } = it;
+      if (schema.$ref && opts.ignoreKeywordsWithRef && (0, util_1.schemaHasRulesButRef)(schema, self.RULES)) {
+        self.logger.warn(`$ref: keywords ignored in schema at path "${errSchemaPath}"`);
       }
     }
     function checkNoDefault(it) {
@@ -9928,8 +9928,8 @@ var require_validate = __commonJS({
         gen.assign((0, codegen_1._)`${evaluated}.items`, items2);
     }
     function schemaKeywords(it, types, typeErrors, errsCount) {
-      const { gen, schema, data, allErrors, opts, self: self2 } = it;
-      const { RULES: RULES2 } = self2;
+      const { gen, schema, data, allErrors, opts, self } = it;
+      const { RULES: RULES2 } = self;
       if (schema.$ref && (opts.ignoreKeywordsWithRef || !(0, util_1.schemaHasRulesButRef)(schema, RULES2))) {
         gen.block(() => keywordCode(it, "$ref", RULES2.all.$ref.definition));
         return;
@@ -12375,11 +12375,11 @@ var require_ref = __commonJS({
       schemaType: "string",
       code(cxt) {
         const { gen, schema: $ref, it } = cxt;
-        const { baseId, schemaEnv: env, validateName, opts, self: self2 } = it;
+        const { baseId, schemaEnv: env, validateName, opts, self } = it;
         const { root } = env;
         if (($ref === "#" || $ref === "#/") && baseId === root.baseId)
           return callRootRef();
-        const schOrEnv = compile_1.resolveRef.call(self2, root, baseId, $ref);
+        const schOrEnv = compile_1.resolveRef.call(self, root, baseId, $ref);
         if (schOrEnv === void 0)
           throw new ref_error_1.default(it.opts.uriResolver, baseId, $ref);
         if (schOrEnv instanceof compile_1.SchemaEnv)
@@ -13939,7 +13939,7 @@ var require_format = __commonJS({
       error,
       code(cxt, ruleType) {
         const { gen, data, $data, schema, schemaCode, it } = cxt;
-        const { opts, errSchemaPath, schemaEnv, self: self2 } = it;
+        const { opts, errSchemaPath, schemaEnv, self } = it;
         if (!opts.validateFormats)
           return;
         if ($data)
@@ -13948,7 +13948,7 @@ var require_format = __commonJS({
           validateFormat();
         function validate$DataFormat() {
           const fmts = gen.scopeValue("formats", {
-            ref: self2.formats,
+            ref: self.formats,
             code: opts.code.formats
           });
           const fDef = gen.const("fDef", (0, codegen_1._)`${fmts}[${schemaCode}]`);
@@ -13968,7 +13968,7 @@ var require_format = __commonJS({
           }
         }
         function validateFormat() {
-          const formatDef = self2.formats[schema];
+          const formatDef = self.formats[schema];
           if (!formatDef) {
             unknownFormat();
             return;
@@ -13980,7 +13980,7 @@ var require_format = __commonJS({
             cxt.pass(validCondition());
           function unknownFormat() {
             if (opts.strictSchema === false) {
-              self2.logger.warn(unknownMsg());
+              self.logger.warn(unknownMsg());
               return;
             }
             throw new Error(unknownMsg());
@@ -14422,7 +14422,7 @@ var require_ajv = __commonJS({
 // sjekk.mjs
 init_define_REGEL_IDER();
 import { execFileSync as execFileSync2 } from "node:child_process";
-import { appendFileSync, readFileSync as readFileSync8 } from "node:fs";
+import { appendFileSync, readFileSync as readFileSync8, realpathSync } from "node:fs";
 import { dirname as dirname2, join as join8 } from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
 
@@ -14539,10 +14539,10 @@ import { existsSync as existsSync2, readFileSync as readFileSync2 } from "node:f
 import { join as join2 } from "node:path";
 var CHECKS = [
   { name: "repo", about: "repo.yaml har typen, eieren og forvalteren, og repoet har mappene typen sier, og ingen andre" },
-  { name: "config", about: ".claude/neo.config.json har adressen, org-en og MCP-serveren i Neo, og ingen hemmelighet eller referanse" },
+  { name: "config", about: ".claude/neo.config.json har adressen, org-en og MCP-serveren i Neo, og hemmelighetene bare som referanser til hvelvet under <system>.hemmeligheter" },
   { name: "godkjenner", about: ".github/CODEOWNERS nevner en ekte godkjenner" },
   { name: "losning", about: "Hver l\xF8sning har losning.yaml med form\xE5l, eier, status og integrasjonene, og hva den bygger p\xE5 n\xE5r den er ute av utkast" },
-  { name: "integrasjon", about: "Hemmelighetene er referanser til hvelvet, og oppgavene hos kunden har status, hvem og det de venter p\xE5" },
+  { name: "integrasjon", about: "Ingen hemmelighet st\xE5r med verdi, og oppgavene hos kunden har status, hvem og det de venter p\xE5" },
   { name: "persona", about: "Hver persona har navn og rolle, og hemmelighetene er referanser til hvelvet" },
   { name: "test", about: "Hver testcase har en beskrivelse og kravene den pr\xF8ver, og kravene finnes" }
 ];
@@ -14598,9 +14598,10 @@ function checkLayout(root, type) {
   for (const s of dirs(root, "integrasjoner")) {
     for (const n of entries(root, `integrasjoner/${s}`)) {
       const rel = `integrasjoner/${s}/${n}`;
-      if (["hos-kunden.md", "hemmeligheter.yaml", "README.md"].includes(n) || n.startsWith(".")) continue;
+      if (["hos-kunden.md", "README.md"].includes(n) || n.startsWith(".")) continue;
       if (n === "neo.yaml" || n === "miljoer") red(rel, `${n} har ingen form i Neo enn\xE5. Ta den bort`);
-      else if (!dirs(root, `integrasjoner/${s}`).includes(n)) red(rel, "En integrasjon har hos-kunden.md, hemmeligheter.yaml, og artefaktene systemet trenger i en egen mappe");
+      else if (n === "hemmeligheter.yaml") red(rel, `Referansene til hvelvet st\xE5r i .claude/neo.config.json under ${s}.hemmeligheter, ved siden av oppsettet av systemet. Flytt dem dit og ta bort fila`);
+      else if (!dirs(root, `integrasjoner/${s}`).includes(n)) red(rel, "En integrasjon har hos-kunden.md, og artefaktene systemet trenger i en egen mappe");
     }
   }
   return f;
@@ -14624,11 +14625,16 @@ function readConfig(root) {
   const walk2 = (x, path) => {
     if (!x || typeof x !== "object") return;
     if (!Array.isArray(x) && ("$env" in x || "kilde" in x)) {
-      f.push({ check: "config", file, message: `${path} er en referanse til en hemmelighet. Referansene st\xE5r i integrasjoner/<system>/hemmeligheter.yaml, ikke her` });
+      f.push({ check: "config", file, message: `${path} er en referanse til en hemmelighet. Referansene st\xE5r under <system>.hemmeligheter, ved siden av oppsettet av systemet` });
       return;
     }
     for (const [k, v] of Object.entries(x)) {
       const p = path ? `${path}.${k}` : k;
+      if (k === "hemmeligheter" && path && !path.includes(".")) {
+        if (!isMap(v)) f.push({ check: "config", file, message: `${p} er et kart fra navnet til referansen` });
+        else for (const [n, r] of Object.entries(v)) if (!isRef(r)) f.push({ check: "config", file, message: `${p}.${n} ${whyNotRef(r)}` });
+        continue;
+      }
       if (SECRET_KEY.test(k) && v != null && typeof v !== "object") f.push({ check: "config", file, message: `${p} st\xE5r med verdi. Config-fila har ingen hemmeligheter` });
       walk2(v, p);
     }
@@ -14702,15 +14708,7 @@ function tasks(root) {
 function checkIntegrasjoner(root) {
   const f = [];
   for (const system of dirs(root, "integrasjoner")) {
-    const sec = `integrasjoner/${system}/hemmeligheter.yaml`;
-    if (existsSync2(join2(root, sec))) {
-      const y = readYaml(root, sec, "integrasjon", f);
-      if (y != null) {
-        if (!isMap(y)) f.push({ check: "integrasjon", file: sec, message: "Fila er et kart fra navnet p\xE5 hemmeligheten til referansen" });
-        else for (const [k, v] of Object.entries(y)) if (!isRef(v)) f.push({ check: "integrasjon", file: sec, message: `${k} ${whyNotRef(v)}` });
-      }
-    }
-    for (const rel of yamlFiles(root, `integrasjoner/${system}`).filter((x) => x !== sec)) {
+    for (const rel of yamlFiles(root, `integrasjoner/${system}`).filter((x) => x !== `integrasjoner/${system}/hemmeligheter.yaml`)) {
       const y = readYaml(root, rel, "integrasjon", f);
       if (y !== void 0) noSecrets(y, "integrasjon", rel, f);
     }
@@ -14732,6 +14730,29 @@ function checkIntegrasjoner(root) {
   return f;
 }
 var personas = (root) => yamlFiles(root, PERSONAER).map((rel) => ({ rel, id: rel.split("/").pop().replace(/\.ya?ml$/, "") }));
+function personaRefs(root) {
+  const list2 = [];
+  const problems = [];
+  for (const { rel } of personas(root)) {
+    const f = [];
+    const y = readYaml(root, rel, "persona", f);
+    if (y === void 0) {
+      problems.push({ sted: rel, why: f.map((x) => x.message).join("; ") });
+      continue;
+    }
+    const h = isMap(y) ? y.hemmeligheter : void 0;
+    if (h == null) continue;
+    if (!isMap(h)) {
+      problems.push({ sted: rel, why: "hemmeligheter er et kart fra navnet til referansen" });
+      continue;
+    }
+    for (const [navn, r] of Object.entries(h)) {
+      if (isRef(r)) list2.push({ ...r, sted: `${rel}#${navn}` });
+      else problems.push({ sted: `${rel}#${navn}`, why: `ikke en referanse (${REF}). St\xE5r verdien her, ta den ut, legg den i hvelvet og bytt den` });
+    }
+  }
+  return { list: list2, problems };
+}
 function checkPersonaer(root) {
   const f = [];
   for (const { rel } of personas(root)) {
@@ -15167,9 +15188,10 @@ function render(root) {
 
 // sjekk.mjs
 function version() {
-  if (true) return "1.0.0";
+  if (true) return "1.1.0";
   return JSON.parse(readFileSync8(join8(dirname2(fileURLToPath2(import.meta.url)), "package.json"), "utf8")).version;
 }
+var personaRefs2 = personaRefs;
 var CHECKS6 = [...CHECKS, ...CHECKS2, ...CHECKS3, ...CHECKS4, ...CHECKS5];
 async function run(root, { base = "origin/main", fetchJson } = {}) {
   const f = [];
@@ -15304,12 +15326,12 @@ async function main(argv, { out = console.log, err = console.error, fetchJson } 
     return 1;
   }
 }
-var self = fileURLToPath2(import.meta.url);
-if (process.argv[1] === self) process.exitCode = await main(process.argv.slice(2));
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath2(import.meta.url))) process.exitCode = await main(process.argv.slice(2));
 export {
   CHECKS6 as CHECKS,
   main,
   parseArgs,
+  personaRefs2 as personaRefs,
   run,
   summary,
   version

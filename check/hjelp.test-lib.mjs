@@ -61,7 +61,7 @@ export const REGISTER = "| Id | Hva | Lagret |\n|---|---|---|\n| K1 | Forskrifte
 // Et repo slik det skal være: en løsning med kilde, forståelse, krav som ble en fil, og fila.
 export const GOOD = () => ({
   "repo.yaml": REPO(),
-  ".claude/neo.config.json": CONFIG,
+  ".claude/neo.config.json": JSON.stringify({ ...JSON.parse(CONFIG), maskinporten: { miljo: "test", hemmeligheter: { "altinn-nokkel": { kilde: "azure-keyvault:kv-kunde/altinn-nokkel", fil: true } } } }),
   ".github/CODEOWNERS": "* @eier/godkjennere\n",
   "felles/kilder/kilder.md": "| Id | Hva |\n|---|---|\n| K1 | Organisasjonskartet |\n",
   "felles/forstaelse/roller-og-tilgang.md": "# Roller\n\n- Seksjonen har fem saksbehandlere. [K1]\n",
@@ -73,6 +73,5 @@ export const GOOD = () => ({
   "losninger/parkering/oppsett/case-types/parkering.yaml": caseType("parkering"),
   "losninger/parkering/test/testcaser/innen-fristen.yaml": "beskrivelse: En søknad innen fristen\npersona: saksbehandler\nforventet:\n  krav: [frist]\n",
   "test/personaer/saksbehandler.yaml": "navn: Sara Saksbehandler\nrolle: saksbehandler\nhemmeligheter:\n  passord: { kilde: azure-keyvault:kv-test/sara }\n",
-  "integrasjoner/altinn/hemmeligheter.yaml": "altinn-nokkel:\n  kilde: azure-keyvault:kv-kunde/altinn-nokkel\n  fil: true\n",
   "integrasjoner/altinn/hos-kunden.md": "## delegering Deleger tilgangen\n\n```yaml\nstatus: ikke-startet\nhvem: Hovedadministratoren\n```\n",
 });

@@ -56,6 +56,9 @@ integrasjoner den bruker).
 
 - **Fra kravene, ikke fra dagens prosess.** Et valg som bare gjenskaper hvordan det gjøres i dag, trenger et krav bak
   seg.
+- **I et repo for standardløsninger** er det ingen kunde: `felles/` er det flere standardløsninger deler, og har ikke
+  `kilder/` eller `forstaelse/`. Et felles valg bygger på kravene i `felles/krav/`, som viser til forståelsen i en
+  løsning.
 - **Neos standard holder** der kravene ikke sier noe annet. Et avvik fra standarden er et valg som skal begrunnes.
 - **Det som ikke har en form i Neo, finnes ikke i repoet.** Et steg et menneske gjør i Neo, står i kravet det
   oppfyller (`blir: { steg, hvorfor }`), ikke i en egen fil.

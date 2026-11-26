@@ -9,7 +9,8 @@
 // hva hver plugin trenger uten å lete etter dem der Claude Code har installert dem.
 //
 //   node scripts/sync-shared.mjs [--root <dir>]
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { join, relative } from "node:path";
 
 const walk = (dir) => (existsSync(dir) ? readdirSync(dir).flatMap((n) => (statSync(join(dir, n)).isDirectory() ? walk(join(dir, n)) : [join(dir, n)])) : []);
@@ -78,7 +79,7 @@ export function keysText(root, plugins) {
   return `${JSON.stringify(all, null, 2)}\n`;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   const args = process.argv.slice(2);
   const root = args.includes("--root") ? args[args.indexOf("--root") + 1] : process.cwd();
   for (const i of plan(root)) {

@@ -18,22 +18,33 @@ testorganisasjonene og testidentitetene forvalteren bygger med.
 
 ## Referansene i repoet
 
-En referanse sier hvor verdien ligger. Verdien står aldri i en fil:
+En referanse sier hvor verdien ligger. Verdien står aldri i en fil. For et system står referansene ved siden av
+oppsettet av systemet i `.claude/neo.config.json`, under `<system>.hemmeligheter`:
 
-```yaml
-# integrasjoner/fiks/hemmeligheter.yaml
-svarinn-passord:
-  kilde: azure-keyvault:<hvelv>/fiks-svarinn-service-passord
+```json
+"fiks": {
+  "miljo": "test",
+  "hemmeligheter": {
+    "svarinn-passord": { "kilde": "azure-keyvault:<hvelv>/fiks-svarinn-service-passord" }
+  }
+},
+"maskinporten": {
+  "klienter": { "fiks": { "clientId": "<klient-ID>" } },
+  "hemmeligheter": {
+    "fiks-nokkel": { "kilde": "azure-keyvault:<hvelv>/<navn>", "fil": true }
+  }
+}
 ```
 
+For en persona står de under `hemmeligheter` i personaen i `test/personaer/`:
+
 ```yaml
-# integrasjoner/maskinporten/hemmeligheter.yaml: nøkkelen til klienten «fiks» i maskinporten.klienter
-fiks-nokkel: { kilde: azure-keyvault:<hvelv>/<navn>, fil: true }
+hemmeligheter:
+  passord: { kilde: azure-keyvault:<hvelv>/<navn> }
 ```
 
-- **Hvor:** `integrasjoner/<system>/hemmeligheter.yaml` for systemene, og under `hemmeligheter` i hver persona i
-  `test/personaer/`. `.claude/neo.config.json` har ingen hemmeligheter og ingen referanser. Navnet til venstre er det
-  pluginen ser etter; README-en til hver plugin sier hvilke den trenger.
+- **Hvor:** under `<system>.hemmeligheter` i config-fila for systemene, og under `hemmeligheter` i hver persona. Ingen
+  andre steder. Navnet til venstre er det pluginen ser etter; README-en til hver plugin sier hvilke den trenger.
 - **`kilde`:** `azure-keyvault:<hvelv>/<navn>`. Key Vault er den eneste kilden.
 - **`fil: true`:** verdien er en fil, for eksempel en nøkkel (PEM).
 

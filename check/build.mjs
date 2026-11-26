@@ -1,13 +1,10 @@
 #!/usr/bin/env node
-// Bygger sjekken til én fil uten avhengigheter, og YAML-leseren til pluginene. Begge committes; CI stopper når de ikke
-// er ferske (`node build.mjs --check`).
+// Bygger sjekken til én fil uten avhengigheter. Den committes; CI stopper når den ikke er fersk (`node build.mjs --check`).
 //
 //   plugins/solution/scripts/sjekk.mjs   sjekken (sjekk.mjs med yaml og ajv), med versjonen og regel-id-ene i mønstrene
-//   shared/yaml.mjs                       parseYaml med pakken yaml, kopiert inn i pluginene som leser YAML
 import { build } from "esbuild";
-import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join, relative } from "node:path";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -25,14 +22,6 @@ export const TARGETS = [
     // ajv er CommonJS; i en ESM-bundle trenger den require.
     require: true,
   },
-  {
-    entry: "yaml.mjs",
-    out: "shared/yaml.mjs",
-    head: `// YAML-leseren pluginene deler: pakken yaml ${pkg.dependencies.yaml}, den Neo bruker. GENERERT fra check/yaml.mjs i\n// neo-forvaltning med \`node check/build.mjs\`: endres der, ikke her.`,
-    define: {},
-    minify: true,
-    require: true,
-  },
 ];
 
 async function bundle(t) {
@@ -44,7 +33,6 @@ async function bundle(t) {
     format: "esm",
     target: "node22",
     legalComments: "none",
-    minify: !!t.minify,
     define: t.define,
     banner: { js: `${t.head}${t.require ? `\nimport { createRequire as __createRequire } from "node:module";\nconst require = __createRequire(import.meta.url);` : ""}` },
     logLevel: "silent",

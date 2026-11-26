@@ -21,8 +21,7 @@
     ],
     "hemmeligheter": [
       {
-        "system": "altinn",
-        "navn": "subscription-key",
+        "path": "altinn.hemmeligheter.subscription-key",
         "valgfri": true,
         "doc": "Ocp-Apim-Subscription-Key, bare når kunden har fått en"
       }
@@ -67,8 +66,7 @@
     ],
     "hemmeligheter": [
       {
-        "system": "documaster",
-        "navn": "client-secret",
+        "path": "documaster.hemmeligheter.client-secret",
         "doc": "Hemmeligheten til klienten"
       }
     ]
@@ -120,14 +118,12 @@
     ],
     "hemmeligheter": [
       {
-        "system": "fiks",
-        "navn": "integrasjon-passord",
+        "path": "fiks.hemmeligheter.integrasjon-passord",
         "valgfri": true,
         "doc": "Integrasjonens servicepassord (headeren IntegrasjonPassord), for SvarUt og Folkeregisteret"
       },
       {
-        "system": "fiks",
-        "navn": "svarinn-passord",
+        "path": "fiks.hemmeligheter.svarinn-passord",
         "valgfri": true,
         "doc": "Service-passordet til SvarInn-mottakersystemet"
       }
@@ -163,8 +159,7 @@
     ],
     "hemmeligheter": [
       {
-        "system": "maskinporten",
-        "navn": "<klient>-nokkel",
+        "path": "maskinporten.hemmeligheter.<klient>-nokkel",
         "perKlient": true,
         "doc": "Den private nøkkelen (PEM) til hver klient, med fil: true"
       }

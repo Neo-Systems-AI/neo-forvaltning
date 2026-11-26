@@ -1,16 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { buildQuery, parseArgs, run, settings, QUERY_PATH } from "./documaster.mjs";
 
 const SECRET = "dm-hemmelig-verdi";
-const data = { version: 2, documaster: { apiUrl: "https://arkiv.test.example:8083/", tokenUrl: "https://idp.test.example/token", clientId: "klient-test", scope: "openid" } };
-const root = mkdtempSync(join(tmpdir(), "documaster-"));
-mkdirSync(join(root, "integrasjoner/documaster"), { recursive: true });
-writeFileSync(join(root, "integrasjoner/documaster/hemmeligheter.yaml"), "client-secret: { kilde: azure-keyvault:kv-kunde/documaster-client-secret }\n");
-const config = { data, root };
+const data = { version: 2, documaster: { apiUrl: "https://arkiv.test.example:8083/", tokenUrl: "https://idp.test.example/token", clientId: "klient-test", scope: "openid", hemmeligheter: { "client-secret": { kilde: "azure-keyvault:kv-kunde/documaster-client-secret" } } } };
+const config = { data };
 const hemmelighet = () => SECRET;
 
 const fake = (answer) => {

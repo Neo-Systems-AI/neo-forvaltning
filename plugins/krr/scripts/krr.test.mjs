@@ -1,9 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { generateKeyPairSync } from "node:crypto";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { gyldigFnr } from "./lib/fnr.mjs";
 import { main } from "./krr.mjs";
 
@@ -19,11 +16,8 @@ const UGYLDIG = "12345678901";
 
 const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
 const PEM = privateKey.export({ type: "pkcs8", format: "pem" });
-const root = mkdtempSync(join(tmpdir(), "krr-"));
-mkdirSync(join(root, "integrasjoner/maskinporten"), { recursive: true });
-writeFileSync(join(root, "integrasjoner/maskinporten/hemmeligheter.yaml"), "krr-nokkel: { kilde: azure-keyvault:kv-kunde/krr, fil: true }\n");
-const data = { version: 2, krr: { miljo: "test", klient: "krr" }, maskinporten: { miljo: "test", klienter: { krr: { clientId: "klient-test", scopes: ["krr:global/kontaktinformasjon.read"] } } } };
-const config = { data, root };
+const data = { version: 2, krr: { miljo: "test", klient: "krr" }, maskinporten: { miljo: "test", klienter: { krr: { clientId: "klient-test", scopes: ["krr:global/kontaktinformasjon.read"] } }, hemmeligheter: { "krr-nokkel": { kilde: "azure-keyvault:kv-kunde/krr", fil: true } } } };
+const config = { data };
 const hemmelighet = () => PEM;
 
 const TOKEN = "tok-som-er-hemmelig-12345"; // gitleaks:allow (oppdiktet token i testen)
@@ -86,10 +80,10 @@ test("feil før kallet: ikke 11 sifre, ingen klient, klienten i et annet miljø,
   assert.equal(await main(["person", "123"], { config, ...c }), 2);
   assert.match(c.text(), /11 sifre/);
   const c2 = capture();
-  assert.equal(await main(["person", OPPDIKTET], { config: { data: { ...data, krr: { miljo: "test" } }, root }, ...c2 }), 1);
+  assert.equal(await main(["person", OPPDIKTET], { config: { data: { ...data, krr: { miljo: "test" } } }, ...c2 }), 1);
   assert.match(c2.text(), /krr.klient mangler/);
   const c3 = capture();
-  assert.equal(await main(["person", OPPDIKTET], { config: { data: { ...data, krr: { miljo: "produksjon", klient: "krr" } }, root }, hemmelighet, fetchImpl: fake({}).fetchImpl, ...c3 }), 1);
+  assert.equal(await main(["person", OPPDIKTET], { config: { data: { ...data, krr: { miljo: "produksjon", klient: "krr" } } }, hemmelighet, fetchImpl: fake({}).fetchImpl, ...c3 }), 1);
   assert.match(c3.text(), /er for test, men kallet går mot produksjon/);
   const c4 = capture();
   assert.equal(await main(["person"], { config, ...c4 }), 2);

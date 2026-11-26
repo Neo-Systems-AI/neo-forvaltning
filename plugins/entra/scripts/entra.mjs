@@ -23,6 +23,7 @@
 //   Prøve og rydding
 //   node entra.mjs testbrukere --domene <underdomene> [--antall 3]   passordet leses skjult
 //   node entra.mjs rydd --app <appId> [--gruppe <id> …] [--domene <underdomene>]
+import { realpathSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./lib/argumenter.mjs";
@@ -250,4 +251,4 @@ export async function main(argv, { exec = execFileSync, readSecret = (p) => hidd
   }
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) process.exitCode = await main(process.argv.slice(2));
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) process.exitCode = await main(process.argv.slice(2));

@@ -14,8 +14,7 @@
   ],
   "hemmeligheter": [
     {
-      "system": "maskinporten",
-      "navn": "<klient>-nokkel",
+      "path": "maskinporten.hemmeligheter.<klient>-nokkel",
       "perKlient": true,
       "doc": "Den private nøkkelen (PEM) til hver klient, med fil: true"
     }

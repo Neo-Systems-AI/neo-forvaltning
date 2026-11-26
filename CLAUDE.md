@@ -11,8 +11,12 @@ committes, kan leses av alle.
 - **Tynn mal, tykke plugins:** innhold og logikk hører hjemme her, i en versjonert plugin. Malen
   (`neo-forvaltning-mal`) har bare struktur og regler, og henter sjekken herfra.
 - **Én sjekk, ett sted:** kilden står i `check/`, og bygges med `node check/build.mjs` til
-  `plugins/solution/scripts/sjekk.mjs` og `shared/yaml.mjs`. De bygde filene endres aldri for hånd; CI stopper når de
-  ikke er ferske.
+  `plugins/solution/scripts/sjekk.mjs`. Den bygde fila endres aldri for hånd; CI stopper når den ikke er fersk. Bare
+  sjekken leser YAML; `solution` bruker den samme leseren gjennom sjekken. En systemplugin leser bare JSON.
+- **Generert kode er merket** i `.gitattributes` (`linguist-generated`): sjekken, kopiene i `plugins/*/scripts/lib/` og
+  lockfila. Diffen viser da det som er skrevet for hånd.
+- **Et skript som kjøres direkte,** løser opp stiene med `realpathSync` på begge sider før det sammenligner
+  `process.argv[1]` med seg selv. Ellers kjører ingenting gjennom en symlenke, med exit 0.
 - **Ett bibliotek:** det skriptene deler (config-fila, hemmelighetene, fødselsnummer og mod 11, argumentene, kallene,
   Maskinporten), står i `shared/`, og kopieres inn i pluginene med `node scripts/sync-shared.mjs` etter importene.
   Ingen kopier av samme logikk i pluginene.

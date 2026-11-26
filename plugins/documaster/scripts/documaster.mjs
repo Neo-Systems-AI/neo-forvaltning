@@ -13,8 +13,9 @@
 //   node documaster.mjs sok --type <Noark-type> [--query "felt = @p"] [--param @p=verdi …] [--limit n]
 //
 // Config: `documaster` i .claude/neo.config.json (apiUrl, tokenUrl, clientId, scope): instansen repoet arbeider mot.
-// Hemmeligheten er `client-secret` i integrasjoner/documaster/hemmeligheter.yaml, hentet fra hvelvet for kallet.
+// Hemmeligheten er referansen documaster.hemmeligheter.client-secret i config-fila, hentet fra hvelvet for kallet.
 // Exit: 0 svar 2xx · 1 feil eller ikke-2xx · 2 feil bruk.
+import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./lib/argumenter.mjs";
 import { load, need } from "./lib/config.mjs";
@@ -139,9 +140,9 @@ export async function run(argv, { config, fetchImpl = fetch, hemmelighet = secre
   const secrets = [];
   try {
     body = buildQuery(parseArgs(argv));
-    const { data, root } = config ?? load();
+    const { data } = config ?? load();
     const s = settings(data);
-    const clientSecret = hemmelighet(ref(root, "documaster", "client-secret"));
+    const clientSecret = hemmelighet(ref(data, "documaster", "client-secret"));
     secrets.push(clientSecret);
     const t = await getToken(s, clientSecret, { fetchImpl });
     secrets.push(t.accessToken);
@@ -164,4 +165,4 @@ export async function run(argv, { config, fetchImpl = fetch, hemmelighet = secre
   }
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) process.exitCode = await run(process.argv.slice(2));
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) process.exitCode = await run(process.argv.slice(2));

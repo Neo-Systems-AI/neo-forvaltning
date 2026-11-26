@@ -6,8 +6,9 @@
 //   node maskinporten.mjs token <klient> [--scope "<scope> …"] [--consumer-org <orgnr>]
 //
 // Klientene står i `.claude/neo.config.json` under `maskinporten.klienter.<navn>` (clientId, kid, scopes), for miljøet
-// i `maskinporten.miljo`. Nøkkelen er `<navn>-nokkel` i `integrasjoner/maskinporten/hemmeligheter.yaml`, hentet fra
+// i `maskinporten.miljo`. Nøkkelen er referansen `maskinporten.hemmeligheter.<navn>-nokkel`, hentet fra
 // hvelvet for kallet. Exit: 0 svar · 1 feil eller avslag · 2 feil bruk.
+import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./lib/argumenter.mjs";
 import { load, miljo } from "./lib/config.mjs";
@@ -48,8 +49,8 @@ export async function main(argv, { fetchImpl = fetch, config, hemmelighet = secr
     }
     if (cmd !== "token" || !navn) throw new Usage(BRUK);
     if (args.miljo) throw new Usage("token bruker miljøet klientene er registrert i (maskinporten.miljo); --miljo gjelder bare well-known");
-    const { data, root } = config ?? load();
-    const t = await tokenFor({ data, root, navn, scopes: args.scope?.split(/[\s,]+/).filter(Boolean), consumerOrg: args["consumer-org"], fetchImpl, hemmelighet, secrets });
+    const { data } = config ?? load();
+    const t = await tokenFor({ data, navn, scopes: args.scope?.split(/[\s,]+/).filter(Boolean), consumerOrg: args["consumer-org"], fetchImpl, hemmelighet, secrets });
     const c = claims(t.accessToken);
     const utlop = typeof t.expiresIn === "number" ? new Date(now() + t.expiresIn * 1000).toISOString() : "(ukjent)";
     const lines = [
@@ -73,4 +74,4 @@ export async function main(argv, { fetchImpl = fetch, config, hemmelighet = secr
   }
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) process.exitCode = await main(process.argv.slice(2));
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) process.exitCode = await main(process.argv.slice(2));

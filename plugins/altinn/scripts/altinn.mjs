@@ -16,17 +16,15 @@
 //
 // Config: `altinn` i .claude/neo.config.json: miljo (tt02 eller produksjon), klient (en klient i
 // maskinporten.klienter, med tjenesteeier-scopes), org og apps. Nøkkelen til klienten hentes fra hvelvet for kallet.
-// Har kunden en Ocp-Apim-Subscription-Key, står den som subscription-key i integrasjoner/altinn/hemmeligheter.yaml.
+// Har kunden en Ocp-Apim-Subscription-Key, er referansen altinn.hemmeligheter.subscription-key.
 // Exit: 0 svar 2xx · 1 feil eller ikke-2xx · 2 feil bruk.
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./lib/argumenter.mjs";
 import { get, load, miljo, need } from "./lib/config.mjs";
-import { ref, secret } from "./lib/hemmeligheter.mjs";
+import { has, ref, secret } from "./lib/hemmeligheter.mjs";
 import { call, redact, report } from "./lib/http.mjs";
 import { tokenFor } from "./lib/maskinporten.mjs";
-import { parseYaml } from "./lib/yaml.mjs";
 
 export const HOSTS = {
   tt02: { maskinporten: "test", platform: "https://platform.tt02.altinn.no", apps: "apps.tt02.altinn.no" },
@@ -54,18 +52,11 @@ export function settings(data) {
   return { miljo: env, hosts: HOSTS[env], klient: need(data, "altinn.klient", "navnet på Maskinporten-klienten med tjenesteeier-scopes under maskinporten.klienter"), apps: get(data, "altinn.apps") ?? [], org: get(data, "altinn.org") };
 }
 
-// En subscription key bare når kunden har fått en: den står da i hemmeligheter.yaml.
-const hasSubscriptionKey = (root) => {
-  const f = join(root, "integrasjoner/altinn/hemmeligheter.yaml");
-  if (!existsSync(f)) return false;
-  return !!parseYaml(readFileSync(f, "utf8"))?.["subscription-key"];
-};
-
 const claims = (jwt) => JSON.parse(Buffer.from(jwt.split(".")[1], "base64url").toString("utf8"));
 
 // Maskinporten-tokenet gjelder ikke mot Altinn 3 direkte; det veksles med en GET (POST gir 411).
-export async function altinnToken(s, { data, root, fetchImpl = fetch, hemmelighet = secret, secrets = [] } = {}) {
-  const mp = await tokenFor({ data, root, navn: s.klient, miljo: s.hosts.maskinporten, fetchImpl, hemmelighet, secrets }).catch((e) => {
+export async function altinnToken(s, { data, fetchImpl = fetch, hemmelighet = secret, secrets = [] } = {}) {
+  const mp = await tokenFor({ data, navn: s.klient, miljo: s.hosts.maskinporten, fetchImpl, hemmelighet, secrets }).catch((e) => {
     throw /Ingen scopes/.test(e.message) ? new Error(`${e.message}. Tjenesteeier-scopes er for eksempel altinn:serviceowner/instances.read, altinn:serviceowner/events og altinn:events.subscribe; sett bare dem klienten har, for Maskinporten avviser hele kallet om ett mangler`) : e;
   });
   const url = `${s.hosts.platform}${EXCHANGE_PATH}`;
@@ -125,12 +116,13 @@ export async function run(argv, { config, fetchImpl = fetch, hemmelighet = secre
   const secrets = [];
   const show = (x) => (args["vis-person"] ? x : hidePersons(x));
   try {
-    const { data, root } = config ?? load();
+    const { data } = config ?? load();
     const s = settings(data);
-    const t = await altinnToken(s, { data, root, fetchImpl, hemmelighet, secrets });
+    const t = await altinnToken(s, { data, fetchImpl, hemmelighet, secrets });
     secrets.push(t.token);
     let subscriptionKey;
-    if (hasSubscriptionKey(root)) secrets.push((subscriptionKey = hemmelighet(ref(root, "altinn", "subscription-key"))));
+    // En subscription key bare når kunden har fått en.
+    if (has(data, "altinn", "subscription-key")) secrets.push((subscriptionKey = hemmelighet(ref(data, "altinn", "subscription-key"))));
     const headers = { authorization: `Bearer ${t.token}`, accept: "application/json", ...(subscriptionKey ? { "ocp-apim-subscription-key": subscriptionKey } : {}) };
     const get = (url, extra = {}) => call(url, { headers: { ...headers, ...extra }, fetchImpl });
     const print = (url, result, body = result.body) => out(report("GET", url, { ...result, body: show(body) }, secrets));
@@ -296,4 +288,4 @@ export async function run(argv, { config, fetchImpl = fetch, hemmelighet = secre
   }
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) process.exitCode = await run(process.argv.slice(2));
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) process.exitCode = await run(process.argv.slice(2));

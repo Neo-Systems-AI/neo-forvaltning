@@ -32,7 +32,7 @@ jobs:
         working-directory: check
       - run: node --test
         working-directory: check
-      - name: Den bygde sjekken og YAML-leseren er bygget fra check/
+      - name: Den bygde sjekken er bygget fra check/
         run: node check/build.mjs --check
 
   plugins:

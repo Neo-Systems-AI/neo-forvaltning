@@ -21,16 +21,15 @@ pluginen `maskinporten`). Id-ene er ikke hemmelige:
   "integrasjon": "<integrasjonens id i Fiks forvaltning>",
   "svarutKonto": "<avsenderkontoen>",
   "svarinnMottakersystem": "<mottakersystemets id>",
-  "folkeregisterRolle": "<rollen i Fiks register>"
+  "folkeregisterRolle": "<rollen i Fiks register>",
+  "hemmeligheter": {
+    "integrasjon-passord": { "kilde": "azure-keyvault:<hvelv>/fiks-integrasjon-passord" },
+    "svarinn-passord": { "kilde": "azure-keyvault:<hvelv>/fiks-svarinn-service-passord" }
+  }
 }
 ```
 
-Passordene står som referanser i `integrasjoner/fiks/hemmeligheter.yaml`, og hentes fra hvelvet for kallet:
-
-```yaml
-integrasjon-passord: { kilde: azure-keyvault:<hvelv>/fiks-integrasjon-passord }
-svarinn-passord: { kilde: azure-keyvault:<hvelv>/fiks-svarinn-service-passord }
-```
+Passordene står som referanser under `hemmeligheter`, og hentes fra hvelvet for kallet.
 
 ## Det kunden må ha selv
 

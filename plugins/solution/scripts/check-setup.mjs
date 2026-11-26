@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // Oppsettet i repoet for hver plugin fra neo-forvaltning som er på: hva pluginen leser fra `.claude/neo.config.json`,
-// hva som er satt, hvor verdien kom fra, og hva som mangler, også referansene i `integrasjoner/<system>/
-// hemmeligheter.yaml` og Maskinporten-klientene pluginene viser til. Hva hver plugin trenger, står i `nokler.json` ved
-// siden av (samlet fra nøkkelfilene til alle pluginene). Bare lesing. Exit 1 når noe påkrevd mangler.
+// hva som er satt, hvor verdien kom fra, og hva som mangler, også referansene til hvelvet under `<system>.hemmeligheter`
+// og Maskinporten-klientene pluginene viser til. Hva hver plugin trenger, står i `nokler.json` ved siden av (samlet fra
+// nøkkelfilene til alle pluginene). Bare lesing. Exit 1 når noe påkrevd mangler.
 //
 //   node check-setup.mjs [--json]
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { get, load, neo } from "./lib/config.mjs";
@@ -35,9 +35,11 @@ export function enabled(root) {
   return [...on].filter(([, v]) => v).map(([k]) => k).sort();
 }
 
-const hasRef = (root, system, navn) => {
+// En referanse under <system>.hemmeligheter.<navn>.
+const hasRef = (data, path) => {
+  const [, system, navn] = path.match(/^([^.]+)\.hemmeligheter\.(.+)$/);
   try {
-    ref(root, system, navn);
+    ref(data, system, navn);
     return { ok: true };
   } catch (e) {
     return { ok: false, why: e.message };
@@ -45,7 +47,7 @@ const hasRef = (root, system, navn) => {
 };
 
 // Radene for én plugin: hver nøkkel, hver referanse, og klientene den viser til.
-export function rows(data, root, plugin, keys = KEYS) {
+export function rows(data, plugin, keys = KEYS) {
   const spec = keys[plugin];
   if (!spec) return [{ path: plugin, ok: false, doc: `${plugin} er ikke en plugin i ${MARKET}` }];
   const out = [];
@@ -58,15 +60,18 @@ export function rows(data, root, plugin, keys = KEYS) {
       const klient = get(data, `maskinporten.klienter.${v}`);
       out.push({ path: `maskinporten.klienter.${v}`, value: klient?.clientId ? `clientId ${klient.clientId}` : undefined, source: klient ? "config" : "usatt", required: true, ok: !!klient?.clientId, doc: `Klienten ${k.path} viser til, med clientId` });
       if (blank(get(data, "maskinporten.miljo"))) out.push({ path: "maskinporten.miljo", source: "usatt", required: true, ok: false, doc: "Miljøet klientene er registrert i" });
-      const r = hasRef(root, "maskinporten", `${v}-nokkel`);
-      out.push({ path: `integrasjoner/maskinporten/hemmeligheter.yaml#${v}-nokkel`, source: r.ok ? "referanse" : "mangler", required: true, ok: r.ok, doc: r.ok ? "Nøkkelen til klienten" : r.why });
+      const path = `maskinporten.hemmeligheter.${v}-nokkel`;
+      const r = hasRef(data, path);
+      out.push({ path, value: r.ok ? get(data, path).kilde : undefined, source: r.ok ? "referanse" : "mangler", required: true, ok: r.ok, doc: r.ok ? "Nøkkelen til klienten" : r.why });
     }
   }
   for (const h of spec.hemmeligheter ?? []) {
-    const names = h.perKlient ? Object.keys(get(data, "maskinporten.klienter") ?? {}).map((n) => h.navn.replace("<klient>", n)) : [h.navn];
-    for (const navn of names) {
-      const r = hasRef(root, h.system, navn);
-      out.push({ path: `integrasjoner/${h.system}/hemmeligheter.yaml#${navn}`, source: r.ok ? "referanse" : "mangler", required: !h.valgfri, ok: r.ok || !!h.valgfri, doc: r.ok ? h.doc : `${h.doc}. ${r.why}` });
+    const paths = h.perKlient ? Object.keys(get(data, "maskinporten.klienter") ?? {}).map((n) => h.path.replace("<klient>", n)) : [h.path];
+    for (const path of paths) {
+      const r = hasRef(data, path);
+      // En valgfri referanse kan mangle, men står den, må den være en referanse.
+      const absent = get(data, path) === undefined;
+      out.push({ path, value: r.ok ? get(data, path).kilde : undefined, source: r.ok ? "referanse" : absent ? "mangler" : "ikke en referanse", required: !h.valgfri, ok: r.ok || (!!h.valgfri && absent), doc: r.ok ? h.doc : `${h.doc}. ${r.why}` });
     }
   }
   return out;
@@ -77,10 +82,10 @@ export function report(root, { data, plugins = enabled(root) } = {}) {
   if (!plugins.length) problems.push(`Ingen plugins fra ${MARKET} er på i .claude/settings.json (enabledPlugins)`);
   const n = neo(data, root);
   if (n.mcpServer && !n.iRepoet) problems.push(`MCP-serveren ${n.mcpServer} står ikke i .mcp.json. Legg den til med kommandoen Neo viser under API-klienter → Koble til Claude, og logg inn med /mcp`);
-  return { neo: n, problems, plugins: plugins.map((p) => ({ plugin: p, rows: rows(data, root, p) })) };
+  return { neo: n, problems, plugins: plugins.map((p) => ({ plugin: p, rows: rows(data, p) })) };
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   let r;
   try {
     const { root, data } = load();

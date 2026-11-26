@@ -48,7 +48,8 @@ Spør om det som mangler, ett tema om gangen, og vis hva du har før du skriver:
 - **`repo.yaml`:** `type`, `eier` (navn, og organisasjonsnummer for en kunde) og `forvalter` (navn og github).
   Godkjenneren står ikke her.
 - **`.github/CODEOWNERS`:** `*` til godkjenneren, så alt i repoet krever godkjenningen. Det er det GitHub håndhever.
-- **`.claude/neo.config.json`:** ett miljø, og ingen hemmeligheter:
+- **`.claude/neo.config.json`:** ett miljø, og ingen hemmeligheter (referansene til hvelvet kommer under
+  `<system>.hemmeligheter` når et system tas i bruk):
 
   ```json
   { "version": 2, "neo": { "url": "https://<adressen>", "org": "<org-en>", "mcpServer": "neo-development" } }
@@ -56,7 +57,6 @@ Spør om det som mangler, ett tema om gangen, og vis hva du har før du skriver:
 
   En del per plugin bare når pluginen trenger noe; sjekken av oppsettet sier hva.
 - **`.claude/settings.json`:** `enabledPlugins` med `<plugin>@neo-forvaltning: true` for hver plugin som skal på.
-- **Et repo for standardløsninger** har ingen kunde å forstå: ta bort `felles/kilder/` og `felles/forstaelse/`.
 - **MCP-serveren**, med kommandoen fra Neo og navnet fra config-fila:
 
   ```bash

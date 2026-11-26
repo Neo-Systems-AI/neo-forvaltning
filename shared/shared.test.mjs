@@ -8,7 +8,7 @@ import { dirname, join } from "node:path";
 import { parse, Usage } from "./argumenter.mjs";
 import { load, miljo, neo, resolve } from "./config.mjs";
 import { gyldigFnr, gyldigOrgnr, maskFnr } from "./fnr.mjs";
-import { allRefs, reach, ref, secret } from "./hemmeligheter.mjs";
+import { configRefs, has, reach, ref, secret } from "./hemmeligheter.mjs";
 import { basic, call, redact, report } from "./http.mjs";
 import { assertion, klient, loadKey, token, tokenFor } from "./maskinporten.mjs";
 
@@ -49,7 +49,7 @@ test("miljøet hos et system: --miljo, ellers <system>.miljo, og aldri en stille
 });
 
 test("en hemmelighet hentes fra hvelvet ved hvert kall, og en fil lastes ned til en mappe som slettes", () => {
-  const root = repo({ "integrasjoner/fiks/hemmeligheter.yaml": "passord: { kilde: azure-keyvault:kv-kunde/fiks-passord }\nnokkel: { kilde: azure-keyvault:kv-kunde/fiks-nokkel, fil: true }\nfeil: { $env: X }\n" });
+  const data = { fiks: { miljo: "test", hemmeligheter: { passord: { kilde: "azure-keyvault:kv-kunde/fiks-passord" }, nokkel: { kilde: "azure-keyvault:kv-kunde/fiks-nokkel", fil: true }, feil: { $env: "X" } } } };
   const calls = [];
   let downloaded;
   const exec = (cmd, args) => {
@@ -61,30 +61,27 @@ test("en hemmelighet hentes fra hvelvet ved hvert kall, og en fil lastes ned til
     }
     return "verdi\n";
   };
-  assert.equal(secret(ref(root, "fiks", "passord"), { exec }), "verdi");
+  assert.equal(secret(ref(data, "fiks", "passord"), { exec }), "verdi");
   assert.deepEqual(calls[0], ["az", "keyvault", "secret", "show", "--vault-name", "kv-kunde", "--name", "fiks-passord", "--query", "value", "-o", "tsv"]);
-  assert.equal(secret(ref(root, "fiks", "nokkel"), { exec }), "innholdet i fila\n");
+  assert.equal(secret(ref(data, "fiks", "nokkel"), { exec }), "innholdet i fila\n");
   assert.ok(!existsSync(dirname(downloaded)), "den midlertidige mappa er slettet");
-  assert.throws(() => ref(root, "fiks", "borte"), /borte står ikke i integrasjoner\/fiks\/hemmeligheter.yaml/);
-  assert.throws(() => ref(root, "fiks", "feil"), /er ikke en referanse/);
-  assert.throws(() => ref(root, "krr", "x"), /integrasjoner\/krr\/hemmeligheter.yaml finnes ikke/);
+  assert.throws(() => ref(data, "fiks", "borte"), /fiks.hemmeligheter.borte står ikke i .claude\/neo.config.json. Legg inn "borte"/);
+  assert.throws(() => ref(data, "fiks", "feil"), /fiks.hemmeligheter.feil i .claude\/neo.config.json er ikke en referanse/);
+  assert.throws(() => ref(data, "krr", "x"), /krr.hemmeligheter.x står ikke/);
+  assert.ok(has(data, "fiks", "passord") && !has(data, "fiks", "borte") && !has({}, "altinn", "subscription-key"));
   const failing = () => {
     throw Object.assign(new Error("x"), { stderr: "ERROR: Please run 'az login' to setup account.\nmore" });
   };
-  assert.throws(() => secret(ref(root, "fiks", "passord"), { exec: failing }), /Fikk ikke hentet integrasjoner\/fiks\/hemmeligheter.yaml#passord fra hvelvet \(azure-keyvault:kv-kunde\/fiks-passord\): ERROR: Please run 'az login'/);
-  assert.deepEqual(reach(ref(root, "fiks", "passord"), { exec: () => "true\n" }), { ok: true });
-  assert.equal(reach(ref(root, "fiks", "passord"), { exec: failing }).ok, false);
+  assert.throws(() => secret(ref(data, "fiks", "passord"), { exec: failing }), /Fikk ikke hentet fiks.hemmeligheter.passord fra hvelvet \(azure-keyvault:kv-kunde\/fiks-passord\): ERROR: Please run 'az login'/);
+  assert.deepEqual(reach(ref(data, "fiks", "passord"), { exec: () => "true\n" }), { ok: true });
+  assert.equal(reach(ref(data, "fiks", "passord"), { exec: failing }).ok, false);
 });
 
-test("referansene i repoet: integrasjonene og personaene, og en verdi der en referanse skulle stått, uten verdien", () => {
-  const root = repo({
-    "integrasjoner/fiks/hemmeligheter.yaml": "passord: { kilde: azure-keyvault:kv/p }\nnokkel: hemmelig123\n",
-    "test/personaer/sara.yaml": "navn: Sara\nrolle: saksbehandler\nhemmeligheter:\n  passord: { kilde: azure-keyvault:kv-test/sara }\n",
-    "test/personaer/uten.yaml": "navn: Uten\nrolle: leser\n",
-  });
-  const { list, problems } = allRefs(root);
-  assert.deepEqual(list.map((r) => r.sted), ["integrasjoner/fiks/hemmeligheter.yaml#passord", "test/personaer/sara.yaml#passord"]);
-  assert.equal(problems.length, 1);
+test("referansene i config-fila, med hvor de står, og en verdi der en referanse skulle stått, uten verdien", () => {
+  const data = { version: 2, neo: { url: "https://neo.test" }, fiks: { hemmeligheter: { passord: { kilde: "azure-keyvault:kv/p" }, nokkel: "hemmelig123" } }, altinn: { hemmeligheter: "x" }, krr: { miljo: "test" } };
+  const { list, problems } = configRefs(data);
+  assert.deepEqual(list.map((r) => r.sted), ["fiks.hemmeligheter.passord"]);
+  assert.deepEqual(problems.map((p) => p.sted), ["fiks.hemmeligheter.nokkel", "altinn.hemmeligheter"]);
   assert.doesNotMatch(JSON.stringify(problems), /hemmelig123/);
 });
 
@@ -132,10 +129,9 @@ test("Maskinporten: klienten med navn, assertion signert med nøkkelen, og token
     assert.match(init.body.toString(), /grant_type=urn/);
     return new Response(JSON.stringify({ access_token: "tok-1234", expires_in: 120, scope: "krr:global/kontaktinformasjon.read" }));
   };
-  const root = repo({ "integrasjoner/maskinporten/hemmeligheter.yaml": "krr-nokkel: { kilde: azure-keyvault:kv/krr-nokkel, fil: true }\n" });
   const secrets = [];
   const asked = [];
-  const t = await tokenFor({ data, root, navn: "krr", fetchImpl, secrets, hemmelighet: (r) => (asked.push(r.kilde), pem) });
+  const t = await tokenFor({ data: { ...data, maskinporten: { ...data.maskinporten, hemmeligheter: { "krr-nokkel": { kilde: "azure-keyvault:kv/krr-nokkel", fil: true } } } }, navn: "krr", fetchImpl, secrets, hemmelighet: (r) => (asked.push(r.kilde), pem) });
   assert.equal(t.accessToken, "tok-1234");
   assert.deepEqual(asked, ["azure-keyvault:kv/krr-nokkel"]);
   assert.deepEqual(secrets, [pem, "tok-1234"]);

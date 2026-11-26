@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // Config-fila i kunderepoet, `.claude/neo.config.json`: én fil alle pluginene leser. Den har ett miljø i Neo (`neo.url`,
-// `neo.org`, `neo.mcpServer`) og én del per plugin med pluginens navn. Ingen hemmeligheter og ingen referanser: de står
-// i `integrasjoner/<system>/hemmeligheter.yaml`. Hva hver plugin leser, står i `neo-config.keys.json` ved siden av
-// manifestet, med en standard der pluginen har en.
+// `neo.org`, `neo.mcpServer`) og én del per plugin med pluginens navn. Ingen hemmeligheter: under
+// `<system>.hemmeligheter` står bare referansene til hvelvet (se hemmeligheter.mjs). Hva hver plugin leser, står i
+// `neo-config.keys.json` ved siden av manifestet, med en standard der pluginen har en.
 //
 //   node config.mjs                 Neo for repoet: adressen, org-en, MCP-serveren og om den står i .mcp.json
 //   node config.mjs <nøkkel>        verdien, for eksempel monitoring.window (pluginens standard når den ikke er satt)
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -80,7 +80,8 @@ export function resolve(data, path, keys = pluginKeys()) {
   return { path, value: undefined, source: "usatt" };
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+// Stiene løses opp, så skriptet kjører også gjennom en symlenke (som mktemp -d på macOS).
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   try {
     const { root, data } = load();
     const [path] = process.argv.slice(2);

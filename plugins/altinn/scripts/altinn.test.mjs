@@ -1,9 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { generateKeyPairSync } from "node:crypto";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { EXCHANGE_PATH, hidePersons, parseInstance, run, settings } from "./altinn.mjs";
 
 const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
@@ -17,12 +14,9 @@ const ALTINN_TOKEN = `${b64({ alg: "RS256" })}.${b64({ iss: "https://platform.tt
 const data = {
   version: 2,
   altinn: { miljo: "tt02", klient: "altinn", org: "ttd", apps: ["ttd/skjema"] },
-  maskinporten: { miljo: "test", klienter: { altinn: { clientId: "klient-tt02", scopes: ["altinn:serviceowner/instances.read", "altinn:serviceowner/events"] } } },
+  maskinporten: { miljo: "test", klienter: { altinn: { clientId: "klient-tt02", scopes: ["altinn:serviceowner/instances.read", "altinn:serviceowner/events"] } }, hemmeligheter: { "altinn-nokkel": { kilde: "azure-keyvault:kv-kunde/altinn-nokkel", fil: true } } },
 };
-const root = mkdtempSync(join(tmpdir(), "altinn-"));
-mkdirSync(join(root, "integrasjoner/maskinporten"), { recursive: true });
-writeFileSync(join(root, "integrasjoner/maskinporten/hemmeligheter.yaml"), "altinn-nokkel: { kilde: azure-keyvault:kv-kunde/altinn-nokkel, fil: true }\n");
-const config = { data, root };
+const config = { data };
 const hemmelighet = () => PEM;
 
 const json = (body, status = 200) => new Response(typeof body === "string" ? body : JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -115,7 +109,7 @@ test("prosess: appen fra instansen når --app mangler, mot app-verten", async ()
   d.altinn.apps = [];
   const { seen, fetchImpl } = fake((url) => (url.includes("/storage/") ? json({ appId: "ttd/annen" }) : json({ currentTask: { elementId: "Task_1" } })));
   const c = capture();
-  assert.equal(await run(["prosess", `51234/${GUID}`, "--historikk"], { config: { data: d, root }, fetchImpl, hemmelighet, ...c }), 0);
+  assert.equal(await run(["prosess", `51234/${GUID}`, "--historikk"], { config: { data: d }, fetchImpl, hemmelighet, ...c }), 0);
   assert.equal(seen.at(-1).url, `https://ttd.apps.tt02.altinn.no/ttd/annen/instances/51234/${GUID}/process/history`);
 });
 
@@ -161,20 +155,17 @@ test("tokenet går mot Maskinporten i miljøet Altinn hører til, og klientene i
   const c = capture();
   const d = structuredClone(data);
   d.altinn.miljo = "produksjon";
-  assert.equal(await run(["token"], { config: { data: d, root }, fetchImpl, hemmelighet, ...c }), 1);
+  assert.equal(await run(["token"], { config: { data: d }, fetchImpl, hemmelighet, ...c }), 1);
   assert.match(c.text(), /Klientene i maskinporten.klienter er for test, men kallet går mot produksjon/);
   assert.equal(seen.length, 0);
 });
 
-test("en subscription key brukes når den står i hemmeligheter.yaml, og sladdes", async () => {
-  const r = mkdtempSync(join(tmpdir(), "altinn-"));
-  mkdirSync(join(r, "integrasjoner/maskinporten"), { recursive: true });
-  mkdirSync(join(r, "integrasjoner/altinn"), { recursive: true });
-  writeFileSync(join(r, "integrasjoner/maskinporten/hemmeligheter.yaml"), "altinn-nokkel: { kilde: azure-keyvault:kv/a, fil: true }\n");
-  writeFileSync(join(r, "integrasjoner/altinn/hemmeligheter.yaml"), "subscription-key: { kilde: azure-keyvault:kv/sub }\n");
+test("en subscription key brukes når referansen står under altinn.hemmeligheter, og sladdes", async () => {
+  const d = structuredClone(data);
+  d.altinn.hemmeligheter = { "subscription-key": { kilde: "azure-keyvault:kv/sub" } };
   const { seen, fetchImpl } = fake(() => json({ ekko: "sub-key-hemmelig" }));
   const c = capture();
-  assert.equal(await run(["instans", `51234/${GUID}`], { config: { data, root: r }, fetchImpl, hemmelighet: (x) => (x.kilde.endsWith("/sub") ? "sub-key-hemmelig" : PEM), ...c }), 0);
+  assert.equal(await run(["instans", `51234/${GUID}`], { config: { data: d }, fetchImpl, hemmelighet: (x) => (x.kilde.endsWith("/sub") ? "sub-key-hemmelig" : PEM), ...c }), 0);
   assert.equal(seen.at(-1).init.headers["ocp-apim-subscription-key"], "sub-key-hemmelig");
   assert.doesNotMatch(c.text(), /sub-key-hemmelig/);
 });

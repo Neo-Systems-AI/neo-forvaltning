@@ -1,18 +1,20 @@
-// Hemmelighetene til kallene mot systemene. Repoet har bare referansen, der den brukes:
-// `integrasjoner/<system>/hemmeligheter.yaml` og `hemmeligheter` i personaene i `test/personaer/`:
+// Hemmelighetene til kallene mot systemene. Repoet har bare referansen, ved siden av oppsettet av systemet i
+// `.claude/neo.config.json`, under `<system>.hemmeligheter`:
 //
-//   <navn>: { kilde: azure-keyvault:<hvelv>/<navn i hvelvet> }            en verdi
-//   <navn>: { kilde: azure-keyvault:<hvelv>/<navn i hvelvet>, fil: true } en fil, for eksempel en nøkkel (PEM)
+//   "<navn>": { "kilde": "azure-keyvault:<hvelv>/<navn i hvelvet>" }               en verdi
+//   "<navn>": { "kilde": "azure-keyvault:<hvelv>/<navn i hvelvet>", "fil": true }  en fil, for eksempel en nøkkel (PEM)
 //
 // Verdien hentes fra Key Vault ved hvert kall, med personens egen innlogging (`az login`), og ligger aldri på disk: en
 // fil lastes ned til en midlertidig mappe for kallet og slettes. Ingen verdi skrives ut; en feil sier referansen.
+// Personaenes referanser (i `test/personaer/`) leses bare av `solution`, som har YAML-leseren til sjekken.
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { parseYaml } from "./yaml.mjs";
+import { CONFIG } from "./config.mjs";
 
 export const KILDE = /^azure-keyvault:([A-Za-z0-9-]+)\/([A-Za-z0-9-]+)$/;
+export const REF = '{ "kilde": "azure-keyvault:<hvelv>/<navn>" } (og "fil": true for en nøkkelfil)';
 const isMap = (v) => !!v && typeof v === "object" && !Array.isArray(v);
 export const isRef = (v) => isMap(v) && KILDE.test(String(v.kilde ?? "")) && (v.fil === undefined || typeof v.fil === "boolean") && Object.keys(v).every((k) => ["kilde", "fil"].includes(k));
 
@@ -23,20 +25,16 @@ const vault = (r) => {
 const az = (exec, args) => exec("az", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
 const azError = (r, e) => new Error(`Fikk ikke hentet ${r.sted ?? r.kilde} fra hvelvet (${r.kilde}): ${String(e.stderr || e.message).trim().split("\n")[0]}. Er du logget inn med az login, og har du tilgang til hvelvet?`);
 
-// Referansen med navnet i hemmeligheter.yaml til et system. Mangler den, sier feilen hvor den skal stå.
-export function ref(root, system, navn) {
-  const file = `integrasjoner/${system}/hemmeligheter.yaml`;
-  if (!existsSync(join(root, file))) throw new Error(`${file} finnes ikke. Referansen ${navn}: { kilde: azure-keyvault:<hvelv>/<navn> } står der`);
-  let doc;
-  try {
-    doc = parseYaml(readFileSync(join(root, file), "utf8"));
-  } catch (e) {
-    throw new Error(`${file} kan ikke leses som YAML (${e.message})`);
-  }
-  const r = isMap(doc) ? doc[navn] : undefined;
-  if (r === undefined) throw new Error(`${navn} står ikke i ${file}. Legg inn ${navn}: { kilde: azure-keyvault:<hvelv>/<navn> }`);
-  if (!isRef(r)) throw new Error(`${navn} i ${file} er ikke en referanse ({ kilde: azure-keyvault:<hvelv>/<navn> }, og fil: true for en fil)`);
-  return { ...r, sted: `${file}#${navn}` };
+// Om systemet har en referanse med navnet. For en hemmelighet bare noen kunder har.
+export const has = (data, system, navn) => data?.[system]?.hemmeligheter?.[navn] !== undefined;
+
+// Referansen med navnet under <system>.hemmeligheter i config-fila. Mangler den, sier feilen hvor den skal stå.
+export function ref(data, system, navn) {
+  const sted = `${system}.hemmeligheter.${navn}`;
+  const r = data?.[system]?.hemmeligheter?.[navn];
+  if (r === undefined) throw new Error(`${sted} står ikke i ${CONFIG}. Legg inn "${navn}": { "kilde": "azure-keyvault:<hvelv>/<navn>" } under ${system}.hemmeligheter`);
+  if (!isRef(r)) throw new Error(`${sted} i ${CONFIG} er ikke en referanse: ${REF}`);
+  return { ...r, sted };
 }
 
 // Verdien fra hvelvet. En fil lastes ned til en midlertidig mappe, leses og slettes.
@@ -72,31 +70,20 @@ export function reach(r, { exec = execFileSync } = {}) {
   }
 }
 
-// Alle referansene i repoet, med hvor de står. Det som ikke er en referanse, er et problem; verdien vises aldri.
-export function allRefs(root) {
+// Alle referansene i config-fila, med hvor de står. Det som ikke er en referanse, er et problem; verdien vises aldri.
+export function configRefs(data) {
   const list = [];
   const problems = [];
-  const sources = [];
-  const integ = join(root, "integrasjoner");
-  if (existsSync(integ)) for (const s of readdirSync(integ).sort()) if (existsSync(join(integ, s, "hemmeligheter.yaml"))) sources.push({ file: `integrasjoner/${s}/hemmeligheter.yaml`, pick: (d) => d });
-  const pers = join(root, "test", "personaer");
-  if (existsSync(pers)) for (const f of readdirSync(pers).filter((x) => /\.ya?ml$/.test(x)).sort()) sources.push({ file: `test/personaer/${f}`, pick: (d) => d?.hemmeligheter });
-  for (const s of sources) {
-    let map;
-    try {
-      map = s.pick(parseYaml(readFileSync(join(root, s.file), "utf8")));
-    } catch (e) {
-      problems.push({ sted: s.file, why: `kan ikke leses som YAML (${e.message})` });
+  for (const [system, part] of Object.entries(isMap(data) ? data : {})) {
+    if (!isMap(part) || part.hemmeligheter === undefined) continue;
+    const at = `${system}.hemmeligheter`;
+    if (!isMap(part.hemmeligheter)) {
+      problems.push({ sted: at, why: "er et kart fra navnet til referansen" });
       continue;
     }
-    if (map == null) continue;
-    if (!isMap(map)) {
-      problems.push({ sted: s.file, why: "hemmelighetene er et kart fra navnet til referansen" });
-      continue;
-    }
-    for (const [navn, r] of Object.entries(map)) {
-      if (isRef(r)) list.push({ ...r, sted: `${s.file}#${navn}` });
-      else problems.push({ sted: `${s.file}#${navn}`, why: "ikke en referanse ({ kilde: azure-keyvault:<hvelv>/<navn> }). Står verdien her, ta den ut, legg den i hvelvet og bytt den" });
+    for (const [navn, r] of Object.entries(part.hemmeligheter)) {
+      if (isRef(r)) list.push({ ...r, sted: `${at}.${navn}` });
+      else problems.push({ sted: `${at}.${navn}`, why: `ikke en referanse (${REF}). Står verdien her, ta den ut, legg den i hvelvet og bytt den` });
     }
   }
   return { list, problems };

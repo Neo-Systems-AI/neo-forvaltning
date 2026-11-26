@@ -18,8 +18,9 @@
 //   node fiks.mjs folkeregister hendelser [--seq <n>] [--rolle <rolle-id>]
 //
 // Config: `fiks` i .claude/neo.config.json (miljo, klient, integrasjon, svarutKonto, svarinnMottakersystem,
-// folkeregisterRolle). Passordene står i integrasjoner/fiks/hemmeligheter.yaml (integrasjon-passord,
+// folkeregisterRolle). Passordene er referansene under fiks.hemmeligheter (integrasjon-passord,
 // svarinn-passord) og hentes fra hvelvet for kallet.
+import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./lib/argumenter.mjs";
 import { load, miljo, need } from "./lib/config.mjs";
@@ -36,17 +37,17 @@ export const HOSTS = {
 export const SCOPE = "ks:fiks";
 
 // Det et kall trenger, slått opp først når kallet trenger det.
-export function context(data, { root, fetchImpl = fetch, hemmelighet = secret }) {
+export function context(data, { fetchImpl = fetch, hemmelighet = secret }) {
   const env = miljo(data, "fiks", undefined, HOSTS);
   const secrets = [];
   const hent = (navn) => {
-    const v = hemmelighet(ref(root, "fiks", navn));
+    const v = hemmelighet(ref(data, "fiks", navn));
     secrets.push(v);
     return v;
   };
   let cached;
   const bearer = async () => {
-    cached ??= (await tokenFor({ data, root, navn: need(data, "fiks.klient", "navnet på Maskinporten-klienten med ks:fiks under maskinporten.klienter"), miljo: env, scopes: [SCOPE], fetchImpl, hemmelighet, secrets })).accessToken;
+    cached ??= (await tokenFor({ data, navn: need(data, "fiks.klient", "navnet på Maskinporten-klienten med ks:fiks under maskinporten.klienter"), miljo: env, scopes: [SCOPE], fetchImpl, hemmelighet, secrets })).accessToken;
     return cached;
   };
   // SvarUt og Folkeregisteret: token og integrasjonen.
@@ -149,8 +150,8 @@ export async function main(argv, { config, fetchImpl = fetch, hemmelighet = secr
     const input = { positionals: args._.slice(2), flags: args };
     ids = input.positionals;
     command.validate?.(input);
-    const { data, root } = config ?? load();
-    ctx = context(data, { root, fetchImpl, hemmelighet });
+    const { data } = config ?? load();
+    ctx = context(data, { fetchImpl, hemmelighet });
     const req = await command.build(ctx, input);
     out(`Miljø: ${ctx.miljo}`);
     const result = await call(req.url, { method: req.method, headers: req.headers, body: req.body, fetchImpl });
@@ -169,4 +170,4 @@ export async function main(argv, { config, fetchImpl = fetch, hemmelighet = secr
   }
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) process.exitCode = await main(process.argv.slice(2));
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) process.exitCode = await main(process.argv.slice(2));
