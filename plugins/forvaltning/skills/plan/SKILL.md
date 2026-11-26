@@ -19,6 +19,8 @@ under gjennomføringen.
 - MCP-serveren for sandkassen: `node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/neo-config.mjs" --miljo sandkasse` (`mcpServer`
   og `url`).
 - Mappene: `neo-config.mjs --get oppsettDir` og `--get reportsDir`.
+- En flyt som bruker en integrasjon eller sender fra en postboks, skriver den som nøkkel. Hent de gyldige med
+  `list_config_environment` (tokenet står i `ref`) i stedet for å skrive navnet eller adressen for hånd.
 
 ## Slik gjør du det
 
