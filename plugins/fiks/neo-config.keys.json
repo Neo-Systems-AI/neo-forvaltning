@@ -1,53 +1,44 @@
 {
   "plugin": "fiks",
-  "neo": false,
-  "environments": true,
-  "maskinporten": true,
   "keys": [
     {
-      "path": "maskinporten.klientId",
-      "perEnv": true,
-      "doc": "Klient-ID-en til Maskinporten-klienten med scopet ks:fiks (SvarUt og Folkeregisteret). Ikke hemmelig"
+      "path": "miljo",
+      "required": true,
+      "doc": "Miljøet i KS Fiks: test eller produksjon"
     },
     {
-      "path": "maskinporten.kid",
-      "perEnv": true,
-      "doc": "Nøkkel-id-en (kid) selvbetjeningen ga nøkkelen. Valgfri: uten den brukes fingeravtrykket"
+      "path": "klient",
+      "required": true,
+      "klient": true,
+      "doc": "Maskinporten-klienten med ks:fiks (et navn under maskinporten.klienter). Organisasjonen må være integrasjonens autoriserte organisasjon"
     },
     {
-      "path": "maskinporten.nokkel",
-      "perEnv": true,
-      "doc": "HEMMELIG. Den private nøkkelen til klienten, som referanse med \"fil\": true, for eksempel { \"$env\": \"FIKS_MASKINPORTEN_NOKKEL\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\", \"fil\": true }"
+      "path": "integrasjon",
+      "doc": "Id-en til integrasjonen i Fiks forvaltning (headeren IntegrasjonId), for SvarUt og Folkeregisteret"
     },
     {
-      "path": "integrasjon.id",
-      "perEnv": true,
-      "doc": "Id-en til integrasjonen i Fiks forvaltning (headeren IntegrasjonId), for SvarUt og Folkeregisteret. Ikke hemmelig"
+      "path": "svarutKonto",
+      "doc": "Id-en til SvarUt-kontoen (avsenderkontoen). Trengs bare for svarut status"
     },
     {
-      "path": "integrasjon.passord",
-      "perEnv": true,
-      "doc": "HEMMELIG. Integrasjonens servicepassord (headeren IntegrasjonPassord), som referanse: { \"$env\": \"FIKS_INTEGRASJON_PASSORD\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\" }"
+      "path": "svarinnMottakersystem",
+      "doc": "Id-en til SvarInn-mottakersystemet (brukernavnet i Basic auth)"
     },
     {
-      "path": "svarut.kontoId",
-      "perEnv": true,
-      "doc": "Id-en til SvarUt-kontoen (avsenderkontoen) i Fiks forvaltning. Trengs bare for svarut status. Ikke hemmelig"
+      "path": "folkeregisterRolle",
+      "doc": "Rollen i Fiks register som gir hjemmel og bestemmer hvilke opplysninger oppslaget får"
+    }
+  ],
+  "hemmeligheter": [
+    {
+      "path": "fiks.hemmeligheter.integrasjon-passord",
+      "valgfri": true,
+      "doc": "Integrasjonens servicepassord (headeren IntegrasjonPassord), for SvarUt og Folkeregisteret"
     },
     {
-      "path": "svarinn.mottakersystemId",
-      "perEnv": true,
-      "doc": "Id-en til SvarInn-mottakersystemet (brukernavnet i Basic auth). Ikke hemmelig"
-    },
-    {
-      "path": "svarinn.passord",
-      "perEnv": true,
-      "doc": "HEMMELIG. Service-passordet til mottakersystemet, som referanse: { \"$env\": \"FIKS_SVARINN_PASSORD\", \"kilde\": \"azure-keyvault:<hvelv>/<navn>\" }"
-    },
-    {
-      "path": "folkeregister.rolleId",
-      "perEnv": true,
-      "doc": "Id-en til rollen i Fiks forvaltning (Fiks register) som gir hjemmel og bestemmer hvilke opplysninger oppslaget får. Integrasjonen må kunne bruke rollen. Ikke hemmelig"
+      "path": "fiks.hemmeligheter.svarinn-passord",
+      "valgfri": true,
+      "doc": "Service-passordet til SvarInn-mottakersystemet"
     }
   ]
 }

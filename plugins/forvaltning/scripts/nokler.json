@@ -1,0 +1,206 @@
+{
+  "altinn": {
+    "keys": [
+      {
+        "path": "miljo",
+        "doc": "Miljøet lese-kallene går mot: tt02 eller produksjon. Trengs bare til api, ikke til publiseringen"
+      },
+      {
+        "path": "klient",
+        "klient": true,
+        "doc": "Maskinporten-klienten med tjenesteeier-scopes (et navn under maskinporten.klienter). Trengs bare til api"
+      },
+      {
+        "path": "org",
+        "doc": "Tjenesteeieren i Altinn Studio (akronymet), når kunden har en"
+      },
+      {
+        "path": "apps",
+        "doc": "Appene kunden har i Altinn, som <org>/<app>. Med én app trengs ikke --app i lese-kallene"
+      }
+    ],
+    "hemmeligheter": [
+      {
+        "path": "altinn.hemmeligheter.subscription-key",
+        "valgfri": true,
+        "doc": "Ocp-Apim-Subscription-Key, bare når kunden har fått en"
+      }
+    ]
+  },
+  "data": {
+    "neo": true,
+    "keys": [
+      {
+        "path": "maxRows",
+        "fallback": 50,
+        "doc": "Flest rader pluginen viser i ett svar"
+      }
+    ]
+  },
+  "documaster": {
+    "keys": [
+      {
+        "path": "apiUrl",
+        "required": true,
+        "doc": "Adressen til API-et på instansen, for eksempel https://<instans>:8083. Ikke nettsiden på /v2/, som svarer 200 med HTML på alle stier"
+      },
+      {
+        "path": "tokenUrl",
+        "required": true,
+        "doc": "Token-adressen til innloggingen: Documasters egen IdP, eller Entra ID (https://login.microsoftonline.com/<tenant>/oauth2/v2.0/token)"
+      },
+      {
+        "path": "clientId",
+        "required": true,
+        "doc": "Klient-ID-en kunden har fått av Documaster, eller registrert i Entra ID"
+      },
+      {
+        "path": "scope",
+        "required": true,
+        "doc": "Scopet i token-kallet: openid mot Documasters IdP, api://<app-id>/.default mot Entra ID"
+      }
+    ],
+    "hemmeligheter": [
+      {
+        "path": "documaster.hemmeligheter.client-secret",
+        "doc": "Hemmeligheten til klienten"
+      }
+    ]
+  },
+  "enhetsregisteret": {
+    "keys": [
+      {
+        "path": "miljo",
+        "doc": "produksjon eller test. Uten den må --miljo sies"
+      },
+      {
+        "path": "orgnr",
+        "doc": "Organisasjonsnummeret som slås opp når ingen er sagt, for eksempel kommunens eget. Ikke hemmelig"
+      }
+    ]
+  },
+  "entra": {
+    "keys": []
+  },
+  "fiks": {
+    "keys": [
+      {
+        "path": "miljo",
+        "required": true,
+        "doc": "Miljøet i KS Fiks: test eller produksjon"
+      },
+      {
+        "path": "klient",
+        "required": true,
+        "klient": true,
+        "doc": "Maskinporten-klienten med ks:fiks (et navn under maskinporten.klienter). Organisasjonen må være integrasjonens autoriserte organisasjon"
+      },
+      {
+        "path": "integrasjon",
+        "doc": "Id-en til integrasjonen i Fiks forvaltning (headeren IntegrasjonId), for SvarUt og Folkeregisteret"
+      },
+      {
+        "path": "svarutKonto",
+        "doc": "Id-en til SvarUt-kontoen (avsenderkontoen). Trengs bare for svarut status"
+      },
+      {
+        "path": "svarinnMottakersystem",
+        "doc": "Id-en til SvarInn-mottakersystemet (brukernavnet i Basic auth)"
+      },
+      {
+        "path": "folkeregisterRolle",
+        "doc": "Rollen i Fiks register som gir hjemmel og bestemmer hvilke opplysninger oppslaget får"
+      }
+    ],
+    "hemmeligheter": [
+      {
+        "path": "fiks.hemmeligheter.integrasjon-passord",
+        "valgfri": true,
+        "doc": "Integrasjonens servicepassord (headeren IntegrasjonPassord), for SvarUt og Folkeregisteret"
+      },
+      {
+        "path": "fiks.hemmeligheter.svarinn-passord",
+        "valgfri": true,
+        "doc": "Service-passordet til SvarInn-mottakersystemet"
+      }
+    ]
+  },
+  "forvaltning": {
+    "neo": true,
+    "neoApi": true,
+    "keys": [
+      {
+        "path": "oppsettDir",
+        "fallback": "oppsett",
+        "doc": "Det ønskede oppsettet, som filer i Neo sitt format"
+      },
+      {
+        "path": "snapshotDir",
+        "fallback": "snapshots",
+        "doc": "Snapshotene per miljø"
+      },
+      {
+        "path": "reportsDir",
+        "fallback": "reports",
+        "doc": "Planer og rapporter"
+      }
+    ]
+  },
+  "krr": {
+    "keys": [
+      {
+        "path": "miljo",
+        "required": true,
+        "doc": "Miljøet i KRR: test eller produksjon"
+      },
+      {
+        "path": "klient",
+        "required": true,
+        "klient": true,
+        "doc": "Maskinporten-klienten med krr:global/kontaktinformasjon.read (et navn under maskinporten.klienter)"
+      }
+    ]
+  },
+  "maskinporten": {
+    "keys": [
+      {
+        "path": "miljo",
+        "required": true,
+        "doc": "Miljøet klientene er registrert i: test eller produksjon"
+      },
+      {
+        "path": "klienter",
+        "required": true,
+        "doc": "Klientene med navn: { <navn>: { clientId, kid, scopes } }. Altinn, Fiks og KRR viser til en klient med navnet. Uten kid brukes thumbprinten av nøkkelen"
+      }
+    ],
+    "hemmeligheter": [
+      {
+        "path": "maskinporten.hemmeligheter.<klient>-nokkel",
+        "perKlient": true,
+        "doc": "Den private nøkkelen (PEM) til hver klient, med fil: true"
+      }
+    ]
+  },
+  "monitoring": {
+    "neo": true,
+    "keys": [
+      {
+        "path": "window",
+        "fallback": "24h",
+        "doc": "Tidsvinduet helsa ser på (24h, 7d, 30d)"
+      }
+    ]
+  },
+  "solution": {
+    "neo": true,
+    "neoApi": true,
+    "keys": [
+      {
+        "path": "off",
+        "fallback": [],
+        "doc": "Reglene i mønstrene som er slått av i dette repoet, med id"
+      }
+    ]
+  }
+}

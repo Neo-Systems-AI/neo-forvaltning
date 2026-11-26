@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "fiks",
-  "version": "0.2.0",
+  "version": "0.6.0",
   "description": "Rå lese-kall mot KS Fiks: SvarUt (forsendelsestyper, mottakersystem, status og hendelser), SvarInn (nye forsendelser) og Folkeregisteret via Fiks. For feilsøk: hva sier Fiks selv, satt opp mot det Neo gjorde. Bare lesing; hemmelighetene sladdes og fødselsnummer maskeres.",
   "author": {
     "name": "Neo Systems AS",

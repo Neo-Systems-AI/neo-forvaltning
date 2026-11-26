@@ -1,47 +1,103 @@
-// Hemmelighetene til kallene mot de eksterne systemene. En hemmelighet står aldri med verdi i config-fila, bare som
-// en referanse: { "$env": "SVARINN_PASSORD", "kilde": "azure-keyvault:kv-kunde/svarinn-passord" }. Verdien ligger i
-// kundens hvelv og hentes lokalt av et menneske (`hent-hemmeligheter.mjs --hent`) til `.env.local` og `.keys/`, som
-// aldri committes. Skriptene leser derfra uten å skrive verdien ut. Kunden eier hemmelighetene; vi eier koden.
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+// Hemmelighetene til kallene mot Neo og systemene. En hemmelighet står aldri med verdi i config-fila, bare som en
+// referanse: { "$env": "SVARINN_PASSORD", "kilde": "azure-keyvault:kv-kunde/svarinn-passord" }, og "fil": true for en
+// nøkkelfil (PEM). Verdien ligger i hvelvet til den som eier den, og ingen kopi lagres lokalt:
+//
+// - I en jobb i GitHub settes variabelen i `$env` fra jobbens hemmeligheter, og skriptet bruker den.
+// - Ellers henter skriptet verdien fra `kilde` for kjøringen, med personens egen innlogging (`az login`, `op signin`).
+//   Verdien holdes i minnet, én gang per kjøring, og skrives aldri til disk eller ut. En nøkkelfil er teksten i den.
+//
+// En referanse kan stå hvor som helst i config-fila. For systemene står den under `<system>.hemmeligheter.<navn>`, ved
+// siden av oppsettet av systemet; for maskinklienten mot Neo under `neo.byEnv.<miljø>.apiClient.clientSecret`.
+import { execFileSync } from "node:child_process";
+import { CONFIG } from "./neo-config.mjs";
 
-export const ENV_FILE = ".env.local";
+export const REF = '{ "$env": "<NAVN>", "kilde": "azure-keyvault:<hvelv>/<navn>" } (og "fil": true for en nøkkelfil)';
 
 export const isRef = (v) => !!v && typeof v === "object" && !Array.isArray(v) && "$env" in v;
 
-// Les .env.local inn i process.env, uten å overskrive det som alt er satt, og uten å skrive noe ut.
-export function loadEnvLocal(root = process.cwd()) {
-  const file = join(root, ENV_FILE);
-  if (!existsSync(file)) return false;
-  for (const line of readFileSync(file, "utf8").split("\n")) {
-    const m = line.match(/^\s*([A-Z][A-Z0-9_]*)\s*=\s*(.*?)\s*$/);
-    if (!m || line.trim().startsWith("#") || process.env[m[1]] !== undefined) continue;
-    process.env[m[1]] = m[2].replace(/^(["'])(.*)\1$/, "$2");
+const run = (exec, cmd, args) => exec(cmd, args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+
+// Kildene, så kunden bruker det den har. Key Vault er standarden. `manuell` har ingen kilde: variabelen må være satt.
+export const SOURCES = {
+  "azure-keyvault": (rest, exec) => {
+    const [vault, name] = rest.split("/");
+    if (!vault || !name) throw new Error(`azure-keyvault trenger <hvelv>/<navn>, fikk «${rest}»`);
+    return run(exec, "az", ["keyvault", "secret", "show", "--vault-name", vault, "--name", name, "--query", "value", "-o", "tsv"]).replace(/\r?\n$/, "");
+  },
+  "1password": (rest, exec) => {
+    if (!rest.startsWith("op://")) throw new Error(`1password trenger op://<hvelv>/<post>/<felt>, fikk «${rest}»`);
+    return run(exec, "op", ["read", "--no-newline", rest]);
+  },
+};
+
+export function parseKilde(kilde) {
+  const i = kilde?.indexOf(":") ?? -1;
+  if (i < 0) return null;
+  return { type: kilde.slice(0, i), rest: kilde.slice(i + 1) };
+}
+
+// Om systemet har en referanse med navnet. For en hemmelighet bare noen kunder har.
+export const has = (data, system, navn) => data?.[system]?.hemmeligheter?.[navn] !== undefined;
+
+// Referansen med navnet under <system>.hemmeligheter i config-fila. Mangler den, sier feilen hvor den skal stå.
+export function ref(data, system, navn) {
+  const sted = `${system}.hemmeligheter.${navn}`;
+  const r = data?.[system]?.hemmeligheter?.[navn];
+  if (r === undefined) throw new Error(`${sted} står ikke i ${CONFIG}. Legg inn "${navn}": ${REF} under ${system}.hemmeligheter`);
+  if (!isRef(r)) throw new Error(`${sted} i ${CONFIG} er ikke en referanse: ${REF}`);
+  return { ...r, sted };
+}
+
+// Verdiene som er hentet i denne kjøringen: hver referanse én gang, og alle sladdes fra det som skrives ut.
+const fetched = new Map();
+
+// Verdien til referansen: variabelen når den er satt (i CI), ellers fra kilden for kjøringen. En feil sier navnet,
+// kilden og hva som gikk galt, aldri verdien.
+export function secret(r, { exec = execFileSync, env = process.env } = {}) {
+  if (!isRef(r)) return r;
+  const where = `${r.$env}${r.sted ? ` (${r.sted})` : ""}`;
+  if (env[r.$env]) return env[r.$env];
+  const key = `${r.$env}|${r.kilde}`;
+  if (fetched.has(key)) return fetched.get(key);
+  if (r.kilde === "manuell") throw new Error(`${where} er ikke satt. Kilden er manuell: sett variabelen i skallet før skriptet kjøres`);
+  const k = parseKilde(r.kilde);
+  if (!k || !SOURCES[k.type]) throw new Error(`${where} har ${r.kilde ? `en ukjent kilde «${r.kilde}»` : "ingen kilde"}. ${REF}`);
+  let v;
+  try {
+    v = SOURCES[k.type](k.rest, exec);
+  } catch (e) {
+    const why = String(e.stderr || e.message).trim().split("\n")[0];
+    const hint = k.type === "azure-keyvault" ? " Er du logget inn med az login, og har du tilgang til hvelvet?" : "";
+    throw new Error(`Fikk ikke hentet ${where} fra ${r.kilde}: ${why}.${hint}`);
   }
-  return true;
+  if (!v) throw new Error(`${where} er tom i ${r.kilde}`);
+  fetched.set(key, v);
+  return v;
 }
 
-export class MissingSecret extends Error {
-  constructor(ref) {
-    super(`Hemmeligheten ${ref.$env} er ikke satt.${ref.kilde ? ` Den ligger i ${ref.kilde};` : ""} hent den med /forvaltning:hemmeligheter (et menneske kjører hentingen, aldri agenten)`);
-    this.ref = ref;
+// Om personen når referansen, uten å hente verdien: bare om den finnes og er slått på. For Key Vault; de andre kildene
+// sier at de ikke er sjekket.
+export function reach(r, { exec = execFileSync, env = process.env } = {}) {
+  if (env[r.$env]) return { ok: true, why: "satt i miljøet" };
+  const k = parseKilde(r.kilde);
+  if (r.kilde === "manuell") return { ok: false, why: "manuell: variabelen er ikke satt" };
+  if (k?.type !== "azure-keyvault") return { ok: null, why: `${k?.type ?? "ingen kilde"}: ikke sjekket` };
+  const [vault, name] = k.rest.split("/");
+  try {
+    const enabled = run(exec, "az", ["keyvault", "secret", "show", "--vault-name", vault, "--name", name, "--query", "attributes.enabled", "-o", "tsv"]).trim();
+    return enabled === "true" ? { ok: true } : { ok: false, why: "slått av i hvelvet" };
+  } catch (e) {
+    return { ok: false, why: String(e.stderr || e.message).trim().split("\n")[0] };
   }
 }
 
-// En verdi fra config-fila: en vanlig verdi som den er, en referanse fra miljøet. Feiler med navnet, aldri verdien.
-export function value(v) {
-  if (!isRef(v)) return v;
-  const got = process.env[v.$env];
-  if (got === undefined || got === "") throw new MissingSecret(v);
-  return got;
-}
-
-// Alle verdiene som er hemmelige i et svar eller en feilmelding, så de kan sladdes.
-export function secretValues(section) {
-  const out = [];
+// Alle verdiene som er hemmelige i et svar eller en feilmelding, så de kan sladdes: det som er hentet i kjøringen, og
+// variablene til referansene i delen som er satt.
+export function secretValues(section, { env = process.env } = {}) {
+  const out = [...fetched.values()];
   const walk = (x) => {
     if (isRef(x)) {
-      const got = process.env[x.$env];
+      const got = env[x.$env];
       if (got && got.length >= 4) out.push(got);
     } else if (x && typeof x === "object") Object.values(x).forEach(walk);
   };

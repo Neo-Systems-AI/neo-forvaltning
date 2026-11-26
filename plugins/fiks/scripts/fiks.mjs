@@ -1,85 +1,65 @@
 #!/usr/bin/env node
-// Rå lese-kall mot KS Fiks, slik vi gjør dem når vi leter etter hvor en feil ligger: hva sier Fiks selv om
-// en forsendelse, et mottakersystem eller en person, satt opp mot det Neo gjorde. Bare lesing: ingen kall som sender,
-// kvitterer eller endrer noe. Hemmelighetene sladdes, og fødselsnummer maskeres i alt som skrives ut.
+// Rå lese-kall mot KS Fiks, til feilsøk: hva sier Fiks selv om en forsendelse, et mottakersystem eller en person, satt
+// opp mot det Neo gjorde. Bare lesing: ingen kall som sender, kvitterer eller endrer noe. Hemmelighetene sladdes, og
+// fødselsnummer maskeres i alt som skrives ut.
 //
 // To måter å logge inn på:
-// - SvarUt og Folkeregisteret: Maskinporten-token med scopet ks:fiks, og integrasjonen fra Fiks forvaltning i
-//   headerne IntegrasjonId og IntegrasjonPassord. Organisasjonen i tokenet må være integrasjonens autoriserte
-//   organisasjon, ellers svarer Fiks 401.
+// - SvarUt og Folkeregisteret: Maskinporten-token med scopet ks:fiks (klienten `fiks.klient`), og integrasjonen fra
+//   Fiks forvaltning i headerne IntegrasjonId og IntegrasjonPassord. Organisasjonen i tokenet må være integrasjonens
+//   autoriserte organisasjon, ellers svarer Fiks 401.
 // - SvarInn: HTTP Basic med mottakersystemets id og service-passordet. Ikke Maskinporten, ikke integrasjonen.
 //
-//   node fiks.mjs [--miljo <miljø>] svarut forsendelsestyper
-//   node fiks.mjs [--miljo <miljø>] svarut mottakersystem <orgnr> [--forsendelsestype <type>]
-//   node fiks.mjs [--miljo <miljø>] svarut status <forsendelses-id> [<id> …]
-//   node fiks.mjs [--miljo <miljø>] svarut hendelser <forsendelses-id>
-//   node fiks.mjs [--miljo <miljø>] svarinn liste
-//   node fiks.mjs [--miljo <miljø>] folkeregister person <fnr> [--part <part>,<part>] [--rolle <rolle-id>]
-//   node fiks.mjs [--miljo <miljø>] folkeregister hendelser [--seq <n>] [--rolle <rolle-id>]
-import { dirname, isAbsolute, join } from "node:path";
-import { load, pluginKeys, resolve } from "./lib/neo-config.mjs";
-import { loadEnvLocal, MissingSecret, secretValues, value } from "./lib/hemmeligheter.mjs";
+//   node fiks.mjs svarut forsendelsestyper
+//   node fiks.mjs svarut mottakersystem <orgnr> [--forsendelsestype <type>]
+//   node fiks.mjs svarut status <forsendelses-id> [<id> …]
+//   node fiks.mjs svarut hendelser <forsendelses-id>
+//   node fiks.mjs svarinn liste
+//   node fiks.mjs folkeregister person <fnr> [--part <part>,<part>] [--rolle <rolle-id>]
+//   node fiks.mjs folkeregister hendelser [--seq <n>] [--rolle <rolle-id>]
+//
+// Config: `fiks` i .claude/neo.config.json (miljo, klient, integrasjon, svarutKonto, svarinnMottakersystem,
+// folkeregisterRolle). Passordene er referansene under fiks.hemmeligheter (integrasjon-passord,
+// svarinn-passord) og hentes fra hvelvet for kjøringen.
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { parse, Usage } from "./lib/argumenter.mjs";
+import { load, miljo, need } from "./lib/neo-config.mjs";
+import { maskFnr } from "./lib/fnr.mjs";
+import { ref, secret } from "./lib/hemmeligheter.mjs";
 import { basic, call, redact, report } from "./lib/http.mjs";
-import { token } from "./lib/maskinporten.mjs";
+import { tokenFor } from "./lib/maskinporten.mjs";
 
 // Vertene per miljø. SvarInn ligger under SvarUt sin vert. `api.fiks.test.ks.no/svarut` svarer 404 for SvarUt.
 export const HOSTS = {
   test: { svarut: "https://test.svarut.ks.no/api", fiksApi: "https://api.fiks.test.ks.no" },
   produksjon: { svarut: "https://svarut.ks.no/api", fiksApi: "https://api.fiks.ks.no" },
 };
-
 export const SCOPE = "ks:fiks";
 
-// Fødsels- og d-nummer: de seks første sifrene står, de fem siste maskeres.
-export const maskFnr = (text) => String(text).replace(/(?<!\d)(\d{6})\d{5}(?!\d)/g, "$1*****");
-
-export class Usage extends Error {}
-
-const get = (o, path) => path.split(".").reduce((x, k) => (x && typeof x === "object" ? x[k] : undefined), o);
-
-// Miljøet, vertene og verdiene fra config-fila for det miljøet. Hemmelighetene slås opp først når et kall trenger dem.
-export function context(data, { miljo, root, keys = pluginKeys(), fetchImpl = fetch } = {}) {
-  const envs = get(data, "fiks.environments") ?? [];
-  if (!envs.length) throw new Usage("fiks.environments mangler i config-fila. Kjør /fiks:env");
-  const env = miljo ?? get(data, "fiks.defaultEnv") ?? envs[0];
-  if (!envs.includes(env)) throw new Usage(`«${env}» er ikke et miljø i fiks.environments. Miljøene: ${envs.join(", ")}`);
-  const hosts = HOSTS[env];
-  if (!hosts) throw new Usage(`Miljøet «${env}» har ingen kjent vert i Fiks. Miljøene må hete ${Object.keys(HOSTS).join(" eller ")}`);
-  const raw = (path) => resolve(data, path, { keys, env });
-  const need = (path, why) => {
-    const r = raw(path);
-    if (r.source === "usatt") throw new Usage(`${r.path} mangler i config-fila: ${why}. Kjør /fiks:env`);
-    return value(r.value);
+// Det et kall trenger, slått opp først når kallet trenger det.
+export function context(data, { fetchImpl = fetch, hemmelighet = secret }) {
+  const env = miljo(data, "fiks", undefined, HOSTS);
+  const secrets = [];
+  const hent = (navn) => {
+    const v = hemmelighet(ref(data, "fiks", navn));
+    secrets.push(v);
+    return v;
   };
-  const optional = (path) => {
-    const r = raw(path);
-    return r.source === "usatt" ? undefined : value(r.value);
-  };
-  const secrets = secretValues(data?.fiks);
   let cached;
   const bearer = async () => {
-    if (!cached) {
-      const clientId = need("maskinporten.klientId", "klient-ID-en til Maskinporten-klienten med ks:fiks");
-      const keyFile = need("maskinporten.nokkel", "den private nøkkelen til Maskinporten-klienten");
-      const t = await token({ miljo: env, clientId, scopes: [SCOPE], keyFile: isAbsolute(keyFile) ? keyFile : join(root ?? process.cwd(), keyFile), kid: optional("maskinporten.kid"), fetchImpl });
-      secrets.push(t.accessToken);
-      cached = t.accessToken;
-    }
+    cached ??= (await tokenFor({ data, navn: need(data, "fiks.klient", "navnet på Maskinporten-klienten med ks:fiks under maskinporten.klienter"), miljo: env, scopes: [SCOPE], fetchImpl, hemmelighet, secrets })).accessToken;
     return cached;
   };
   // SvarUt og Folkeregisteret: token og integrasjonen.
   const fiksHeaders = async () => ({
     authorization: `Bearer ${await bearer()}`,
-    IntegrasjonId: need("integrasjon.id", "id-en til integrasjonen i Fiks forvaltning"),
-    IntegrasjonPassord: need("integrasjon.passord", "integrasjonens servicepassord"),
+    IntegrasjonId: need(data, "fiks.integrasjon", "id-en til integrasjonen i Fiks forvaltning"),
+    IntegrasjonPassord: hent("integrasjon-passord"),
     accept: "application/json",
   });
   // SvarInn: Basic med mottakersystemet.
-  const svarinnHeaders = () => ({
-    authorization: basic(need("svarinn.mottakersystemId", "id-en til SvarInn-mottakersystemet"), need("svarinn.passord", "service-passordet til mottakersystemet")),
-    accept: "application/json",
-  });
-  return { miljo: env, hosts, secrets, need, optional, fiksHeaders, svarinnHeaders, fetchImpl };
+  const svarinnHeaders = () => ({ authorization: basic(need(data, "fiks.svarinnMottakersystem", "id-en til SvarInn-mottakersystemet"), hent("svarinn-passord")), accept: "application/json" });
+  return { miljo: env, hosts: HOSTS[env], secrets, data, fiksHeaders, svarinnHeaders };
 }
 
 const segment = (id, what) => {
@@ -95,25 +75,29 @@ export const COMMANDS = {
   },
   "svarut mottakersystem": {
     about: "Mottakersystemene en organisasjon har i SvarInn (v2). Tom liste: en forsendelse dit går til Altinn eller print",
+    validate: ({ positionals }) => {
+      if (!/^\d{9}$/.test(positionals[0] ?? "")) throw new Usage("Oppgi et organisasjonsnummer med ni sifre.");
+    },
     build: async (ctx, { positionals, flags }) => {
-      const orgnr = positionals[0];
-      if (!orgnr || !/^\d{9}$/.test(orgnr)) throw new Usage("Oppgi et organisasjonsnummer med ni sifre.");
-      const q = new URLSearchParams({ organisasjonsnummer: orgnr });
+      const q = new URLSearchParams({ organisasjonsnummer: positionals[0] });
       if (flags.forsendelsestype) q.set("forsendelseType", flags.forsendelsestype);
       return { method: "GET", url: `${ctx.hosts.svarut}/v2/mottakersystem?${q}`, headers: await ctx.fiksHeaders() };
     },
   },
   "svarut status": {
     about: "Status for én eller flere forsendelser fra avsenderkontoen (v3, status/sok). POST, men bare et søk",
-    build: async (ctx, { positionals }) => {
+    validate: ({ positionals }) => {
       if (!positionals.length) throw new Usage("Oppgi minst én forsendelses-id.");
       positionals.forEach((id) => segment(id, "forsendelses-id-en"));
-      const konto = segment(ctx.need("svarut.kontoId", "id-en til SvarUt-kontoen (avsenderkontoen)"), "svarut.kontoId");
+    },
+    build: async (ctx, { positionals }) => {
+      const konto = segment(need(ctx.data, "fiks.svarutKonto", "id-en til SvarUt-kontoen (avsenderkontoen)"), "fiks.svarutKonto");
       return { method: "POST", url: `${ctx.hosts.svarut}/v3/kontoer/${konto}/forsendelser/status/sok`, headers: { ...(await ctx.fiksHeaders()), "content-type": "application/json" }, body: JSON.stringify({ id: positionals }) };
     },
   },
   "svarut hendelser": {
     about: "Hendelsesloggen for én forsendelse (v2)",
+    validate: ({ positionals }) => segment(positionals[0], "forsendelses-id-en"),
     build: async (ctx, { positionals }) => ({ method: "GET", url: `${ctx.hosts.svarut}/v2/forsendelser/${segment(positionals[0], "forsendelses-id-en")}/hendelser`, headers: await ctx.fiksHeaders() }),
   },
   "svarinn liste": {
@@ -122,45 +106,29 @@ export const COMMANDS = {
   },
   "folkeregister person": {
     about: "Én person i Folkeregisteret gjennom rollen. Uten --part kommer bare grunnsettet",
+    validate: ({ positionals }) => {
+      if (!/^\d{11}$/.test(positionals[0] ?? "")) throw new Usage("Oppgi et fødsels- eller d-nummer med 11 sifre.");
+    },
     build: async (ctx, { positionals, flags }) => {
-      const fnr = positionals[0];
-      if (!fnr || !/^\d{11}$/.test(fnr)) throw new Usage("Oppgi et fødsels- eller d-nummer med 11 sifre.");
-      const rolle = segment(flags.rolle ?? ctx.need("folkeregister.rolleId", "rollen i Fiks forvaltning, eller --rolle"), "rolle-id-en");
+      const rolle = segment(flags.rolle ?? need(ctx.data, "fiks.folkeregisterRolle", "rollen i Fiks forvaltning, eller --rolle"), "rolle-id-en");
       const q = new URLSearchParams();
       for (const p of (flags.part ?? "").split(",").map((s) => s.trim()).filter(Boolean)) q.append("part", p);
-      return { method: "GET", url: `${ctx.hosts.fiksApi}/folkeregister/api/v1/${rolle}/v1/personer/${fnr}${q.size ? `?${q}` : ""}`, headers: await ctx.fiksHeaders() };
+      return { method: "GET", url: `${ctx.hosts.fiksApi}/folkeregister/api/v1/${rolle}/v1/personer/${positionals[0]}${q.size ? `?${q}` : ""}`, headers: await ctx.fiksHeaders() };
     },
   },
   "folkeregister hendelser": {
     about: "Hendelseslisten i Folkeregisteret fra et sekvensnummer (standard 1)",
+    validate: ({ flags }) => {
+      if (!/^\d+$/.test(flags.seq ?? "1")) throw new Usage("--seq er et heltall.");
+    },
     build: async (ctx, { flags }) => {
-      const seq = flags.seq ?? "1";
-      if (!/^\d+$/.test(seq)) throw new Usage("--seq er et heltall.");
-      const rolle = segment(flags.rolle ?? ctx.need("folkeregister.rolleId", "rollen i Fiks forvaltning, eller --rolle"), "rolle-id-en");
-      return { method: "GET", url: `${ctx.hosts.fiksApi}/folkeregister/api/v1/${rolle}/v1/hendelser/feed?seq=${seq}`, headers: await ctx.fiksHeaders() };
+      const rolle = segment(flags.rolle ?? need(ctx.data, "fiks.folkeregisterRolle", "rollen i Fiks forvaltning, eller --rolle"), "rolle-id-en");
+      return { method: "GET", url: `${ctx.hosts.fiksApi}/folkeregister/api/v1/${rolle}/v1/hendelser/feed?seq=${flags.seq ?? "1"}`, headers: await ctx.fiksHeaders() };
     },
   },
 };
 
-const FLAGS = new Set(["miljo", "forsendelsestype", "part", "rolle", "seq"]);
-
-export function parse(argv) {
-  const positionals = [];
-  const flags = {};
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (a.startsWith("--")) {
-      const name = a.slice(2);
-      if (!FLAGS.has(name)) throw new Usage(`Ukjent flagg --${name}.`);
-      const v = argv[++i];
-      if (v === undefined || v.startsWith("--")) throw new Usage(`--${name} trenger en verdi.`);
-      flags[name] = v;
-    } else positionals.push(a);
-  }
-  return { positionals, flags };
-}
-
-export const usage = () => `Bruk: fiks.mjs [--miljo <miljø>] <kommando>\n\n${Object.entries(COMMANDS).map(([k, c]) => `  ${k.padEnd(26)}${c.about}`).join("\n")}`;
+export const usage = () => `Bruk: fiks.mjs <kommando>\n\n${Object.entries(COMMANDS).map(([k, c]) => `  ${k.padEnd(26)}${c.about}`).join("\n")}`;
 
 // 401 fra Fiks har nesten alltid samme årsak; si den.
 export function hint(status, command) {
@@ -170,26 +138,24 @@ export function hint(status, command) {
     : "401 fra KS Fiks: organisasjonen i tokenet er ikke integrasjonens autoriserte organisasjon i Fiks forvaltning, eller integrasjonens passord stemmer ikke.";
 }
 
-// Hele kjøringen. Returnerer exit-koden: 0 for 2xx, 1 når Fiks svarer noe annet eller noe mangler, 2 for feil bruk.
-export async function run(argv, { cwd = process.cwd(), fetchImpl = fetch, out = console.log, err = console.error } = {}) {
+// Hele kjøringen. Exit: 0 for 2xx, 1 når Fiks svarer noe annet eller noe mangler, 2 for feil bruk.
+export async function main(argv, { config, fetchImpl = fetch, hemmelighet = secret, out = console.log, err = console.error } = {}) {
   let ctx;
+  let ids = [];
   try {
-    const { positionals, flags } = parse(argv);
-    const name = positionals.slice(0, 2).join(" ");
+    const args = parse(argv, { verdier: ["forsendelsestype", "part", "rolle", "seq"] });
+    const name = args._.slice(0, 2).join(" ");
     const command = COMMANDS[name];
-    if (!command) throw new Usage(positionals.length ? `Ukjent kommando «${name}».` : "Oppgi en kommando.");
-    const { found, data, errors } = load(cwd);
-    if (!data) {
-      err(errors.join("\n"));
-      return 1;
-    }
-    const root = found.root ?? dirname(dirname(found.path));
-    loadEnvLocal(root);
-    ctx = context(data, { miljo: flags.miljo, root, fetchImpl });
-    const req = await command.build(ctx, { positionals: positionals.slice(2), flags });
+    if (!command) throw new Usage(args._.length ? `Ukjent kommando «${name}».` : "Oppgi en kommando.");
+    const input = { positionals: args._.slice(2), flags: args };
+    ids = input.positionals;
+    command.validate?.(input);
+    const { data } = config ?? load();
+    ctx = context(data, { fetchImpl, hemmelighet });
+    const req = await command.build(ctx, input);
     out(`Miljø: ${ctx.miljo}`);
     const result = await call(req.url, { method: req.method, headers: req.headers, body: req.body, fetchImpl });
-    out(maskFnr(report(req.method, req.url, result, ctx.secrets)));
+    out(maskFnr(report(req.method, req.url, result, ctx.secrets), ids));
     if (result.ok) return 0;
     const why = hint(result.status, name);
     if (why) err(why);
@@ -199,13 +165,9 @@ export async function run(argv, { cwd = process.cwd(), fetchImpl = fetch, out = 
       err(`${e.message}\n\n${usage()}`);
       return 2;
     }
-    // En manglende hemmelighet sier navnet og kilden; alt annet sladdes og maskeres før det skrives ut.
-    const msg = e instanceof MissingSecret ? e.message : (e?.message ?? String(e));
-    err(maskFnr(redact(msg, ctx?.secrets ?? [])));
+    err(maskFnr(redact(`Feil: ${e.message}`, ctx?.secrets ?? []), ids));
     return 1;
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  process.exitCode = await run(process.argv.slice(2));
-}
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) process.exitCode = await main(process.argv.slice(2));

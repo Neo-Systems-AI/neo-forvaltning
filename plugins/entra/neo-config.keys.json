@@ -1,7 +1,4 @@
 {
   "plugin": "entra",
-  "neo": false,
-  "environments": false,
-  "maskinporten": false,
   "keys": []
 }

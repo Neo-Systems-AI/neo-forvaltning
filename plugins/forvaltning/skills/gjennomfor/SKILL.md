@@ -36,8 +36,7 @@ description: Gjennomfører en godkjent plan i Neo sin sandkasse med ett skript o
    Det som alt er skrevet, står: hver fil er sin egen transaksjon.
 3. Snapshot av sandkassen (`/forvaltning:snapshot`). Filene som ble gjennomført, er nå like i `oppsett/` og i
    snapshotet.
-4. Før en rad i `beslutninger.md`: dato, hva, hvem som godkjente (PR-en), hvem som kjørte gjennomføringen.
-5. Si til kunden at endringen ligger i sandkassen og kan promoteres, og hva som bør testes før det. Forhåndsvisningen
+4. Si til kunden at endringen ligger i sandkassen og kan promoteres, og hva som bør testes før det. Forhåndsvisningen
    av promoteringen i Neo viser om produksjonen mangler en integrasjon eller postboks en flyt er bundet til (et gap
    på flyten): den settes opp i produksjonen, med samme navn og adresse, før promoteringen.
 

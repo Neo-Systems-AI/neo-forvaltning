@@ -48,7 +48,7 @@ endringene, `unchanged`, eller `rejected` med grunnene. Rett fila til den ikke e
    og `.json`, i rekkefølgen Neo skriver filene. Exit 1 betyr at minst én fil er avvist; grunnen står i planen. En fil
    i en mappe Neo ikke kjenner, er avvist: flytt den, eller legg den i `oppsett/manuelt/` om den beskriver noe som
    gjøres for hånd.
-2. Skriv over planen, i klartekst og per sakstype: hva endres, hvorfor (lenke til raden i `beslutninger.md`), og hva
+2. Skriv over planen, i klartekst og per sakstype: hva endres, hvorfor (lenke til kravet eller saken), og hva
    saksbehandlerne vil merke.
 3. Commit `plan-<miljø>.md` og `plan-<miljø>.json`, og legg planen i PR-beskrivelsen. Godkjenningen av PR-en er kundens
    godkjenning av akkurat denne planen: gjennomføringen sjekker mot `plan-<miljø>.json`.

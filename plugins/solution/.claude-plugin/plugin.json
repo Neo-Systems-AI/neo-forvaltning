@@ -1,13 +1,21 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "solution",
-  "version": "0.1.1",
-  "description": "Å designe og bygge en løsning i Neo, fra en idé eller en kunngjøring til konfig som er testet i UI og gitt til kunden. Løpet er nummerert: research på kunden og på prosessen fra kilder som lagres uendret, kravene, designvalgene, konfigen bygget fra kravene med mønstrene for god konfig (med KI-oppsettet per sakstype), testene, runden i UI med personen som observatør, og sorteringen av funnene i konfig og ønsker til Neo. Ved siden av: gjennomgangen av konfigen i et miljø mot mønstrene, og overleveringen til kunden.",
+  "version": "0.5.0",
+  "description": "Løypa fra en idé til en løsning i Neo som er testet i UI og gitt til kunden: research på kunden og prosessen fra kilder som lagres uendret, kravene med hva hvert krav ble, designvalgene med avvikene fra mønstrene, konfigen i oppsett/ i Neos format bygget med mønstrene for god konfig, testene, runden i UI og sorteringen av funnene. Ved siden av: gjennomgangen av konfigen i et miljø mot mønstrene, og overleveringen til kunden. Veien inn og ut av Neo og repoet står i pluginen forvaltning.",
   "author": {
     "name": "Neo Systems AS",
     "url": "https://github.com/Neo-Systems-AI"
   },
   "repository": "https://github.com/Neo-Systems-AI/neo-forvaltning",
   "license": "MIT",
-  "keywords": ["neo", "løsning", "konfigurasjon", "research", "krav", "test"]
+  "keywords": [
+    "neo",
+    "løsning",
+    "konfigurasjon",
+    "konfig-som-fil",
+    "research",
+    "krav",
+    "test"
+  ]
 }

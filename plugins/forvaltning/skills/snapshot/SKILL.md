@@ -29,8 +29,8 @@ Neo skriver filene selv (`GET /api/config/export`). Formen, nøklene og pekerne 
    - **Maskinklienten mangler eller avvises:** se `/forvaltning:env` og `node … konfig.mjs token`.
 3. Filene og `ikke-med.md` committes, med meldingen `snapshot: <miljø> <dato>`.
 4. Si kort hva som er endret siden forrige snapshot (`git diff --stat`). En endring ingen har gjort gjennom repoet, er
-   et avvik: skriv det i `beslutninger.md` som «avvik funnet», så kunden kan avgjøre om det skal tas inn i oppsettet
-   eller rulles tilbake.
+   et avvik: skriv det i PR-en med snapshotet, så kunden kan avgjøre om det skal tas inn i oppsettet eller rulles
+   tilbake.
 
 ## Sandkassen og produksjonen
 

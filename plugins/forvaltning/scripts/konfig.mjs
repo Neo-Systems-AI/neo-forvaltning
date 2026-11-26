@@ -13,11 +13,11 @@
 //   --miljo <miljø>   et miljø i neo.environments (standard: neo.defaultEnv). Plan og apply virker bare i en sandkasse.
 //
 // Exit: 0 ok · 1 Neo avviste noe, eller planen er ikke den som ble godkjent · 2 feil bruk eller config.
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync, realpathSync } from "node:fs";
 import { join, relative } from "node:path";
 
 import { load, resolve } from "./lib/neo-config.mjs";
-import { loadEnvLocal } from "./lib/hemmeligheter.mjs";
 import { apiSettings, neoApi, neoToken, NeoApiError } from "./lib/neo-api.mjs";
 import { write } from "./skriv-eksport.mjs";
 import { differences, markdown, summary } from "./planrapport.mjs";
@@ -105,9 +105,12 @@ const parse = (argv) => {
 export async function main(argv, { log = console.log, err = console.error } = {}) {
   const { command, miljo, fil } = parse(argv);
   if (!["token", "miljo", "export", "plan", "apply"].includes(command)) throw new Usage("Bruk: node konfig.mjs token | miljo | export | plan [--fil <sti>] | apply  [--miljo <miljø>]");
-  loadEnvLocal();
-  const { data, errors } = load();
-  if (!data) throw new Usage(errors.join("\n"));
+  let data;
+  try {
+    ({ data } = load());
+  } catch (e) {
+    throw new Usage(e.message);
+  }
   const s = apiSettings(data, miljo);
   const api = neoApi(s);
   log(`Miljø: ${s.miljo} (${s.url})`);
@@ -162,7 +165,7 @@ export async function main(argv, { log = console.log, err = console.error } = {}
   return 0;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   main(process.argv.slice(2)).then(
     (code) => process.exit(code),
     (e) => {

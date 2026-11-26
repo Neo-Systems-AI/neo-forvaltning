@@ -8,8 +8,8 @@ description: Skriver kravene til en løsning fra forståelsen - ett krav per vil
 Kravene sier hva som må holde, ikke hvordan. De er det oppsettet bygges fra og testene sjekker, så et krav som mangler
 her, blir ikke bygget, og et krav som er feil, blir bygget feil.
 
-**Inn:** forståelsen i løsningen og i `virksomheten/`. **Ut:** `3-krav/` i løsningen, som items. Formen på et krav står
-i repoets regel for mappa (`.claude/rules/`).
+**Inn:** forståelsen i løsningen, og i `felles/forstaelse/` i et kunderepo. **Ut:** `krav/` i løsningen, som items, og det som er felles
+for flere løsninger i `felles/krav/`. Formen på et krav står i repoets regel for mappa (`.claude/rules/`).
 
 ## Et krav
 
@@ -22,24 +22,28 @@ i repoets regel for mappa (`.claude/rules/`).
   - `menneske`: skjønn eller en beslutning et menneske tar.
 - **Hvorfor**, i én setning, med hjemmelen eller grunnen.
 - **Kilden:** id-en til kilden eller ankeret i forståelsen.
-- **Hva det blir** står tomt til oppsettet bygges. Kravene antar ikke hva Neo har.
+- **Hva det blir** (`blir`) står tomt til oppsettet bygges. Kravene antar ikke hva Neo har.
 
 ## Slik gjør du det
 
 1. Gå gjennom forståelsen dimensjon for dimensjon, og skriv kravene i samme rekkefølge, så hullene synes.
-2. Ta med kravene fra `virksomheten/` som løsningen berører (en rolle som godkjenner, et system som skal oppdateres,
+2. Ta med det som gjelder hele kunden og som løsningen berører (en rolle som godkjenner, et system som skal oppdateres,
    en rapport oppover), med kilde dit.
 3. Velg hvem som utfører hvert krav etter hva det krever: en regel som kan skrives ned, er deterministisk, selv om den
    gjøres for hånd i dag. Skjønn som en agent kan forberede med kilde, er agentisk. Det som er en beslutning, er et
    menneske.
 4. Spørsmålene fra researchen som ikke er besvart, blir ikke krav. Si hvilke krav som venter på dem.
-5. Kjør repoets sjekk til den er grønn: hvert krav har hvem som utfører det, hvorfor og en kilde som finnes.
+5. Kjør sjekken av repoet (`check` i `.claude/method.json`) til den er grønn: hvert krav er et item med yaml-blokken,
+   og har hvem som utfører det, hvorfor og en kilde som finnes.
 
 ## Regler
 
 - **Et krav fra hjemmelen tas aldri bort.** Det kan oppfylles på en annen måte enn i dag, men ikke forenkles vekk.
 - **Dagens prosess er ikke et krav.** At noe gjøres i dag, er en kilde til forståelsen, ikke en grunn til at det skal
   være slik.
+- **I et repo for standardløsninger** (`type: standard` i `kunde.yaml`) finnes ingen kunde å forstå, så `felles/` har
+  ikke `kilder/` eller `forstaelse/`. Et krav i `felles/krav/` viser der til forståelsen i en løsning, for eksempel
+  `../losninger/<losning>/forstaelse/forlop.md`.
 - **Ingen krav uten kilde.** Det som er en god idé, men ikke står noe sted, legges fram som et forslag, ikke skrives som
   et krav.
 

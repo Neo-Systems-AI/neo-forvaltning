@@ -6,46 +6,34 @@ det Neo gjorde. Bare lesing. Hemmelighetene sladdes, og fødselsnummer maskeres.
 | Skill | Hva |
 |---|---|
 | `fiks:api` | Kallene: SvarUt (forsendelsestyper, mottakersystem, status, hendelser), SvarInn (nye forsendelser) og Folkeregisteret (person, hendelser) |
-| `fiks:env` | Config-fila slik pluginen leser den |
 
 `scripts/fiks.mjs` er kallene, uten avhengigheter (Node 22). `scripts/fiks.test.mjs` prøver dem uten nettverk.
 
 ## Config
 
-I `.claude/neo.config.json`, under `fiks`. Miljøene heter `test` og `produksjon`. En hemmelighet står aldri med verdi,
-bare som referanse til kundens hvelv:
+I `.claude/neo.config.json`, under `fiks`, med Maskinporten-klienten beskrevet under `maskinporten.klienter` (se
+pluginen `maskinporten`). Id-ene er ikke hemmelige:
 
 ```json
-{
-  "fiks": {
-    "environments": ["test", "produksjon"],
-    "defaultEnv": "test",
-    "byEnv": {
-      "test": {
-        "maskinporten": {
-          "klientId": "<klient-id>",
-          "kid": "<kid, valgfri>",
-          "nokkel": { "$env": "FIKS_MASKINPORTEN_NOKKEL", "kilde": "azure-keyvault:<hvelv>/<navn>", "fil": true }
-        },
-        "integrasjon": {
-          "id": "<integrasjonens id i Fiks forvaltning>",
-          "passord": { "$env": "FIKS_INTEGRASJON_PASSORD", "kilde": "azure-keyvault:<hvelv>/<navn>" }
-        },
-        "svarut": { "kontoId": "<avsenderkontoen>" },
-        "svarinn": {
-          "mottakersystemId": "<mottakersystemets id>",
-          "passord": { "$env": "FIKS_SVARINN_PASSORD", "kilde": "azure-keyvault:<hvelv>/<navn>" }
-        },
-        "folkeregister": { "rolleId": "<rollen i Fiks register>" }
-      }
-    }
+"fiks": {
+  "miljo": "test",
+  "klient": "fiks",
+  "integrasjon": "<integrasjonens id i Fiks forvaltning>",
+  "svarutKonto": "<avsenderkontoen>",
+  "svarinnMottakersystem": "<mottakersystemets id>",
+  "folkeregisterRolle": "<rollen i Fiks register>",
+  "hemmeligheter": {
+    "integrasjon-passord": { "$env": "FIKS_INTEGRASJON_PASSORD", "kilde": "azure-keyvault:<hvelv>/fiks-integrasjon-passord" },
+    "svarinn-passord": { "$env": "FIKS_SVARINN_SERVICE_PASSORD", "kilde": "azure-keyvault:<hvelv>/fiks-svarinn-service-passord" }
   }
 }
 ```
 
-Hemmelige er Maskinporten-nøkkelen, integrasjonens passord og SvarInn-passordet. Id-ene er ikke hemmelige.
+Passordene står som referanser under `hemmeligheter`, og hentes fra hvelvet for kjøringen.
 
 ## Det kunden må ha selv
+
+Oppsettet hos kunden, steg for steg, står i [`docs/fiks.md`](./docs/fiks.md).
 
 Kunden eier avtalene, tilgangene og hemmelighetene; vi eier koden.
 

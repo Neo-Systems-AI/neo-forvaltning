@@ -12,16 +12,19 @@
 //   node altinn.mjs hendelser --tjenesteeier [--app <org/app>] [--etter <id>] [--fra <utc>] [--til <utc>] [--part <n>]
 //   node altinn.mjs appmeta [--app <org/app>]
 //
-//   --miljo tt02|produksjon   standard: altinn.miljo (tt02)
 //   --vis-person              vis fødselsnumrene i svaret; uten den er de skjult
 //
-// Config: `altinn` i .claude/neo.config.json. Nøkkelen leses fra miljøet eller .env.local (en sti under .keys/ eller
-// en PEM), aldri fra fila. Exit: 0 svar 2xx · 1 feil eller ikke-2xx · 2 feil bruk.
-import { isAbsolute, join } from "node:path";
-import { load, resolve, pluginKeys } from "./lib/neo-config.mjs";
-import { loadEnvLocal, secretValues, value } from "./lib/hemmeligheter.mjs";
+// Config: `altinn` i .claude/neo.config.json: miljo (tt02 eller produksjon), klient (en klient i
+// maskinporten.klienter, med tjenesteeier-scopes), org og apps. Nøkkelen til klienten hentes fra hvelvet for kjøringen.
+// Har kunden en Ocp-Apim-Subscription-Key, er referansen altinn.hemmeligheter.subscription-key.
+// Exit: 0 svar 2xx · 1 feil eller ikke-2xx · 2 feil bruk.
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { parse, Usage } from "./lib/argumenter.mjs";
+import { get, load, miljo, need } from "./lib/neo-config.mjs";
+import { has, ref, secret } from "./lib/hemmeligheter.mjs";
 import { call, redact, report } from "./lib/http.mjs";
-import { token as maskinportenToken } from "./lib/maskinporten.mjs";
+import { tokenFor } from "./lib/maskinporten.mjs";
 
 export const HOSTS = {
   tt02: { maskinporten: "test", platform: "https://platform.tt02.altinn.no", apps: "apps.tt02.altinn.no" },
@@ -29,8 +32,6 @@ export const HOSTS = {
 };
 export const EXCHANGE_PATH = "/authentication/api/v1/exchange/maskinporten";
 const MAX_PAGES = 50;
-
-export class Usage extends Error {}
 
 const APP = /^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9-]*$/i;
 const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -43,76 +44,24 @@ export function parseInstance(ref) {
   return { part: m[1], guid: m[2] };
 }
 
-export function parseArgs(argv) {
-  const BOOL = new Set(["ko", "alle", "historikk", "innhold", "tjenesteeier", "vis-person"]);
-  const out = { _: [] };
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (!a.startsWith("--")) {
-      out._.push(a);
-      continue;
-    }
-    const name = a.slice(2);
-    if (BOOL.has(name)) {
-      out[name] = true;
-      continue;
-    }
-    const v = argv[i + 1];
-    if (v === undefined || v.startsWith("--")) throw new Usage(`--${name} trenger en verdi`);
-    out[name] = v;
-    i++;
-  }
-  return out;
-}
+export const parseArgs = (argv) => parse(argv, { verdier: ["app", "org", "part", "antall", "etter", "type", "fra", "til"], brytere: ["ko", "alle", "historikk", "innhold", "tjenesteeier", "vis-person"] });
 
-export function pickEnv(data, wanted, keys = pluginKeys()) {
-  const envs = data?.altinn?.environments ?? [];
-  if (!envs.length) throw new Error("altinn.environments mangler i .claude/neo.config.json (for eksempel [\"tt02\", \"produksjon\"]). Se /altinn:env");
-  const env = wanted ?? resolve(data, "miljo", { keys }).value;
-  if (!envs.includes(env)) throw new Error(`«${env}» er ikke et miljø i altinn.environments (${envs.join(", ")})`);
-  if (!HOSTS[env]) throw new Error(`«${env}» er ikke et Altinn-miljø pluginen kjenner. Miljøene: ${Object.keys(HOSTS).join(", ")}`);
-  return env;
-}
-
-export function settings(data, miljo, keys = pluginKeys()) {
-  const get = (path) => resolve(data, path, { keys, env: miljo });
-  const need = (path) => {
-    const r = get(path);
-    if (r.source === "usatt") throw new Error(`${r.path} er ikke satt i .claude/neo.config.json. Se /altinn:env`);
-    return r.value;
-  };
-  const clientId = need("maskinporten.clientId");
-  const nokkel = need("maskinporten.nokkel");
-  if (typeof nokkel !== "object") throw new Error(`altinn.byEnv.${miljo}.maskinporten.nokkel skal være en referanse ({ "$env": …, "kilde": …, "fil": true }), ikke en verdi. Fjern verdien fra fila`);
-  const scopes = need("maskinporten.scopes");
-  return {
-    miljo,
-    hosts: HOSTS[miljo],
-    clientId,
-    kid: get("maskinporten.kid").value,
-    nokkel,
-    scopes: Array.isArray(scopes) ? scopes : String(scopes).split(/\s+/).filter(Boolean),
-    subscriptionKey: get("subscriptionKey").value,
-    apps: get("apps").value ?? [],
-    org: get("org").value,
-  };
-}
-
-// Nøkkelen: en PEM rett i miljøet, eller en sti (relativ til repoet, slik hentingen skriver den til .keys/).
-export function keySource(ref, root = process.cwd()) {
-  const v = value(ref);
-  if (v.includes("-----BEGIN")) return { keyPem: v.replace(/\\n/g, "\n") };
-  return { keyFile: isAbsolute(v) ? v : join(root, v) };
+// Innstillingene for miljøet. Mangler en, sies stien.
+export function settings(data) {
+  const env = miljo(data, "altinn", undefined, HOSTS);
+  return { miljo: env, hosts: HOSTS[env], klient: need(data, "altinn.klient", "navnet på Maskinporten-klienten med tjenesteeier-scopes under maskinporten.klienter"), apps: get(data, "altinn.apps") ?? [], org: get(data, "altinn.org") };
 }
 
 const claims = (jwt) => JSON.parse(Buffer.from(jwt.split(".")[1], "base64url").toString("utf8"));
 
 // Maskinporten-tokenet gjelder ikke mot Altinn 3 direkte; det veksles med en GET (POST gir 411).
-export async function altinnToken(s, { root, fetchImpl = fetch } = {}) {
-  const mp = await maskinportenToken({ miljo: s.hosts.maskinporten, clientId: s.clientId, scopes: s.scopes, kid: s.kid, ...keySource(s.nokkel, root), fetchImpl });
+export async function altinnToken(s, { data, fetchImpl = fetch, hemmelighet = secret, secrets = [] } = {}) {
+  const mp = await tokenFor({ data, navn: s.klient, miljo: s.hosts.maskinporten, fetchImpl, hemmelighet, secrets }).catch((e) => {
+    throw /Ingen scopes/.test(e.message) ? new Error(`${e.message}. Tjenesteeier-scopes er for eksempel altinn:serviceowner/instances.read, altinn:serviceowner/events og altinn:events.subscribe; sett bare dem klienten har, for Maskinporten avviser hele kallet om ett mangler`) : e;
+  });
   const url = `${s.hosts.platform}${EXCHANGE_PATH}`;
   const res = await call(url, { headers: { authorization: `Bearer ${mp.accessToken}` }, fetchImpl });
-  if (!res.ok) throw Object.assign(new Error(`Vekslingen hos Altinn feilet: ${res.status} (${url}) ${typeof res.body === "string" ? res.body.slice(0, 300) : JSON.stringify(res.body).slice(0, 300)}`), { mpToken: mp.accessToken });
+  if (!res.ok) throw new Error(`Vekslingen hos Altinn feilet: ${res.status} (${url}) ${typeof res.body === "string" ? res.body.slice(0, 300) : JSON.stringify(res.body).slice(0, 300)}`);
   // Svaret er tokenet som en JSON-streng eller ren tekst.
   const tok = String(res.body).trim().replace(/^"|"$/g, "");
   if (tok.split(".").length !== 3) throw new Error(`Vekslingen svarte ${res.status}, men svaret ser ikke ut som et JWT`);
@@ -143,8 +92,8 @@ const size = (n) => {
   return n;
 };
 
-// Hele kjøringen, med config og fetch utenfra så den kan testes. Skriver til out/err og returnerer exit-koden.
-export async function run(argv, { data, root = process.cwd(), fetchImpl = fetch, out = console.log, err = console.error } = {}) {
+// Hele kjøringen, med config, fetch og hvelvet utenfra så den kan testes. Skriver til out/err og gir exit-koden.
+export async function run(argv, { config, fetchImpl = fetch, hemmelighet = secret, out = console.log, err = console.error } = {}) {
   let args;
   try {
     args = parseArgs(argv);
@@ -160,27 +109,26 @@ export async function run(argv, { data, root = process.cwd(), fetchImpl = fetch,
     if (args.part && !/^\d+$/.test(args.part)) throw new Usage("--part skal være et part-id (bare sifre)");
     size(args.antall);
   } catch (e) {
-    if (!(e instanceof Usage)) throw e;
     err(e.message);
     return 2;
   }
 
-  const secrets = secretValues(data?.altinn);
+  const secrets = [];
   const show = (x) => (args["vis-person"] ? x : hidePersons(x));
   try {
-    const s = settings(data, pickEnv(data, args.miljo));
-    const t = await altinnToken(s, { root, fetchImpl }).catch((e) => {
-      if (e.mpToken) secrets.push(e.mpToken);
-      throw e;
-    });
-    secrets.push(t.token, t.mpToken);
-    const headers = { authorization: `Bearer ${t.token}`, accept: "application/json", ...(s.subscriptionKey ? { "ocp-apim-subscription-key": value(s.subscriptionKey) } : {}) };
-    if (s.subscriptionKey) secrets.push(value(s.subscriptionKey));
+    const { data } = config ?? load();
+    const s = settings(data);
+    const t = await altinnToken(s, { data, fetchImpl, hemmelighet, secrets });
+    secrets.push(t.token);
+    let subscriptionKey;
+    // En subscription key bare når kunden har fått en.
+    if (has(data, "altinn", "subscription-key")) secrets.push((subscriptionKey = hemmelighet(ref(data, "altinn", "subscription-key"))));
+    const headers = { authorization: `Bearer ${t.token}`, accept: "application/json", ...(subscriptionKey ? { "ocp-apim-subscription-key": subscriptionKey } : {}) };
     const get = (url, extra = {}) => call(url, { headers: { ...headers, ...extra }, fetchImpl });
     const print = (url, result, body = result.body) => out(report("GET", url, { ...result, body: show(body) }, secrets));
     out(`Miljø: ${s.miljo}`);
 
-    const [cmd, ref, dataGuid] = args._;
+    const [cmd, inst, dataGuid] = args._;
     const storage = `${s.hosts.platform}/storage/api/v1`;
 
     if (cmd === "token") {
@@ -213,7 +161,7 @@ export async function run(argv, { data, root = process.cwd(), fetchImpl = fetch,
       return r.ok ? 0 : 1;
     }
 
-    const { part, guid } = ref ? parseInstance(ref) : {};
+    const { part, guid } = inst ? parseInstance(inst) : {};
     const instanceUrl = `${storage}/instances/${part}/${guid}`;
 
     if (cmd === "instans") {
@@ -335,17 +283,9 @@ export async function run(argv, { data, root = process.cwd(), fetchImpl = fetch,
       err(e.message);
       return 2;
     }
-    err(redact(e.message, secrets));
+    err(redact(`Feil: ${e.message}`, secrets));
     return 1;
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const { found, data, errors } = load();
-  if (!data) {
-    console.error(errors.join("\n"));
-    process.exit(1);
-  }
-  loadEnvLocal(found.root);
-  process.exit(await run(process.argv.slice(2), { data, root: found.root ?? process.cwd() }));
-}
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) process.exitCode = await run(process.argv.slice(2));

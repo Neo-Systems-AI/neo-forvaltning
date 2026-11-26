@@ -5,7 +5,8 @@
 // kan tidfeste for seg, i stedet for å telle feil.
 //
 //   node summarize-runs.mjs <mappe> [--window 24h|7d|30d] [--now <iso>] [--json]
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync, realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { basename, join } from "node:path";
 
 const UNITS = { h: 3600e3, d: 86400e3 };
@@ -68,7 +69,7 @@ export function markdown(rows, window) {
   return attention.length ? `${head}\n\n| Flyt | Kjøringer | Feilet | Sist feilet | Siste feil |\n|---|---|---|---|---|\n${lines.join("\n")}\n\n${rest}\n` : `${head} ${rest}\n`;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   const args = process.argv.slice(2);
   const dir = args[0];
   if (!dir) {
