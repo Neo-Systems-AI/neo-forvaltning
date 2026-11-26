@@ -28,7 +28,7 @@ export function readYaml(root, rel, check, f) {
   try {
     return parseYaml(readFileSync(join(root, rel), "utf8"));
   } catch (e) {
-    f.push({ check, file: rel, message: `Kan ikke leses som YAML (${e.message})` });
+    f.push({ check, file: rel, message: `Kan ikke leses som YAML (${e.message}). Rett YAML-en der feilen sier` });
     return undefined;
   }
 }

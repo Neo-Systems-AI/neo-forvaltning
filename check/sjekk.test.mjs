@@ -34,11 +34,11 @@ test("kunde.yaml: typen, kunden, godkjenneren, forvalteren og versjonene, og rep
   const root = repo({ ...GOOD(), "kunde.yaml": "type: kommune\nkunde: { navn: K }\nforvalter: { navn: \"\" }\n", "repo.yaml": "type: kunde\n" });
   assert.deepEqual(msgs(check(root), "kunde"), [
     "kunde.yaml: forvalter.navn er ikke fylt ut",
-    "kunde.yaml: godkjenner mangler",
-    "kunde.yaml: type må være kunde eller standard",
-    "kunde.yaml: verktoy mangler: versjonene av malen og forvaltning repoet er laget for",
+    "kunde.yaml: godkjenner mangler. Legg det inn i kunde.yaml, slik malen viser",
+    "kunde.yaml: type må være kunde eller standard. Sett type: kunde for én kommune eller virksomhet, type: standard for standardløsninger",
+    "kunde.yaml: verktoy mangler: versjonene av malen og forvaltning repoet er laget for. Legg inn verktoy: { mal: <VERSION i malen>, forvaltning: <versjonen av pluginen> }",
   ]);
-  assert.deepEqual(msgs(check(root), "repo"), ["repo.yaml: Fila heter kunde.yaml, med type (kunde eller standard)"]);
+  assert.deepEqual(msgs(check(root), "repo"), ["repo.yaml: Fila heter kunde.yaml, med type (kunde eller standard). Gi den nytt navn til kunde.yaml, og legg til type"]);
   rmSync(root, { recursive: true });
 });
 
@@ -64,25 +64,25 @@ test("strukturen: konfigen i oppsett/ i roten, mappene har navn, ikke tall, og d
     "integrasjoner/altinn/notat.txt": "",
     "integrasjoner/altinn/hemmeligheter.yaml": "altinn-nokkel: { $env: A, kilde: azure-keyvault:kv/a }\n",
   });
-  const oppsett = "Konfigen står i oppsett/ i roten, slik Neo eksporterer den, og kravene peker på fila der (blir: fil: oppsett/…). En løsning og felles/ har ingen egen oppsett/";
+  const oppsett = "Konfigen står i oppsett/ i roten, slik Neo eksporterer den, og kravene peker på fila der (blir: fil: oppsett/…). En løsning og felles/ har ingen egen oppsett/. Flytt filene til oppsett/ i roten, og rett blir i kravene";
   assert.deepEqual(msgs(check(root), "repo"), [
-    "felles/forstaelse: Et repo for standardløsninger har ingen kunde å forstå, så felles/ har ikke kilder eller forstaelse",
-    "felles/kilder: Et repo for standardløsninger har ingen kunde å forstå, så felles/ har ikke kilder eller forstaelse",
+    "felles/forstaelse: Et repo for standardløsninger har ingen kunde å forstå, så felles/ har ikke kilder eller forstaelse. Flytt det som gjelder én løsning, inn i løsningen, og ta bort mappa",
+    "felles/kilder: Et repo for standardløsninger har ingen kunde å forstå, så felles/ har ikke kilder eller forstaelse. Flytt det som gjelder én løsning, inn i løsningen, og ta bort mappa",
     `felles/oppsett: ${oppsett}`,
-    "integrasjoner/README.md: Lista over det kunden må gjøre, lages av sjekken (sjekk.mjs hos-kunden) og committes ikke. Ta den bort",
+    "integrasjoner/README.md: Lista over det kunden må gjøre, lages av sjekken (sjekk.mjs hos-kunden) og committes ikke. Ta den bort fra git",
     "integrasjoner/altinn/hemmeligheter.yaml: Nøklene ligger bare i hvelvet, med faste navn som pluginene bestemmer, og config-fila sier bare hvilket hvelv (hvelv). Ta den bort, og legg nøkkelen inn med /forvaltning:nokler",
     "integrasjoner/altinn/neo.yaml: neo.yaml har ingen form i Neo ennå. Ta den bort",
-    "integrasjoner/altinn/notat.txt: En integrasjon har hos-kunden.md, og artefaktene systemet trenger i en egen mappe",
-    "losninger/parkering/2-forstaelse: Mappene har navn, ikke tall: 2-forstaelse heter forstaelse",
-    "losninger/parkering/notater.md: En løsning har README.md, design, forstaelse, kilder, krav, losning.yaml, test. Det som ikke har en form, finnes ikke",
+    "integrasjoner/altinn/notat.txt: En integrasjon har hos-kunden.md, og artefaktene systemet trenger i en egen mappe. Flytt fila inn i en mappe under integrasjonen",
+    "losninger/parkering/2-forstaelse: Mappene har navn, ikke tall: 2-forstaelse heter forstaelse. Gi mappa nytt navn",
+    "losninger/parkering/notater.md: En løsning har README.md, design, forstaelse, kilder, krav, losning.yaml, test. Det som ikke har en form, finnes ikke. Flytt innholdet inn i en av dem etter reglene i .claude/rules/, og ta bort notater.md",
     `losninger/parkering/oppsett: ${oppsett}`,
-    "losninger/parkering/test/notat.md: test/ i en løsning har testcaser/, testplan.md og runder/. Det som ikke har en form, finnes ikke",
-    "losninger/parkering/test/runder/runde-1.md: En runde heter etter datoen, ÅÅÅÅ-MM-DD.md, og ÅÅÅÅ-MM-DD-2.md for neste runde samme dag",
-    "notater: En mappe på roten er en av felles, losninger, integrasjoner, test, oppsett, snapshots, reports. Det som ikke har en form, finnes ikke",
-    "organisasjon: Det som er felles, står i felles/ (felles/krav/, felles/design/), og konfigen i oppsett/",
+    "losninger/parkering/test/notat.md: test/ i en løsning har testcaser/, testplan.md og runder/. Det som ikke har en form, finnes ikke. Flytt innholdet inn i en av dem, og ta bort resten",
+    "losninger/parkering/test/runder/runde-1.md: En runde heter etter datoen, ÅÅÅÅ-MM-DD.md, og ÅÅÅÅ-MM-DD-2.md for neste runde samme dag. Gi fila nytt navn",
+    "notater: En mappe på roten er en av felles, losninger, integrasjoner, test, oppsett, snapshots, reports. Det som ikke har en form, finnes ikke. Flytt innholdet dit det hører hjemme etter reglene i .claude/rules/, og ta bort mappa",
+    "organisasjon: Det som er felles, står i felles/ (felles/krav/, felles/design/), og konfigen i oppsett/. Flytt innholdet dit, og ta bort mappa",
     "profil.yaml: profil.yaml har ingen form i Neo ennå. Ta den bort",
-    "snapshots/test: test er ikke et miljø i neo.environments (sandkasse, produksjon)",
-    "snapshots/x.yaml: snapshots/ har én mappe per miljø, med filene Neo eksporterte",
+    "snapshots/test: test er ikke et miljø i neo.environments (sandkasse, produksjon). Ta bort mappa, eller rett navnet til miljøet",
+    "snapshots/x.yaml: snapshots/ har én mappe per miljø, med filene Neo eksporterte. Ta bort fila, og ta et nytt snapshot med /forvaltning:snapshot",
     "state: Id-ene per miljø finnes ikke lenger: Neo skriver filene med nøkler (forvaltning 0.2.0). Ta bort state/",
   ]);
   rmSync(root, { recursive: true });
@@ -106,11 +106,11 @@ test("config-fila: version 1 med sandkasse og produksjon under neo.byEnv, hvelve
     ".claude/neo.config.json: fiks.hemmeligheter: Nøklene ligger bare i hvelvet, med faste navn som pluginene bestemmer, og config-fila sier bare hvilket hvelv (hvelv). Ta den bort, og legg nøkkelen inn med /forvaltning:nokler",
     ".claude/neo.config.json: fiks.nokkel er en referanse. Nøklene ligger bare i hvelvet, med faste navn som pluginene bestemmer, og config-fila sier bare hvilket hvelv (hvelv). Ta den bort, og legg nøkkelen inn med /forvaltning:nokler",
     ".claude/neo.config.json: fiks.passord står med verdi. Config-fila har ingen hemmeligheter",
-    ".claude/neo.config.json: neo.byEnv.annen er ikke et miljø i neo.environments",
+    ".claude/neo.config.json: neo.byEnv.annen er ikke et miljø i neo.environments. Ta den bort, eller legg miljøet til i neo.environments",
     ".claude/neo.config.json: neo.byEnv.sandkasse.apiClient.clientSecret: Nøklene ligger bare i hvelvet, med faste navn som pluginene bestemmer, og config-fila sier bare hvilket hvelv (hvelv). Ta den bort, og legg nøkkelen inn med /forvaltning:nokler (neo--sandkasse-klient)",
-    ".claude/neo.config.json: neo.environments har ikke produksjon. Miljøene er sandkasse og produksjon",
-    ".claude/neo.config.json: neo.url, neo.org, neo.mcpServer står rett under neo. Miljøene står under neo.byEnv.<miljø> med mcpServer og url, og org-en er miljøet",
-    ".claude/neo.config.json: version må være 1: versjon 2 hadde ett miljø (neo.url, neo.org, neo.mcpServer). Nå er det sandkasse og produksjon under neo.byEnv",
+    ".claude/neo.config.json: neo.environments har ikke produksjon. Miljøene er sandkasse og produksjon: legg det til",
+    ".claude/neo.config.json: neo.url, neo.org, neo.mcpServer står rett under neo. Miljøene står under neo.byEnv.<miljø> med mcpServer og url, og org-en er miljøet. Flytt dem dit, slik malen viser",
+    ".claude/neo.config.json: version må være 1: versjon 2 hadde ett miljø (neo.url, neo.org, neo.mcpServer). Nå er det sandkasse og produksjon under neo.byEnv. Sett version: 1, i formen malen har",
   ]);
   assert.deepEqual(msgs(f, "config", "warn"), [
     ".claude/neo.config.json: Adressen til Neo for sandkasse er ikke fylt ut (neo.byEnv.sandkasse.url)",
@@ -133,9 +133,9 @@ test("konfigfilene i oppsett/ og snapshots/ er Neos filer: den gamle JSON-formen
   });
   const old = "Formen fra før forvaltning 0.2.0. Ta et nytt snapshot (/forvaltning:snapshot) og bygg oppsettet fra filene Neo skriver";
   assert.deepEqual(msgs(check(root), "oppsett"), [
-    "oppsett/case-types/x.yaml: Ikke en konfigfil fra Neo: den må ha apiVersion: neo-config/v1, kind og spec øverst",
+    "oppsett/case-types/x.yaml: Ikke en konfigfil fra Neo: den må ha apiVersion: neo-config/v1, kind og spec øverst. Ta et snapshot (/forvaltning:snapshot) og bygg fila fra den Neo skriver",
     `oppsett/list_case_types.json: ${old}`,
-    "oppsett/notat.txt: Ikke en konfigfil. Oppsettet er .yaml-filer fra Neo; det som gjøres for hånd, står i oppsett/manuelt/",
+    "oppsett/notat.txt: Ikke en konfigfil. Oppsettet er .yaml-filer fra Neo; det som gjøres for hånd, står i oppsett/manuelt/. Ta fila bort, eller flytt den dit",
     `snapshots/produksjon/get_workflow--a.json: ${old}`,
     "snapshots/sandkasse/raw/export_config.json: Et rått svar er committet. raw/ står i .gitignore",
   ]);
@@ -157,7 +157,7 @@ test("kildene på endringen: en endret kilde er rød, en slettet bare når den i
   git(root, "tag", "base");
   assert.deepEqual(msgs(check(root, { base: "base" }), "kilder"), []);
   write(root, `${L}/filer/K1_forskriften.md`, "§ 1 Fristen er fem uker.\n");
-  assert.deepEqual(msgs(check(root, { base: "base" }), "kilder"), [`${L}/filer/K1_forskriften.md: En lagret kilde er endret. En kilde endres aldri: en ny versjon får en ny id og en ny fil`]);
+  assert.deepEqual(msgs(check(root, { base: "base" }), "kilder"), [`${L}/filer/K1_forskriften.md: En lagret kilde er endret. En kilde endres aldri: en ny versjon får en ny id og en ny fil. Sett fila tilbake (git checkout), og lagre den nye versjonen som en ny kilde`]);
   git(root, "checkout", "-q", "--", ".");
   unlinkSync(join(root, `${L}/filer/K1_forskriften.md`));
   write(root, `${L}/kilder.md`, REGISTER);
@@ -180,15 +180,15 @@ test("forståelsen: en påstand uten kilde, eller med en kilde som ikke er i reg
   const root = repo({ ...GOOD(), "losninger/parkering/forstaelse/data.md": "# Data\n\n- Maks 1 400.\n- Maks 1 850. [K99]\n- Fristene står i `forlop.md`.\n", "felles/forstaelse/systemer.md": "- Arkivet er Documaster. [K2]\n", "losninger/parkering/kilder/filer/K2_x.pdf": "x" });
   const f = check(root);
   assert.deepEqual(msgs(f, "forstaelse"), [
-    "felles/forstaelse/systemer.md: K2 står ikke i registeret (felles/kilder/kilder.md)",
-    "losninger/parkering/forstaelse/data.md: K99 står ikke i registeret (losninger/parkering/kilder/kilder.md)",
-    "losninger/parkering/forstaelse/data.md: Påstanden viser ikke til en kilde: «Maks 1 400.»",
+    "felles/forstaelse/systemer.md: K2 står ikke i registeret (felles/kilder/kilder.md). Rett id-en, eller legg kilden inn i registeret",
+    "losninger/parkering/forstaelse/data.md: K99 står ikke i registeret (losninger/parkering/kilder/kilder.md). Rett id-en, eller legg kilden inn i registeret",
+    "losninger/parkering/forstaelse/data.md: Påstanden viser ikke til en kilde: «Maks 1 400.». Vis til kilden ([K1]), eller flytt den til «Det kildene ikke svarer på»",
   ]);
-  assert.deepEqual(msgs(f, "kilder"), ["losninger/parkering/kilder/filer/K2_x.pdf: Fila står ikke i registeret (losninger/parkering/kilder/kilder.md). En lagret kilde har en id og opphav"]);
+  assert.deepEqual(msgs(f, "kilder"), ["losninger/parkering/kilder/filer/K2_x.pdf: Fila står ikke i registeret (losninger/parkering/kilder/kilder.md). En lagret kilde har en id og opphav. Legg den inn i registeret med id, lenke og datoene"]);
   rmSync(root, { recursive: true });
 });
 
-test("kravene: item med yaml, flyt, hvorfor, kilde, id én gang, og blir på fila i oppsett/ når løsningen er ute av utkast", () => {
+test("kravene: item med yaml, flyt, hvorfor, kilde, id én gang, og blir på fila i oppsett/ når løsningen er ute av utkast. Sett bygger-pa i losning.yaml", () => {
   const root = repo({
     ...GOOD(),
     "losninger/parkering/krav/dokumenter.md": [
@@ -200,26 +200,26 @@ test("kravene: item med yaml, flyt, hvorfor, kilde, id én gang, og blir på fil
     "oppsett/custom-fields/case-gnr.yaml": "apiVersion: neo-config/v1\nkind: customFieldDefinition\nspec:\n  name: gnr\n  entityType: case\n",
   });
   assert.deepEqual(msgs(check(root), "krav").map((m) => m.replace(/^[^:]+: /, "")).sort(), [
-    "Id-en frist er brukt før, i losninger/parkering/krav/dokumenter.md",
-    "frist: K9 står ikke i registeret (losninger/parkering/kilder/kilder.md)",
+    "Id-en frist er brukt før, i losninger/parkering/krav/dokumenter.md. Gi dette kravet en ny id",
+    "frist: K9 står ikke i registeret (losninger/parkering/kilder/kilder.md). Rett id-en, eller legg kilden inn i registeret",
     "frist: blir.fil ../../README.md er ikke en konfigfil i oppsett/: oppsett/<mappa for typen>/<navn>.yaml, fra roten. Det som gjøres for hånd, er et steg",
-    "frist: blir.fil felles/oppsett/custom-fields/x.yaml: konfigen står i oppsett/ i roten, slik Neo eksporterer den. En løsning og felles/ har ingen egen oppsett/",
-    "frist: blir.fil oppsett/case-types/borte.yaml finnes ikke",
+    "frist: blir.fil felles/oppsett/custom-fields/x.yaml: konfigen står i oppsett/ i roten, slik Neo eksporterer den. En løsning og felles/ har ingen egen oppsett/. Flytt filene til oppsett/ i roten, og rett blir i kravene",
+    "frist: blir.fil oppsett/case-types/borte.yaml finnes ikke. Rett stien til fila i oppsett/",
     "frist: blir.fil oppsett/manuelt/maler.md er ikke en konfigfil i oppsett/: oppsett/<mappa for typen>/<navn>.yaml, fra roten. Det som gjøres for hånd, er et steg",
-    "frist: blir.steg trenger hvorfor: hvorfor kravet ikke ble konfig",
-    "frist: flyt må være deterministisk, agentisk, menneske",
-    "frist: hver linje i blir er én av { fil: <sti> }, { steg: <tekst>, hvorfor: <tekst> } eller { onske: <tekst>, hvorfor: <tekst> }",
-    "frist: hvorfor mangler",
-    "frist: overskriften #borte finnes ikke i forstaelse/forlop.md",
+    "frist: blir.steg trenger hvorfor. Skriv hvorfor kravet ikke ble konfig",
+    "frist: flyt må være deterministisk, agentisk, menneske. Sett den som passer (formen står i .claude/rules/krav.md)",
+    "frist: hver linje i blir er én av { fil: <sti> }, { steg: <tekst>, hvorfor: <tekst> } eller { onske: <tekst>, hvorfor: <tekst> }. Skriv linja i en av dem",
+    "frist: hvorfor mangler. Skriv hvorfor kravet finnes",
+    "frist: overskriften #borte finnes ikke i forstaelse/forlop.md. Rett lenken til en overskrift som finnes",
     "vedtak: blir mangler. Løsningen er i-test, så hvert krav sier hva det ble: { fil: oppsett/… }, { steg: …, hvorfor: … } eller { onske: …, hvorfor: … }",
-    "«uten-blokk Et krav uten yaml-blokken» har ingen yaml-blokk rett under. Et krav er «## <id> <tittel>» med yaml-blokken (flyt, hvorfor, kilde, blir) rett under",
+    "«uten-blokk Et krav uten yaml-blokken» har ingen yaml-blokk rett under. Et krav er «## <id> <tittel>» med yaml-blokken (flyt, hvorfor, kilde, blir) rett under. Legg blokken rett under overskriften, eller gjør overskriften til en vanlig tekst",
   ].sort());
   write(root, "losninger/parkering/losning.yaml", LOSNING("utkast"));
   assert.ok(!msgs(check(root), "krav").some((m) => /vedtak: blir mangler/.test(m)), "i utkast kan blir stå tomt");
   rmSync(root, { recursive: true });
 });
 
-test("avvikene i design/: en regel som finnes og grunnen, og fila i oppsett/ når løsningen er ute av utkast", () => {
+test("avvikene i design/: en regel som finnes og grunnen, og fila i oppsett/ når løsningen er ute av utkast. Sett bygger-pa i losning.yaml", () => {
   const root = repo({
     ...GOOD(),
     "felles/design/valg.md": "## to-parkering To sakstyper med samme navn\n\n```yaml\navvik: navn-er-nokkelen\nfil: case-types/kommer.yaml\ngrunn: Kunden vil ha det slik i overgangen.\n```\n",
@@ -227,9 +227,9 @@ test("avvikene i design/: en regel som finnes og grunnen, og fila i oppsett/ nå
   });
   const f = check(root);
   assert.deepEqual(msgs(f, "avvik", "fail"), [
-    "losninger/parkering/design/valg.md: borte: oppsett/case-types/borte.yaml finnes ikke. Avviket kan stå før fila mens løsningen er i utkast; nå er den i-test",
-    "losninger/parkering/design/valg.md: feil: grunn mangler: hvorfor regelen brytes med vilje",
-    "losninger/parkering/design/valg.md: feil: regelen «finnes-ikke» finnes ikke i mønstrene",
+    "losninger/parkering/design/valg.md: borte: oppsett/case-types/borte.yaml finnes ikke. Avviket kan stå før fila mens løsningen er i utkast; nå er den i-test. Rett stien, eller lag fila i oppsett/",
+    "losninger/parkering/design/valg.md: feil: grunn mangler. Skriv hvorfor regelen brytes med vilje",
+    "losninger/parkering/design/valg.md: feil: regelen «finnes-ikke» finnes ikke i mønstrene. Rett id-en til en regel som finnes (mønstrene i pluginen solution)",
   ]);
   assert.deepEqual(msgs(f, "avvik", "warn"), ["felles/design/valg.md: to-parkering: oppsett/case-types/kommer.yaml finnes ikke ennå"]);
   write(root, "losninger/parkering/losning.yaml", LOSNING("utkast"));
@@ -248,14 +248,14 @@ test("integrasjonene, personaene og testcasene: ingen hemmeligheter", () => {
   });
   const f = check(root);
   assert.deepEqual(msgs(f, "integrasjon").map((m) => m.replace(/^[^:]+: /, "")).sort(), [
-    "klient.secret står med verdi. En hemmelighet står aldri i repoet; den ligger i hvelvet",
+    "klient.secret står med verdi. En hemmelighet står aldri i repoet. Ta verdien ut, be eieren bytte den (den er ikke hemmelig lenger), og legg den nye inn i hvelvet med /forvaltning:nokler",
   ]);
-  assert.deepEqual(msgs(f, "persona"), ["test/personaer/leder.yaml: hemmeligheter står ikke i en persona: personen logger inn selv, og passordet ligger der testidentiteten forvaltes"]);
+  assert.deepEqual(msgs(f, "persona"), ["test/personaer/leder.yaml: hemmeligheter står ikke i en persona: personen logger inn selv, og passordet ligger der testidentiteten forvaltes. Ta bort hemmeligheter, og be eieren bytte verdier som har stått her"]);
   assert.deepEqual(msgs(f, "test").map((m) => m.replace(/^[^:]+: /, "")).sort(), [
-    "En test i test/ går gjennom flere løsninger: losninger må ha minst to",
-    "Kravet borte finnes ikke i noen krav/",
+    "En test i test/ går gjennom flere løsninger: losninger må ha minst to. Flytt en test for én løsning til løsningens test/testcaser/",
+    "Kravet borte finnes ikke i noen krav/. Rett id-en, eller skriv kravet",
     "Personaen ukjent finnes ikke (test/personaer/ukjent.yaml)",
-    "inn.password står med verdi. En hemmelighet står aldri i repoet; den ligger i hvelvet",
+    "inn.password står med verdi. En hemmelighet står aldri i repoet. Ta verdien ut, be eieren bytte den (den er ikke hemmelig lenger), og legg den nye inn i hvelvet med /forvaltning:nokler",
   ]);
   rmSync(root, { recursive: true });
 });
@@ -268,8 +268,8 @@ test("testplanen i en minste form: hvert krav har et punkt, og et punkt viser ti
   });
   assert.deepEqual(msgs(check(root), "test"), [
     "losninger/parkering/test/testplan.md: Kravet vedtak har ikke et punkt i testplanen. Hvert krav har minst ett punkt: en overskrift med krav: [vedtak] i yaml-blokken under",
-    "losninger/parkering/test/testplan.md: p1: kravet borte finnes ikke i noen krav/",
-    "losninger/parkering/test/testplan.md: p2: krav er tomt: kravene punktet prøver",
+    "losninger/parkering/test/testplan.md: p1: kravet borte finnes ikke i noen krav/. Rett id-en, eller skriv kravet",
+    "losninger/parkering/test/testplan.md: p2: krav er tomt. Skriv kravene punktet prøver (krav: [<id>])",
   ]);
   rmSync(root, { recursive: true });
 });
@@ -282,13 +282,13 @@ test("CODEOWNERS: en kommentar som forklarer @ENDRE-MEG, teller ikke; en eierlin
   rmSync(root, { recursive: true });
 });
 
-test("losning.yaml: bygger-pa kreves når løsningen er ute av utkast", () => {
+test("losning.yaml: bygger-pa kreves når løsningen er ute av utkast. Sett bygger-pa i losning.yaml", () => {
   const root = repo({ ...GOOD(), "losninger/klage/losning.yaml": "formal: Klager\nstatus: ferdig\nintegrasjoner: [fiks]\nbygger-pa: { standard: klage }\n", "losninger/ny/README.md": "" });
   assert.deepEqual(msgs(check(root), "losning").map((m) => m.replace(/^[^:]+: /, "")).sort(), [
-    "bygger-pa må være «egen», eller { standard: <navn>, versjon: <versjon> }, når løsningen er ute av utkast",
-    "eier mangler",
-    "losning.yaml mangler: formålet, eieren, statusen, integrasjonene og hva den bygger på",
-    "status må være utkast, i-test, i-bruk, avviklet",
+    "bygger-pa må være «egen», eller { standard: <navn>, versjon: <versjon> }, når løsningen er ute av utkast. Sett bygger-pa i losning.yaml",
+    "eier mangler. Legg det inn i losning.yaml",
+    "losning.yaml mangler: formålet, eieren, statusen, integrasjonene og hva den bygger på. Løypa i pluginen solution lager den; formen står i .claude/rules/losninger.md",
+    "status må være utkast, i-test, i-bruk, avviklet. Sett den som gjelder",
     "Integrasjonen fiks står ikke i integrasjoner/",
   ].sort());
   rmSync(root, { recursive: true });
