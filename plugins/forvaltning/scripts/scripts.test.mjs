@@ -3,41 +3,8 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { checkPath, unwrap, write } from "./skriv-eksport.mjs";
-import { loadManifest, order } from "./rekkefolge.mjs";
+import { checkPath, write } from "./skriv-eksport.mjs";
 import { differences, markdown, summary } from "./planrapport.mjs";
-import { tokensIn, tokensInDir } from "./miljo-nokler.mjs";
-
-test("miljø-nøklene: integrasjoner og postbokser, med og uten anførselstegn, og ingenting annet", () => {
-  const text = [
-    "spec:",
-    "  definition:",
-    "    nodes:",
-    "      - id: krr",
-    "        data:",
-    "          integrationId: ref:integration:KRR/Kontaktregisteret",
-    "      - id: arkiv",
-    "        data:",
-    '          integrationId: "ref:integration:DOCUMASTER/Arkiv %2F bygg"',
-    "      - id: epost",
-    "        data:",
-    "          inputs:",
-    "            sender:",
-    "              integrationId: 'ref:mailbox:MICROSOFT/postmottak@kommune.example'",
-    "            caseTypeId: ref:caseType:byggesak",
-    "            notat: ikke ref:integration:X/Y midt i en tekst",
-  ].join("\n");
-  assert.deepEqual(tokensIn(text), [
-    "ref:integration:KRR/Kontaktregisteret",
-    "ref:integration:DOCUMASTER/Arkiv %2F bygg",
-    "ref:mailbox:MICROSOFT/postmottak@kommune.example",
-  ]);
-  const dir = tmp();
-  mkdirSync(join(dir, "workflows"), { recursive: true });
-  writeFileSync(join(dir, "workflows/a.yaml"), text);
-  writeFileSync(join(dir, "workflows/b.yaml"), "x: ref:integration:KRR/Kontaktregisteret\n");
-  assert.equal(tokensInDir(dir).length, 3);
-});
 
 const tmp = () => mkdtempSync(join(tmpdir(), "forvaltning-"));
 const TYPE = "apiVersion: neo-config/v1\nkind: caseType\nspec:\n  name: Byggesak\n  slug: byggesak\n";
@@ -64,11 +31,6 @@ test("en fil Neo ikke lenger har, fjernes; en lik fil røres ikke", () => {
   assert.equal(existsSync(join(dir, "workflows/gammel.yaml")), false);
 });
 
-test("MCP-innpakningen pakkes ut", () => {
-  const inner = svar([]);
-  assert.deepEqual(unwrap({ content: [{ type: "text", text: JSON.stringify(inner) }] }), inner);
-});
-
 test("ok:false skriver ingenting og sier hva som må rettes i Neo", () => {
   const dir = tmp();
   assert.throws(
@@ -84,38 +46,6 @@ test("en sti ut av mappa avvises", () => {
   assert.ok(checkPath("case-types/x.json"));
   assert.equal(checkPath("case-types/byggesak.yaml"), null);
   assert.throws(() => write(svar([{ path: "../ut.yaml", text: "x" }]), tmp()), /ikke en relativ sti/);
-});
-
-const manifest = {
-  kinds: [
-    { kind: "caseType", directory: "case-types" },
-    { kind: "taskStatusGroup", directory: "task-status-groups" },
-    { kind: "workflow", directory: "workflows" },
-  ],
-  applyOrder: ["taskStatusGroup", "caseType", "workflow"],
-};
-
-test("rekkefølgen er manifestets, alfabetisk innenfor en type", () => {
-  assert.deepEqual(order(["workflows/a.yaml", "case-types/b.yaml", "case-types/a.yaml", "task-status-groups/z.yaml"], manifest), [
-    "task-status-groups/z.yaml",
-    "case-types/a.yaml",
-    "case-types/b.yaml",
-    "workflows/a.yaml",
-  ]);
-});
-
-test("en fil i en mappe Neo ikke kjenner, er en feil", () => {
-  assert.throws(() => order(["maler/x.yaml"], manifest), /maler\/x\.yaml/);
-});
-
-test("manifestet hentes fra adressen", async () => {
-  let asked;
-  const fake = async (url) => {
-    asked = url;
-    return { ok: true, json: async () => manifest };
-  };
-  assert.deepEqual(await loadManifest("https://neo.example/", fake), manifest);
-  assert.equal(asked, "https://neo.example/api/config/schema");
 });
 
 const plans = [

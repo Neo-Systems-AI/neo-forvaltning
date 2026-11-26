@@ -12,17 +12,18 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/check-setup.mjs"
 Én tabell per plugin som er på i `.claude/settings.json`, med det pluginen leser:
 
 - **Kilden** står på hver linje: `config` er satt i fila, `plugin-standard` følger med pluginen, `usatt` mangler, og
-  `referanse` er en referanse til hvelvet under `<system>.hemmeligheter`.
+  `referanse` er en referanse til en hemmelighet.
 - **❌** er noe påkrevd som mangler: MCP-serveren for et miljø, en nøkkel, en klient i `maskinporten.klienter` som en
-  plugin viser til, eller en referanse til hvelvet. Skriptet gir da exit 1.
-- **MCP-serverne:** står en ikke i `.mcp.json`, legg den til med kommandoen Neo viser under *API-klienter → Koble til
-  Claude* i det miljøet, og be personen logge inn med `/mcp`.
+  plugin viser til, eller en referanse til en hemmelighet. Skriptet gir da exit 1.
+- **MCP-serverne** trengs bare for `monitoring` og `data`. Står en ikke i `.mcp.json`, legg den til med kommandoen Neo
+  viser under *API-klienter → Koble til Claude* i det miljøet, og be personen logge inn med `/mcp`.
+- **Maskinklienten** står i `neo.byEnv.<miljø>.apiClient` (`clientId`, og `clientSecret` som referanse).
+  `node "${CLAUDE_PLUGIN_ROOT}/scripts/konfig.mjs" token` viser om Neo godtar den.
 
-Rett det som mangler, og kjør på nytt til den gir exit 0. Om referansene kan nås i hvelvet, viser hemmelighetene, ikke
-denne.
+Rett det som mangler, og kjør på nytt til den gir exit 0. Om hemmelighetene er satt, viser `/forvaltning:hemmeligheter`.
 
 ## Regler
 
-- **Config-fila har ingen hemmeligheter.** Under `<system>.hemmeligheter` står bare referansene til hvelvet, ved siden
-  av oppsettet av systemet.
-- **Mangler fila,** kopier `.claude/neo.config.json` fra `neo-forvaltning-mal`, og fyll inn miljøene.
+- **Fila har ingen hemmeligheter.** En hemmelighet står bare som referanse til kundens hvelv, og hentes til
+  `.env.local` av et menneske (`/forvaltning:hemmeligheter`).
+- **Mangler fila**, kjør `/forvaltning:oppstart`, eller kopier `.claude/neo.config.json` fra `neo-forvaltning-mal`.

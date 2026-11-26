@@ -127,6 +127,7 @@
   },
   "forvaltning": {
     "neo": true,
+    "neoApi": true,
     "keys": [
       {
         "path": "oppsettDir",
@@ -193,6 +194,7 @@
   },
   "solution": {
     "neo": true,
+    "neoApi": true,
     "keys": [
       {
         "path": "off",

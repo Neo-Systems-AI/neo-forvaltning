@@ -29,7 +29,7 @@ test("nøkkelfila beskriver bare nøkler, og kopiene fra shared/ er de importene
   const msgs = run(root).filter((x) => x.check === "config").map((x) => `${x.file}: ${x.message}`).sort();
   assert.deepEqual(msgs, [
     "plugins/p/neo-config.keys.json: Hver nøkkel har path og doc: {\"path\":\"x\"}",
-    "plugins/p/neo-config.keys.json: Nøkkelfila beskriver bare nøkler (neo, keys, hemmeligheter), ikke env",
+    "plugins/p/neo-config.keys.json: Nøkkelfila beskriver bare nøkler (neo, neoApi, keys, hemmeligheter), ikke env",
     "plugins/p/neo-config.keys.json: plugin er «q», mappa er «p»",
     "plugins/p/scripts/lib/a.mjs: Ikke lik shared/a.mjs. Kjør node scripts/sync-shared.mjs",
     "plugins/p/scripts/lib/b.mjs: Ikke lik shared/b.mjs. Kjør node scripts/sync-shared.mjs",
@@ -89,16 +89,15 @@ test("en lenke eller en regel i dokumentasjonen til en plugin som ikke finnes, s
   ]);
 });
 
-test("en skill som viser til en annen skill, eller har en dato, stoppes", () => {
+test("en skill med en dato stoppes; en henvisning til en annen skill er lov", () => {
   const root = repo();
   mkdirSync(join(root, "plugins/p/skills/a"), { recursive: true });
   mkdirSync(join(root, "plugins/p/skills/b"), { recursive: true });
   writeFileSync(join(root, "plugins/p/skills/b/SKILL.md"), "# B\n");
   writeFileSync(join(root, "plugins/p/skills/a/SKILL.md"), "Kjør /p:b etterpå.\nSe p:a og x:b, og mcp__neo:verktoy.\nAvgjort 2026-11-25.\n");
   const msgs = run(root).filter((x) => x.check === "skills").map((x) => `${x.line}: ${x.message}`);
-  assert.equal(msgs.length, 2);
-  assert.match(msgs[0], /^1: Viser til \/p:b/);
-  assert.match(msgs[1], /^3: En dato/);
+  assert.equal(msgs.length, 1);
+  assert.match(msgs[0], /^3: En dato/);
 });
 
 test("et skript som sammenligner process.argv[1] med seg selv uten å løse opp symlenkene, stoppes", () => {

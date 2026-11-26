@@ -14,10 +14,15 @@ PR i repoet.
 
 ## Slik gjør du det
 
-1. **Hent konfigen** slik den kjører nå i miljøet: kall `list_case_types`, `list_custom_fields` og `list_workflows`
-   gjennom MCP-serveren for miljøet, og lagre hvert svar uendret i en mappe som ikke committes, som
-   `<verktøy>.json`. Reglene trenger svarene fra Neo slik de kjører, også det som ikke er konfig (om en flyt er
-   aktivert), så de leser ikke snapshotet til `forvaltning`. Er uttrekket eldre enn i dag, hent det på nytt.
+1. **Hent konfigen** slik den kjører nå i miljøet, med maskinklienten (`neo.byEnv.<miljø>.apiClient`):
+
+   ```bash
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/uttrekk.mjs" <mappe som ikke committes> [--miljo <miljø>]
+   ```
+
+   Skriptet lagrer sakstypene, feltene og flytene uendret. Reglene trenger svarene fra Neo slik de kjører, også det
+   som ikke er konfig (om en flyt er aktivert), så de leser ikke snapshotet til `forvaltning`. Er uttrekket eldre enn
+   i dag, hent det på nytt.
 2. **Kjør reglene** på uttrekket:
 
    ```bash

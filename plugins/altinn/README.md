@@ -109,7 +109,7 @@ Hver kjøring skriver miljøet, `GET <adresse> → <status> (<ms>)` og svaret, m
 
 - **En Maskinporten-klient** i miljøet lese-kallene går mot (test-Maskinporten for tt02, Maskinporten for produksjon), registrert på kundens organisasjonsnummer, med tjenesteeier-scopes for Altinn. For lesing: `altinn:serviceowner/instances.read`, og for hendelsene `altinn:serviceowner/events` og `altinn:events.subscribe`. Maskinporten avviser hele kallet om klienten mangler ett scope, så `scopes` på klienten settes til dem den har.
 - **Kunden er tjenesteeier i Altinn** (akronymet i `org`), ellers får tokenet ikke `urn:altinn:org`, og Storage svarer 400.
-- **Nøkkelen i kundens nøkkelhvelv.** Referansen står under `maskinporten.hemmeligheter` i config-fila (`<klient>-nokkel`), og skriptet henter den for kallet.
+- **Nøkkelen i kundens nøkkelhvelv.** Referansen står under `maskinporten.hemmeligheter` i config-fila (`<klient>-nokkel`), og skriptet leser den fra `.keys/`, der et menneske har hentet den (`/forvaltning:hemmeligheter`).
 
 I `.claude/neo.config.json`, med klienten beskrevet under `maskinporten.klienter` (se pluginen `maskinporten`):
 

@@ -1,6 +1,6 @@
 ---
 name: gjennomfor
-description: Gjennomfører en godkjent plan i Neo sin sandkasse, én fil om gangen, med apply_config gjennom MCP. Neo skriver hver fil i én transaksjon og nekter om sandkassen er endret siden planen. Promoteringen til produksjon gjøres av kundens org-admin i Neo. Bruk bare når PR-en med planen er godkjent.
+description: Gjennomfører en godkjent plan i Neo sin sandkasse med ett skript og maskinklienten. Skriptet lager planen på nytt, stopper om den ikke er den som ble godkjent, og skriver fil for fil; Neo skriver hver fil i én transaksjon og nekter om sandkassen er endret siden planen. Promoteringen til produksjon gjøres av kundens org-admin i Neo. Bruk bare når PR-en med planen er godkjent.
 ---
 
 # Gjennomføringen
@@ -8,59 +8,49 @@ description: Gjennomfører en godkjent plan i Neo sin sandkasse, én fil om gang
 ## Før du starter
 
 - PR-en med planen er godkjent av den som står som godkjenner i `kunde.yaml` (og i `CODEOWNERS`), og merget. Er den
-  ikke det, stopp og si det. Gjennomfør fra `main`, så filene er de som ble godkjent.
-- Du bruker MCP-serveren for sandkassen (`neo-config.mjs --miljo sandkasse`). Produksjonen endres ikke herfra:
+  ikke det, stopp og si det. Gjennomfør fra `main`, så filene og planen er de som ble godkjent.
+- Skriptet kaller sandkassen med maskinklienten (`neo.byEnv.sandkasse.apiClient`). Produksjonen endres ikke herfra:
   endringen promoteres fra sandkassen av kundens org-admin i Neo, og den står da i revisjonsloggen.
 
 ## Slik gjør du det
 
-1. Lag planen på nytt mot sandkassen, med steg 1–3 i `/forvaltning:plan`, til
-   `<reportsDir>/plan-sandkasse/raw/`. Sjekk den mot den godkjente:
+1. Gjennomfør:
 
    ```bash
-   node "${CLAUDE_PLUGIN_ROOT}/scripts/planrapport.mjs" <reportsDir>/plan-sandkasse/raw --sjekk <reportsDir>/plan-sandkasse.json
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/konfig.mjs" apply
    ```
 
-   Er den ikke den samme (exit 1), er sandkassen eller filene endret siden godkjenningen. Stopp: lag planen på nytt og
-   få den godkjent.
-2. For hver fil i rekkefølgen, der planen sier ny eller endret: kall `apply_config` med `file: { path, text }` og
-   `planHash` fra den nye planen for samme fil. Uendrede filer hoppes over.
-3. Stopp ved første feil, og si hva som er gjort og hva som gjenstår:
-   - `409 PLAN_STALE`: noe er endret i sandkassen mellom planen og skrivingen. Begynn på nytt fra steg 1.
-   - `422`: Neo avviste fila. Grunnene står i svaret.
-   - `403 TOKEN_…`: sandkassen er satt til begrenset tilgang for Claude (for eksempel bare utkast av flyter, ikke
+   Skriptet gjør dette, og stopper ved første avvik:
+   - lager planen på nytt og sjekker den mot `<reportsDir>/plan-<miljø>.json`, den godkjente. Er den ikke den samme,
+     er sandkassen eller filene endret siden godkjenningen, og ingenting skrives;
+   - skriver hver fil som er ny eller endret, i rekkefølgen planen har, med hashen planen ga fila. Hashen gjelder
+     sandkassen slik den er når filene før er skrevet, så en fil som peker på et objekt en annen fil lager, går;
+   - skriver et oppgavemal-sett med steg som venter på en sakstype, én gang til når sakstypene er skrevet.
+2. Exit 1: si hva som er skrevet (skriptet lister det) og hvorfor det stoppet:
+   - **Planen er ikke den som ble godkjent:** lag planen på nytt (`/forvaltning:plan`) og få den godkjent.
+   - **409:** noe er endret i sandkassen mellom planen og skrivingen. Lag planen på nytt.
+   - **422:** Neo avviste fila. Grunnene står i svaret.
+   - **403 `TOKEN_…`:** sandkassen er satt til begrenset tilgang for tokens (for eksempel bare utkast av flyter, ikke
      KI-oppsettet). Endringen gjøres da i Neo av en person, eller org-admin åpner tilgangen.
 
    Det som alt er skrevet, står: hver fil er sin egen transaksjon.
-4. Et oppgavemal-sett med «skrives etter sakstypene» skrives én gang til når sakstypene er skrevet: `plan_config` og
-   `apply_config` for den fila på nytt.
-5. Snapshot av sandkassen (`/forvaltning:snapshot sandkasse`). Filene som ble gjennomført, er nå like i
-   `oppsett/` og i snapshotet.
-6. Sjekk at produksjonen har miljøet flytene er bundet til. Integrasjonene og postboksene følger ikke med
-   promoteringen; produksjonen må ha sine egne med samme navn og adresse.
-
-   ```bash
-   node "${CLAUDE_PLUGIN_ROOT}/scripts/miljo-nokler.mjs" <oppsettDir>
-   ```
-
-   Er lista ikke tom, kall `check_config_refs` med `refs`: lista, gjennom MCP-serveren for **produksjonen**
-   (`neo-config.mjs --miljo produksjon`). Det er en lesing og endrer ingenting. Hvert token som ikke er `found`, er
-   noe kunden må sette opp i produksjonen før promoteringen («integrasjonen DOCUMASTER «Arkiv» finnes ikke»). Ellers
-   blir noden stående uten integrasjon og feiler først når den kjører.
-7. Før en rad i `beslutninger.md`: dato, hva, hvem som godkjente (PR-en), hvem som gjennomførte.
-8. Si til kunden at endringen ligger i sandkassen og kan promoteres, hva som bør testes før det, og hva som mangler i
-   produksjonen fra steg 6.
+3. Snapshot av sandkassen (`/forvaltning:snapshot`). Filene som ble gjennomført, er nå like i `oppsett/` og i
+   snapshotet.
+4. Si til kunden at endringen ligger i sandkassen og kan promoteres, og hva som bør testes før det. Forhåndsvisningen
+   av promoteringen i Neo viser om produksjonen mangler en integrasjon eller postboks en flyt er bundet til (et gap
+   på flyten): den settes opp i produksjonen, med samme navn og adresse, før promoteringen.
 
 ## Det Neo gjør med hver fil
 
-- Objektet blir slik fila sier, med en versjon før og en etter i Neo.
+- Objektet blir slik fila sier, med en versjon før og en etter i Neo. Revisjonen viser maskinklienten; godkjenningen
+  er PR-en.
 - Det fila har fjernet, blir stående (planen viste det som «blir stående i Neo»).
 - En flyt beholder statusen sin: en aktiv flyt er aktiv etterpå, og godkjenningen til å skrive i saker stemples på
-  nytt for den som gjennomfører. Med begrenset tilgang for Claude kan bare en flyt som er utkast, endres.
+  nytt. Med begrenset tilgang for tokens kan bare en flyt som er utkast, endres.
 - En veiviser skrives som utkast og publiseres i Neo.
 
 ## Det som gjøres utenom
 
 - Det som står i `ikke-med.md` i snapshotet og i `oppsett/manuelt/` (det Neo ikke skriver som fil ennå), gjøres i
   Neo, og snapshotet etterpå viser at det er gjort.
-- Gjennomføringen gjøres av en person. En jobb i GitHub som gjør den etter godkjenningen, kommer senere.
+- Den samme kommandoen kan kjøres av en jobb i GitHub etter merge, med maskinklientens hemmelighet som secret.

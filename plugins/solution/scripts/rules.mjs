@@ -4,7 +4,8 @@
 // stedet for å si at alt er i orden. En regel kunden ikke vil ha, slås av i `.claude/neo.config.json` med id-en.
 //
 //   node rules.mjs <snapshot-mappe> [--off regel,regel] [--json]
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { existsSync, readdirSync, readFileSync, realpathSync } from "node:fs";
 import { join } from "node:path";
 
 const read = (dir, file) => (existsSync(join(dir, file)) ? JSON.parse(readFileSync(join(dir, file), "utf8")) : undefined);
@@ -71,7 +72,7 @@ export function markdown(results) {
   return lines.join("\n") + "\n";
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   const args = process.argv.slice(2);
   if (!args[0]) {
     console.error("Bruk: node rules.mjs <snapshot-mappe> [--off regel,regel] [--json]");

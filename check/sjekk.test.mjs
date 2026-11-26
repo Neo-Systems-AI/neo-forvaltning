@@ -5,7 +5,7 @@ import { mkdtempSync, readFileSync, rmSync, symlinkSync, unlinkSync } from "node
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { main, personaRefs, run, version } from "./sjekk.mjs";
+import { main, run, version } from "./sjekk.mjs";
 import { citations, claims, items, points } from "./les.mjs";
 import { render } from "./hos-kunden.mjs";
 import { ruleIds } from "./avvik.mjs";
@@ -62,7 +62,7 @@ test("strukturen: konfigen i oppsett/ i roten, mappene har navn, ikke tall, og d
     "snapshots/x.yaml": caseType("z"),
     "integrasjoner/altinn/neo.yaml": "app: x\n",
     "integrasjoner/altinn/notat.txt": "",
-    "integrasjoner/altinn/hemmeligheter.yaml": "altinn-nokkel: { kilde: azure-keyvault:kv/a }\n",
+    "integrasjoner/altinn/hemmeligheter.yaml": "altinn-nokkel: { $env: A, kilde: azure-keyvault:kv/a }\n",
   });
   const oppsett = "Konfigen står i oppsett/ i roten, slik Neo eksporterer den, og kravene peker på fila der (blir: fil: oppsett/…). En løsning og felles/ har ingen egen oppsett/";
   assert.deepEqual(msgs(check(root), "repo"), [
@@ -93,20 +93,18 @@ test("config-fila: version 1 med sandkasse og produksjon under neo.byEnv, og hem
     ...GOOD(),
     ".claude/neo.config.json": JSON.stringify({
       version: 2,
-      neo: { url: "https://neo.test", org: "o", mcpServer: "neo-dev", environments: ["sandkasse", "test"], byEnv: { sandkasse: { url: "https://<neo-adresse>" }, annen: {} } },
-      fiks: { passord: "hemmelig", nokkel: { $env: "X" }, hemmeligheter: { ok: { kilde: "azure-keyvault:kv/ok" }, fil: { kilde: "azure-keyvault:kv/fil", fil: true }, verdi: "abc123", env: { $env: "X", kilde: "azure-keyvault:kv/b" }, annet: { kilde: "1password:x" } } },
+      neo: { url: "https://neo.test", org: "o", mcpServer: "neo-dev", environments: ["sandkasse", "test"], byEnv: { sandkasse: { url: "https://<neo-adresse>", apiClient: { clientId: "<klient-id>" } }, annen: {} } },
+      fiks: { passord: "hemmelig", nokkel: { $env: "X" }, hemmeligheter: { ok: { $env: "OK", kilde: "azure-keyvault:kv/ok" }, fil: { $env: "FIL", kilde: "azure-keyvault:kv/fil", fil: true }, verdi: "abc123", env: { $env: "X", kilde: "azure-keyvault:kv/b" }, annet: { kilde: "1password:x" } } },
       altinn: { hemmeligheter: "abc" },
-      documaster: { klient: { hemmeligheter: { x: { kilde: "azure-keyvault:kv/x" } } } },
+      documaster: { klient: { hemmeligheter: { x: { $env: "X", kilde: "azure-keyvault:kv/x" } } } },
     }),
   });
   const f = check(root);
   assert.deepEqual(msgs(f, "config", "fail"), [
     ".claude/neo.config.json: altinn.hemmeligheter er et kart fra navnet til referansen",
-    ".claude/neo.config.json: documaster.klient.hemmeligheter.x er en referanse til en hemmelighet. Referansene står under <system>.hemmeligheter, ved siden av oppsettet av systemet",
-    ".claude/neo.config.json: fiks.hemmeligheter.annet må være { kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil), uten verdien",
-    ".claude/neo.config.json: fiks.hemmeligheter.env referansen har ikke $env lenger: skriptene henter verdien fra hvelvet ved hvert kall. Ta bort $env",
-    ".claude/neo.config.json: fiks.hemmeligheter.verdi må være { kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil), uten verdien",
-    ".claude/neo.config.json: fiks.nokkel er en referanse til en hemmelighet. Referansene står under <system>.hemmeligheter, ved siden av oppsettet av systemet",
+    ".claude/neo.config.json: fiks.hemmeligheter.annet må være { $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil), uten verdien",
+    ".claude/neo.config.json: fiks.hemmeligheter.verdi må være { $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil), uten verdien",
+    ".claude/neo.config.json: fiks.nokkel må være { $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil), uten verdien",
     ".claude/neo.config.json: fiks.passord står med verdi. Config-fila har ingen hemmeligheter",
     ".claude/neo.config.json: neo.byEnv.annen er ikke et miljø i neo.environments",
     ".claude/neo.config.json: neo.environments har ikke produksjon. Miljøene er sandkasse og produksjon",
@@ -116,8 +114,7 @@ test("config-fila: version 1 med sandkasse og produksjon under neo.byEnv, og hem
   assert.deepEqual(msgs(f, "config", "warn"), [
     ".claude/neo.config.json: Adressen til Neo for sandkasse er ikke fylt ut (neo.byEnv.sandkasse.url)",
     ".claude/neo.config.json: Adressen til Neo for test er ikke fylt ut (neo.byEnv.test.url)",
-    ".claude/neo.config.json: MCP-serveren for sandkasse er ikke satt (neo.byEnv.sandkasse.mcpServer)",
-    ".claude/neo.config.json: MCP-serveren for test er ikke satt (neo.byEnv.test.mcpServer)",
+    ".claude/neo.config.json: Maskinklienten for sandkasse er ikke fylt ut (neo.byEnv.sandkasse.apiClient). Skriptene i forvaltning trenger den",
   ]);
   rmSync(root, { recursive: true });
 });
@@ -239,7 +236,7 @@ test("avvikene i design/: en regel som finnes og grunnen, og fila i oppsett/ nå
   rmSync(root, { recursive: true });
 });
 
-test("integrasjonene, personaene og testcasene: referanser uten $env, og ingen verdi", () => {
+test("integrasjonene, personaene og testcasene: ingen verdi, bare referanser", () => {
   const root = repo({
     ...GOOD(),
     "integrasjoner/altinn/app/oppsett.yaml": "klient:\n  secret: abc\n",
@@ -249,14 +246,14 @@ test("integrasjonene, personaene og testcasene: referanser uten $env, og ingen v
   });
   const f = check(root);
   assert.deepEqual(msgs(f, "integrasjon").map((m) => m.replace(/^[^:]+: /, "")).sort(), [
-    "klient.secret står med verdi. En hemmelighet står som { kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil), og verdien ligger i hvelvet",
+    "klient.secret står med verdi. En hemmelighet står som { $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil), og verdien ligger i hvelvet",
   ]);
   assert.equal(msgs(f, "persona").length, 2);
   assert.deepEqual(msgs(f, "test").map((m) => m.replace(/^[^:]+: /, "")).sort(), [
     "En test i test/ går gjennom flere løsninger: losninger må ha minst to",
     "Kravet borte finnes ikke i noen krav/",
     "Personaen ukjent finnes ikke (test/personaer/ukjent.yaml)",
-    "inn.password står med verdi. En hemmelighet står som { kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil), og verdien ligger i hvelvet",
+    "inn.password står med verdi. En hemmelighet står som { $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en nøkkelfil), og verdien ligger i hvelvet",
   ]);
   rmSync(root, { recursive: true });
 });
@@ -363,18 +360,5 @@ test("den bygde fila kjører gjennom en symlenke, og sier noe på hver vei", () 
     assert.ok(r.out.trim().length > 0, `${args.join(" ")} gir exit ${r.code} uten utskrift`);
   }
   rmSync(dir, { recursive: true });
-  rmSync(root, { recursive: true });
-});
-
-test("referansene i personaene, med hvor de står, og det som ikke er en referanse", () => {
-  const root = repo({
-    "test/personaer/sara.yaml": "navn: Sara\nrolle: s\nhemmeligheter:\n  passord: { kilde: azure-keyvault:kv-test/sara }\n  pin: 1234\n",
-    "test/personaer/lea.yaml": "navn: Lea\nrolle: l\n",
-    "test/personaer/feil.yaml": "a: [1\n",
-  });
-  const { list, problems } = personaRefs(root);
-  assert.deepEqual(list.map((r) => [r.sted, r.kilde]), [["test/personaer/sara.yaml#passord", "azure-keyvault:kv-test/sara"]]);
-  assert.deepEqual(problems.map((p) => p.sted), ["test/personaer/feil.yaml", "test/personaer/sara.yaml#pin"]);
-  assert.doesNotMatch(JSON.stringify(problems), /1234/);
   rmSync(root, { recursive: true });
 });

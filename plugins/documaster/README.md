@@ -27,14 +27,15 @@ I `.claude/neo.config.json` i kundens repo, for instansen repoet arbeider mot:
   "clientId": "<klient-id>",
   "scope": "openid",
   "hemmeligheter": {
-    "client-secret": { "kilde": "azure-keyvault:<hvelv>/documaster-client-secret" }
+    "client-secret": { "$env": "DOCUMASTER_CLIENT_SECRET", "kilde": "azure-keyvault:<hvelv>/documaster-client-secret" }
   }
 }
 ```
 
 - **`apiUrl` er API-et, ikke nettsiden.** API-et svarer på port 8083; nettsiden på `/v2/` svarer 200 med HTML på alle
   stier, så en feil adresse ser ut som et vellykket kall. Skriptet stopper på et HTML-svar.
-- **Hemmeligheten** hentes fra hvelvet for kallet, med personens egen innlogging, og ligger aldri på disk.
+- **Hemmeligheten** leses fra `.env.local`, der et menneske har hentet den fra kundens hvelv
+  (`/forvaltning:hemmeligheter`).
 
 ## Kallene
 

@@ -16,9 +16,9 @@ const PEM = privateKey.export({ type: "pkcs8", format: "pem" });
 const data = {
   version: 2,
   fiks: { miljo: "test", klient: "fiks", integrasjon: "integrasjon-1", svarutKonto: "konto-1", svarinnMottakersystem: "mottaker-1", folkeregisterRolle: "rolle-1" },
-  maskinporten: { miljo: "test", klienter: { fiks: { clientId: "klient-1" } }, hemmeligheter: { "fiks-nokkel": { kilde: "azure-keyvault:hvelv/nokkel", fil: true } } },
+  maskinporten: { miljo: "test", klienter: { fiks: { clientId: "klient-1" } }, hemmeligheter: { "fiks-nokkel": { $env: "NOKKEL", kilde: "azure-keyvault:hvelv/nokkel", fil: true } } },
 };
-data.fiks.hemmeligheter = { "integrasjon-passord": { kilde: "azure-keyvault:hvelv/integrasjon" }, "svarinn-passord": { kilde: "azure-keyvault:hvelv/svarinn" } };
+data.fiks.hemmeligheter = { "integrasjon-passord": { $env: "INTEGRASJON", kilde: "azure-keyvault:hvelv/integrasjon" }, "svarinn-passord": { $env: "SVARINN", kilde: "azure-keyvault:hvelv/svarinn" } };
 const hemmelighet = (r) => ({ "azure-keyvault:hvelv/integrasjon": PASSORD["integrasjon-passord"], "azure-keyvault:hvelv/svarinn": PASSORD["svarinn-passord"], "azure-keyvault:hvelv/nokkel": PEM })[r.kilde];
 
 // Maskinporten og Fiks uten nettverk. Svaret fra Fiks gjentar hemmelighetene kallet brukte, og fødselsnummeret, så

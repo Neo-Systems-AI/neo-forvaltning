@@ -13,7 +13,7 @@
 //   node documaster.mjs sok --type <Noark-type> [--query "felt = @p"] [--param @p=verdi …] [--limit n]
 //
 // Config: `documaster` i .claude/neo.config.json (apiUrl, tokenUrl, clientId, scope): instansen repoet arbeider mot.
-// Hemmeligheten er referansen documaster.hemmeligheter.client-secret i config-fila, hentet fra hvelvet for kallet.
+// Hemmeligheten er referansen documaster.hemmeligheter.client-secret i config-fila, lest fra .env.local.
 // Exit: 0 svar 2xx · 1 feil eller ikke-2xx · 2 feil bruk.
 import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";

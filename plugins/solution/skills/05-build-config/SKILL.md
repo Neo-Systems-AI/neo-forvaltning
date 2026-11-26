@@ -22,8 +22,8 @@ i roten av repoet, og `blir` på hvert krav.
   manifestet sier: `oppsett/case-types/hc-parkering.yaml`. Hver fil har `apiVersion: neo-config/v1`, `kind` og `spec`.
   Stien Neo får, er stien under `oppsett/`; om den stemmer, sier Neo i planen. En løsning har ingen egen `oppsett/`.
 - **Pekere står som navn eller slug,** aldri som id. I en flyt står de som token (`ref:caseType:hc-parkering`).
-- **Formen på et objekt som finnes,** gir `export_config` fra Neo. Bruk den når skjemaet alene ikke viser hvordan et
-  felt fylles.
+- **Formen på et objekt som finnes,** står i snapshotet av sandkassen (`snapshots/sandkasse/`). Bruk det når
+  skjemaet alene ikke viser hvordan et felt fylles.
 - **Det flere løsninger bruker** (felt uten sakstype, statussett, innboks-tagger) er én fil i `oppsett/`, og kravene i
   `felles/krav/` peker på den. Ett objekt i Neo, én fil.
 - **Det formatet ikke har ennå,** og det som er miljø og ikke konfig (team, roller, tilgang), står i designet som et
@@ -72,12 +72,13 @@ i roten av repoet, og `blir` på hvert krav.
 
 - **Hver ting har en jobb.** En fil uten krav bak seg lages ikke. Omfanget følger kravene, og et krav fra hjemmelen
   tas aldri bort for å forenkle.
-- **Ikke spekuler i Neo.** Bruk bare felt og verdier skjemaet tar imot. Det Neo ikke kan, står som et gap med kravet og
-  det som mangler, ikke som en vei rundt.
-- **Integrasjonene og postboksene en flyt bruker,** hentes fra Neo, aldri gjettet: `list_config_environment` gir dem
-  med tokenet ferdig skrevet (`ref:integration:<app>/<navn>` i `integrationId` på noden,
-  `ref:mailbox:<leverandør>/<adresse>` i `sender.integrationId`). Finnes ikke den løsningen trenger, er det noe
-  kunden må sette opp i Neo, og det står som et gap.
+- **Ikke spekuler i Neo.** Bruk bare felt og verdier Neo tar imot: sjekk mot konfigen som kjører i miljøet, eller mot
+  formen i repoets regler. Det Neo ikke kan, står som et gap med kravet og det som mangler, ikke som en vei rundt.
+- **Integrasjonene og postboksene en flyt bruker,** hentes fra Neo, aldri gjettet:
+  `node "${CLAUDE_PLUGIN_ROOT}/scripts/uttrekk.mjs" <mappe>` skriver `config_environment.json` med tokenet ferdig
+  skrevet (`ref:integration:<app>/<navn>` i `integrationId` på noden, `ref:mailbox:<leverandør>/<adresse>` i
+  `sender.integrationId`). Finnes ikke den løsningen trenger, er det noe kunden må sette opp i Neo, og det står som et
+  gap.
 - **Ferdig konfigurert:** hver innstilling er Neos standard eller satt med en grunn.
 - **Navn og tekst** er norsk bokmål og klarspråk, etter skrivereglene i `felles/design/` og mønstrene for navn og
   skriving.

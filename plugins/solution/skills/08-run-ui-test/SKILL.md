@@ -13,8 +13,8 @@ med resultatene og funnene. En runde som er kjørt, endres ikke; neste runde er 
 
 ## 1. Gjør klar
 
-- **Konfigen:** miljøet runden kjører i, og at konfigen der er lik repoet på commiten testplanen er skrevet mot: hent
-  konfigen fra sandkassen inn i repoet (`export_config`), og se at `git diff` er tom for løsningens filer. Er den ikke
+- **Konfigen:** miljøet runden kjører i, og at konfigen der er lik repoet på commiten testplanen er skrevet mot: ta et
+  snapshot av sandkassen (`/forvaltning:snapshot`), og se at `git diff` er tom for løsningens filer. Er den ikke
   lik, er det et funn før runden starter.
 - **Neo:** versjonen miljøet viser, så runden kan sammenlignes med neste.
 - **Testcasene:** lagt inn og slik testplanen sier, sjekket i Neo, ikke i en logg.

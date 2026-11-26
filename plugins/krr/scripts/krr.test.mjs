@@ -16,7 +16,7 @@ const UGYLDIG = "12345678901";
 
 const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
 const PEM = privateKey.export({ type: "pkcs8", format: "pem" });
-const data = { version: 2, krr: { miljo: "test", klient: "krr" }, maskinporten: { miljo: "test", klienter: { krr: { clientId: "klient-test", scopes: ["krr:global/kontaktinformasjon.read"] } }, hemmeligheter: { "krr-nokkel": { kilde: "azure-keyvault:kv-kunde/krr", fil: true } } } };
+const data = { version: 2, krr: { miljo: "test", klient: "krr" }, maskinporten: { miljo: "test", klienter: { krr: { clientId: "klient-test", scopes: ["krr:global/kontaktinformasjon.read"] } }, hemmeligheter: { "krr-nokkel": { $env: "KRR", kilde: "azure-keyvault:kv-kunde/krr", fil: true } } } };
 const config = { data };
 const hemmelighet = () => PEM;
 

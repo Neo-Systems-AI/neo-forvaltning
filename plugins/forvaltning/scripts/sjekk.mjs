@@ -7450,7 +7450,7 @@ var require_dist = __commonJS({
 
 // sjekk.mjs
 init_define_REGEL_IDER();
-import { execFileSync as execFileSync2 } from "node:child_process";
+import { execFileSync as execFileSync3 } from "node:child_process";
 import { appendFileSync, readFileSync as readFileSync8, realpathSync } from "node:fs";
 import { dirname as dirname2, join as join8 } from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
@@ -7591,12 +7591,14 @@ function anchors(md) {
 
 // struktur.mjs
 init_define_REGEL_IDER();
+import { execFileSync } from "node:child_process";
 import { existsSync as existsSync2, readFileSync as readFileSync2 } from "node:fs";
 import { join as join2 } from "node:path";
 var CHECKS = [
   { name: "kunde", about: "kunde.yaml har typen, kunden, godkjenneren, forvalteren og versjonene" },
   { name: "repo", about: "Repoet har mappene typen sier, og ingen andre: konfigen i oppsett/ i roten, snapshotene per milj\xF8, og ingen oppsett/ i en l\xF8sning eller i felles/" },
-  { name: "config", about: ".claude/neo.config.json er version 1 med milj\xF8ene sandkasse og produksjon og MCP-serveren per milj\xF8, og hemmelighetene bare som referanser til hvelvet under <system>.hemmeligheter" },
+  { name: "config", about: ".claude/neo.config.json er version 1 med milj\xF8ene sandkasse og produksjon, adressen og maskinklienten, og hemmelighetene bare som referanser ({ $env, kilde })" },
+  { name: "hemmeligheter", about: "Ingen hentede hemmeligheter (.env.local, .keys/) er committet" },
   { name: "godkjenner", about: ".github/CODEOWNERS nevner en ekte godkjenner" },
   { name: "losning", about: "Hver l\xF8sning har losning.yaml med form\xE5l, eier, status og integrasjonene, og hva den bygger p\xE5 n\xE5r den er ute av utkast" },
   { name: "integrasjon", about: "Ingen hemmelighet st\xE5r med verdi, og oppgavene hos kunden har status, hvem og det de venter p\xE5" },
@@ -7608,10 +7610,10 @@ var STATUS_LOSNING = ["utkast", "i-test", "i-bruk", "avviklet"];
 var STATUS_OPPGAVE = ["ikke-startet", "i-gang", "ferdig"];
 var PERSONAER = "test/personaer";
 var SECRET_KEY = /(passord|password|secret|hemmelig|token|apikey|api_key|privatekey|private_key|nokkel|nøkkel|^key$|keypem)/i;
-var KILDE = /^azure-keyvault:[A-Za-z0-9-]+\/[A-Za-z0-9-]+$/;
-var REF = "{ kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en n\xF8kkelfil)";
-var isRef = (v) => isMap(v) && KILDE.test(String(v.kilde ?? "")) && (v.fil === void 0 || typeof v.fil === "boolean") && Object.keys(v).every((k) => ["kilde", "fil"].includes(k));
-var whyNotRef = (v) => isMap(v) && "$env" in v ? "referansen har ikke $env lenger: skriptene henter verdien fra hvelvet ved hvert kall. Ta bort $env" : `m\xE5 v\xE6re ${REF}, uten verdien`;
+var KILDE = /^(azure-keyvault:[A-Za-z0-9-]+\/[A-Za-z0-9-]+|1password:op:\/\/\S+|manuell)$/;
+var REF = "{ $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> } (og fil: true for en n\xF8kkelfil)";
+var isRef = (v) => isMap(v) && /^[A-Z][A-Z0-9_]*$/.test(String(v.$env ?? "")) && KILDE.test(String(v.kilde ?? "")) && (v.fil === void 0 || typeof v.fil === "boolean") && Object.keys(v).every((k) => ["$env", "kilde", "fil"].includes(k));
+var whyNotRef = (v) => `m\xE5 v\xE6re ${REF}, uten verdien`;
 var GAMMELT = {
   "repo.yaml": "Fila heter kunde.yaml, med type (kunde eller standard)",
   state: "Id-ene per milj\xF8 finnes ikke lenger: Neo skriver filene med n\xF8kler (forvaltning 0.2.0). Ta bort state/",
@@ -7709,13 +7711,13 @@ function readConfig(root) {
   for (const env of Object.keys(isMap(neo.byEnv) ? neo.byEnv : {})) if (!envs.includes(env)) f.push({ check: "config", file, message: `neo.byEnv.${env} er ikke et milj\xF8 i neo.environments` });
   for (const env of envs) {
     const v = isMap(neo.byEnv?.[env]) ? neo.byEnv[env] : {};
-    if (!text(v.mcpServer)) f.push({ check: "config", level: "warn", file, message: `MCP-serveren for ${env} er ikke satt (neo.byEnv.${env}.mcpServer)` });
     if (!/^https:\/\/[^<>\s]+$/.test(String(v.url ?? ""))) f.push({ check: "config", level: "warn", file, message: `Adressen til Neo for ${env} er ikke fylt ut (neo.byEnv.${env}.url)` });
+    if (v.apiClient !== void 0 && !/^[^<>\s]+$/.test(String(v.apiClient?.clientId ?? ""))) f.push({ check: "config", level: "warn", file, message: `Maskinklienten for ${env} er ikke fylt ut (neo.byEnv.${env}.apiClient). Skriptene i forvaltning trenger den` });
   }
   const walk2 = (x, path) => {
     if (!x || typeof x !== "object") return;
     if (!Array.isArray(x) && ("$env" in x || "kilde" in x)) {
-      f.push({ check: "config", file, message: `${path} er en referanse til en hemmelighet. Referansene st\xE5r under <system>.hemmeligheter, ved siden av oppsettet av systemet` });
+      if (!isRef(x)) f.push({ check: "config", file, message: `${path} ${whyNotRef(x)}` });
       return;
     }
     for (const [k, v] of Object.entries(x)) {
@@ -7725,12 +7727,21 @@ function readConfig(root) {
         else for (const [n, r] of Object.entries(v)) if (!isRef(r)) f.push({ check: "config", file, message: `${p}.${n} ${whyNotRef(r)}` });
         continue;
       }
-      if (SECRET_KEY.test(k) && v != null && typeof v !== "object") f.push({ check: "config", file, message: `${p} st\xE5r med verdi. Config-fila har ingen hemmeligheter` });
+      if (SECRET_KEY.test(k) && v != null && typeof v !== "object" && !/Dir$|File$/i.test(k)) f.push({ check: "config", file, message: `${p} st\xE5r med verdi. Config-fila har ingen hemmeligheter` });
       walk2(v, p);
     }
   };
   walk2(data, "");
   return { data, envs, findings: f };
+}
+function checkCommitted(root) {
+  let files = [];
+  try {
+    files = execFileSync("git", ["ls-files"], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).split("\n").filter(Boolean);
+  } catch {
+    return [];
+  }
+  return files.filter((p) => /(^|\/)(\.env(\.[^/]*)?|\.keys\/.*)$/.test(p) && !p.endsWith(".example")).map((p) => ({ check: "hemmeligheter", file: p, message: "Hemmeligheter er committet. Fjern fila fra git, og bytt verdiene i hvelvet: de er ikke hemmelige lenger" }));
 }
 function checkCodeowners(root) {
   const co = join2(root, ".github/CODEOWNERS");
@@ -7821,29 +7832,6 @@ function checkIntegrasjoner(root) {
   return f;
 }
 var personas = (root) => yamlFiles(root, PERSONAER).map((rel) => ({ rel, id: rel.split("/").pop().replace(/\.ya?ml$/, "") }));
-function personaRefs(root) {
-  const list2 = [];
-  const problems = [];
-  for (const { rel } of personas(root)) {
-    const f = [];
-    const y = readYaml(root, rel, "persona", f);
-    if (y === void 0) {
-      problems.push({ sted: rel, why: f.map((x) => x.message).join("; ") });
-      continue;
-    }
-    const h = isMap(y) ? y.hemmeligheter : void 0;
-    if (h == null) continue;
-    if (!isMap(h)) {
-      problems.push({ sted: rel, why: "hemmeligheter er et kart fra navnet til referansen" });
-      continue;
-    }
-    for (const [navn, r] of Object.entries(h)) {
-      if (isRef(r)) list2.push({ ...r, sted: `${rel}#${navn}` });
-      else problems.push({ sted: `${rel}#${navn}`, why: `ikke en referanse (${REF}). St\xE5r verdien her, ta den ut, legg den i hvelvet og bytt den` });
-    }
-  }
-  return { list: list2, problems };
-}
 function checkPersonaer(root) {
   const f = [];
   for (const { rel } of personas(root)) {
@@ -7913,7 +7901,7 @@ function checkTestplan(root, kravIder) {
 
 // kilder.mjs
 init_define_REGEL_IDER();
-import { execFileSync } from "node:child_process";
+import { execFileSync as execFileSync2 } from "node:child_process";
 import { existsSync as existsSync3, readFileSync as readFileSync3 } from "node:fs";
 import { join as join3 } from "node:path";
 var CHECKS2 = [
@@ -7934,7 +7922,7 @@ function registry(root, dir) {
   return ids;
 }
 function changed(root, base, dirsWithSources) {
-  const git = (...args) => execFileSync("git", ["-c", "core.quotePath=false", ...args], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  const git = (...args) => execFileSync2("git", ["-c", "core.quotePath=false", ...args], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
   try {
     git("rev-parse", "--verify", "--quiet", `${base}^{commit}`);
   } catch {
@@ -8157,7 +8145,6 @@ function version() {
   if (true) return "2.0.0";
   return JSON.parse(readFileSync8(join8(dirname2(fileURLToPath2(import.meta.url)), "package.json"), "utf8")).version;
 }
-var personaRefs2 = personaRefs;
 var CHECKS6 = [...CHECKS, ...CHECKS2, ...CHECKS3, ...CHECKS4, ...CHECKS5];
 function run(root, { base = "origin/main" } = {}) {
   const f = [];
@@ -8167,6 +8154,7 @@ function run(root, { base = "origin/main" } = {}) {
   f.push(...config.findings);
   f.push(...checkLayout(root, kunde.type, config.envs));
   f.push(...checkCodeowners(root));
+  f.push(...checkCommitted(root));
   f.push(...checkLosninger(root));
   f.push(...checkIntegrasjoner(root));
   f.push(...checkPersonaer(root));
@@ -8229,7 +8217,7 @@ function parseArgs(argv) {
 }
 var gitRoot = () => {
   try {
-    return execFileSync2("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    return execFileSync3("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
   } catch {
     return process.cwd();
   }
@@ -8273,7 +8261,6 @@ export {
   CHECKS6 as CHECKS,
   main,
   parseArgs,
-  personaRefs2 as personaRefs,
   run,
   summary,
   version

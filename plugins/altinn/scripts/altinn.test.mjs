@@ -14,7 +14,7 @@ const ALTINN_TOKEN = `${b64({ alg: "RS256" })}.${b64({ iss: "https://platform.tt
 const data = {
   version: 2,
   altinn: { miljo: "tt02", klient: "altinn", org: "ttd", apps: ["ttd/skjema"] },
-  maskinporten: { miljo: "test", klienter: { altinn: { clientId: "klient-tt02", scopes: ["altinn:serviceowner/instances.read", "altinn:serviceowner/events"] } }, hemmeligheter: { "altinn-nokkel": { kilde: "azure-keyvault:kv-kunde/altinn-nokkel", fil: true } } },
+  maskinporten: { miljo: "test", klienter: { altinn: { clientId: "klient-tt02", scopes: ["altinn:serviceowner/instances.read", "altinn:serviceowner/events"] } }, hemmeligheter: { "altinn-nokkel": { $env: "ALTINN_NOKKEL", kilde: "azure-keyvault:kv-kunde/altinn-nokkel", fil: true } } },
 };
 const config = { data };
 const hemmelighet = () => PEM;
@@ -162,7 +162,7 @@ test("tokenet går mot Maskinporten i miljøet Altinn hører til, og klientene i
 
 test("en subscription key brukes når referansen står under altinn.hemmeligheter, og sladdes", async () => {
   const d = structuredClone(data);
-  d.altinn.hemmeligheter = { "subscription-key": { kilde: "azure-keyvault:kv/sub" } };
+  d.altinn.hemmeligheter = { "subscription-key": { $env: "SUB", kilde: "azure-keyvault:kv/sub" } };
   const { seen, fetchImpl } = fake(() => json({ ekko: "sub-key-hemmelig" }));
   const c = capture();
   assert.equal(await run(["instans", `51234/${GUID}`], { config: { data: d }, fetchImpl, hemmelighet: (x) => (x.kilde.endsWith("/sub") ? "sub-key-hemmelig" : PEM), ...c }), 0);

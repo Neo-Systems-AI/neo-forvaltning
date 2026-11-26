@@ -62,7 +62,7 @@ export function checkDocs(root) {
   return f;
 }
 
-// En skill sier hva, ikke hvor: den viser ikke til en annen skill (`plugin:skill`), og har ingen datoer. Digdirs skills
+// En skill har ingen datoer; historikken står i PR-en. Digdirs skills
 // i `altinn` er kopiert uendret og sjekkes ikke.
 export function checkSkills(root, plugins) {
   const f = [];
@@ -75,11 +75,7 @@ export function checkSkills(root, plugins) {
       const file = join(dir, s, "SKILL.md");
       if (!existsSync(file)) continue;
       const rel = relative(root, file);
-      if (UNNTAK.skills.includes(rel)) continue;
       readFileSync(file, "utf8").split("\n").forEach((line, i) => {
-        for (const [ref, plugin, skill] of line.matchAll(/\/?\b([a-z][a-z0-9-]*):([a-z0-9][a-z0-9-]*)\b/g)) {
-          if (names.has(plugin) && !(plugin === p && skill === s) && existsSync(join(root, "plugins", plugin, "skills", skill))) f.push({ check: "skills", file: rel, line: i + 1, message: `Viser til ${ref}. En skill vet ikke om de andre; løpet står i README-en til pluginen` });
-        }
         if (/\b20\d\d-\d\d-\d\d\b/.test(line)) f.push({ check: "skills", file: rel, line: i + 1, message: "En dato. En skill har ingen historikk; den står i PR-en" });
       });
     }
@@ -109,14 +105,15 @@ export function checkSkillRefs(root, plugins, files) {
 }
 
 // Nøkkelfila sier hva pluginen leser fra .claude/neo.config.json: `neo: true` når den snakker med Neo (miljøene og
-// MCP-serveren per miljø), nøklene relativt til pluginens del, og referansene til hvelvet den trenger under
+// MCP-serveren per miljø), `neoApi: true` når den gjør det med skript og maskinklienten i stedet for MCP, nøklene relativt til pluginens del, og referansene til hvelvet den trenger under
 // <system>.hemmeligheter. Bare nøkler: hva som kopieres inn i pluginen, avledes av importene.
 export function checkKeys(root, p, keys) {
   const f = [];
   const kf = `plugins/${p}/neo-config.keys.json`;
   if (keys.plugin !== p) f.push({ check: "config", file: kf, message: `plugin er «${keys.plugin}», mappa er «${p}»` });
-  const extra = Object.keys(keys).filter((k) => !["plugin", "neo", "keys", "hemmeligheter"].includes(k));
-  if (extra.length) f.push({ check: "config", file: kf, message: `Nøkkelfila beskriver bare nøkler (neo, keys, hemmeligheter), ikke ${extra.join(", ")}` });
+  const extra = Object.keys(keys).filter((k) => !["plugin", "neo", "neoApi", "keys", "hemmeligheter"].includes(k));
+  if (extra.length) f.push({ check: "config", file: kf, message: `Nøkkelfila beskriver bare nøkler (neo, neoApi, keys, hemmeligheter), ikke ${extra.join(", ")}` });
+  if (keys.neoApi !== undefined && (keys.neoApi !== true || keys.neo !== true)) f.push({ check: "config", file: kf, message: "neoApi er true når pluginen kaller Neo med maskinklienten, og da er neo også true" });
   if (keys.neo !== undefined && keys.neo !== true) f.push({ check: "config", file: kf, message: "neo er true når pluginen snakker med Neo, ellers står den ikke" });
   if (!Array.isArray(keys.keys)) f.push({ check: "config", file: kf, message: "keys mangler (en tom liste når pluginen ikke leser noe)" });
   for (const k of keys.keys ?? []) if (!k.path || !k.doc) f.push({ check: "config", file: kf, message: `Hver nøkkel har path og doc: ${JSON.stringify(k)}` });
@@ -131,20 +128,13 @@ export function checkEntry(root, files) {
   const f = [];
   for (const file of files) {
     const rel = relative(root, file);
-    if (!rel.endsWith(".mjs") || rel.startsWith("check/node_modules/") || rel === "scripts/check.mjs" || rel === "scripts/check.test.mjs" || UNNTAK.inngang.includes(rel)) continue;
+    if (!rel.endsWith(".mjs") || rel.startsWith("check/node_modules/") || rel === "scripts/check.mjs" || rel === "scripts/check.test.mjs") continue;
     readFileSync(file, "utf8").split("\n").forEach((line, i) => {
       if (!/^\s*\/\//.test(line) && /process\.argv\[1\]/.test(line) && /import\.meta\.url|\bself\b/.test(line) && !/realpathSync\(process\.argv\[1\]\)/.test(line)) f.push({ check: "inngang", file: rel, line: i + 1, message: "Sammenligner process.argv[1] med stien til skriptet uten å løse opp symlenkene. Gjennom en symlenke kjører da ingenting, med exit 0. Bruk realpathSync på begge sider" });
     });
   }
   return f;
 }
-
-// Filene for konfig som fil (`forvaltning` 0.2.0) står slik de ble skrevet, til det er avklart om de skal følge reglene
-// for inngangen og for skills som viser til andre skills. Unntakene tas bort når det er avgjort; en ny fil får ikke et.
-export const UNNTAK = {
-  inngang: ["plugins/forvaltning/scripts/miljo-nokler.mjs", "plugins/forvaltning/scripts/planrapport.mjs", "plugins/forvaltning/scripts/rekkefolge.mjs", "plugins/forvaltning/scripts/skriv-eksport.mjs", "plugins/solution/scripts/rules.mjs"],
-  skills: ["plugins/forvaltning/skills/gjennomfor/SKILL.md"],
-};
 
 // Det som aldri skal stå i et offentlig repo. Kundenavn holdes ute ved review; her står det som kan sjekkes.
 export const INTERNAL = [

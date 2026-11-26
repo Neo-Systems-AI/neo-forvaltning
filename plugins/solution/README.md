@@ -67,7 +67,8 @@ test/personaer/               testbrukerne, felles for alle løsningene
 
 | Skript | Hva |
 |---|---|
-| `scripts/rules.mjs` | Reglene i mønstrene som kan sjekkes maskinelt, på uttrekket fra Neo (`list_case_types`, `list_custom_fields`, `list_workflows`) |
+| `scripts/rules.mjs` | Reglene i mønstrene som kan sjekkes maskinelt, kjørt på konfigen slik den kjører i et miljø. Hver regel har samme id som i mønstrene |
+| `scripts/uttrekk.mjs` | Henter det reglene leser (sakstypene, feltene og flytene) rett fra Neo sitt API med maskinklienten i `neo.byEnv.<miljø>.apiClient` |
 | `scripts/docs.mjs` | Hvor mønstrene står i pluginen |
 
 ## Dokumentasjonen

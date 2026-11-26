@@ -22,7 +22,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/maskinporten.mjs" token <klient> [--scope "<
 - `--consumer-org` ber om et delegert token på vegne av en annen organisasjon.
 - Avslaget kommer fram som Maskinporten ga det: status, `error` og `error_description`.
 
-Klientene står i `.claude/neo.config.json` under `maskinporten.klienter`. Nøkkelen hentes fra hvelvet for kallet;
+Klientene står i `.claude/neo.config.json` under `maskinporten.klienter`. Nøkkelen leses fra `.keys/`, der et menneske har hentet den fra hvelvet;
 får skriptet den ikke, sier det referansen, og personen logger inn med `az login` eller ber om tilgang.
 
 ## Reglene

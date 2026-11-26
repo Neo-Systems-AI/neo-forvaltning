@@ -1,7 +1,7 @@
 // Maskinporten: token med JWT-grant (RS256), uten avhengigheter. Klientene beskrives ett sted, i
 // `maskinporten.klienter.<navn>` i config-fila (clientId, kid, scopes), for miljøet i `maskinporten.miljo`. Altinn, Fiks
 // og KRR viser til en klient med navn. Nøkkelen er referansen `maskinporten.hemmeligheter.<navn>-nokkel`,
-// en PEM i hvelvet, hentet ved hvert kall. Klienten, nøkkelen og virksomhetssertifikatet er kundens; vi har koden.
+// en PEM i hvelvet, hentet til .keys/ av et menneske. Klienten, nøkkelen og virksomhetssertifikatet er kundens; vi har koden.
 import { createHash, createPrivateKey, createPublicKey, createSign, randomUUID } from "node:crypto";
 import { get, need } from "./neo-config.mjs";
 import { ref, secret } from "./hemmeligheter.mjs";
@@ -63,7 +63,7 @@ export function klient(data, navn, { miljo } = {}) {
   return { navn, sted, miljo: env, clientId: k.clientId, kid: k.kid, scopes: k.scopes ?? [] };
 }
 
-// Et token for klienten med navnet. Nøkkelen hentes fra hvelvet for kallet; verdien legges i `secrets` så den sladdes.
+// Et token for klienten med navnet. Nøkkelen leses fra .keys/; verdien legges i `secrets` så den sladdes.
 export async function tokenFor({ data, navn, miljo, scopes, consumerOrg, fetchImpl = fetch, hemmelighet = secret, secrets = [] }) {
   const k = klient(data, navn, { miljo });
   const wanted = scopes?.length ? scopes : k.scopes;

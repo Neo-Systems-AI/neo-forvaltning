@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { buildQuery, parseArgs, run, settings, QUERY_PATH } from "./documaster.mjs";
 
 const SECRET = "dm-hemmelig-verdi";
-const data = { version: 2, documaster: { apiUrl: "https://arkiv.test.example:8083/", tokenUrl: "https://idp.test.example/token", clientId: "klient-test", scope: "openid", hemmeligheter: { "client-secret": { kilde: "azure-keyvault:kv-kunde/documaster-client-secret" } } } };
+const data = { version: 2, documaster: { apiUrl: "https://arkiv.test.example:8083/", tokenUrl: "https://idp.test.example/token", clientId: "klient-test", scope: "openid", hemmeligheter: { "client-secret": { $env: "DOCUMASTER_CLIENT_SECRET", kilde: "azure-keyvault:kv-kunde/documaster-client-secret" } } } };
 const config = { data };
 const hemmelighet = () => SECRET;
 

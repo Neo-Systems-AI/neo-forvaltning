@@ -9,7 +9,7 @@ const PEM = privateKey.export({ type: "pkcs8", format: "pem" });
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
 const JWT = `${b64({ alg: "RS256" })}.${b64({ iss: "https://test.maskinporten.no/", client_id: "klient-test", consumer: { ID: "0192:999999999" }, scope: "krr:global/kontaktinformasjon.read", exp: 2000 })}.signatur-som-er-hemmelig`;
 
-const data = { version: 2, maskinporten: { miljo: "test", klienter: { krr: { clientId: "klient-test", scopes: ["krr:global/kontaktinformasjon.read"] }, fiks: { clientId: "klient-fiks" } }, hemmeligheter: { "krr-nokkel": { kilde: "azure-keyvault:kv-kunde/mp-krr", fil: true }, "fiks-nokkel": { kilde: "azure-keyvault:kv-kunde/mp-fiks", fil: true } } } };
+const data = { version: 2, maskinporten: { miljo: "test", klienter: { krr: { clientId: "klient-test", scopes: ["krr:global/kontaktinformasjon.read"] }, fiks: { clientId: "klient-fiks" } }, hemmeligheter: { "krr-nokkel": { $env: "MP_KRR", kilde: "azure-keyvault:kv-kunde/mp-krr", fil: true }, "fiks-nokkel": { $env: "MP_FIKS", kilde: "azure-keyvault:kv-kunde/mp-fiks", fil: true } } } };
 const config = { data };
 const hemmelighet = () => PEM;
 const wk = () => new Response(JSON.stringify({ issuer: "https://test.maskinporten.no/", token_endpoint: "https://test.maskinporten.no/token" }), { headers: { "content-type": "application/json" } });

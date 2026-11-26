@@ -1,29 +1,46 @@
-// Hemmelighetene til kallene mot systemene. Repoet har bare referansen, ved siden av oppsettet av systemet i
-// `.claude/neo.config.json`, under `<system>.hemmeligheter`:
+// Hemmelighetene til kallene mot Neo og systemene. En hemmelighet står aldri med verdi i config-fila, bare som en
+// referanse: { "$env": "SVARINN_PASSORD", "kilde": "azure-keyvault:kv-kunde/svarinn-passord" }, og "fil": true for en
+// nøkkelfil (PEM). Verdien ligger i kundens hvelv og hentes lokalt av et menneske (`hent-hemmeligheter.mjs --hent`) til
+// `.env.local` og `.keys/`, som aldri committes; i en jobb i GitHub settes den samme variabelen fra jobbens hemmeligheter.
+// Skriptene leser derfra uten å skrive verdien ut. Kunden eier hemmelighetene; vi eier koden.
 //
-//   "<navn>": { "kilde": "azure-keyvault:<hvelv>/<navn i hvelvet>" }               en verdi
-//   "<navn>": { "kilde": "azure-keyvault:<hvelv>/<navn i hvelvet>", "fil": true }  en fil, for eksempel en nøkkel (PEM)
-//
-// Verdien hentes fra Key Vault ved hvert kall, med personens egen innlogging (`az login`), og ligger aldri på disk: en
-// fil lastes ned til en midlertidig mappe for kallet og slettes. Ingen verdi skrives ut; en feil sier referansen.
-// Personaenes referanser (i `test/personaer/`) leses bare av `solution`, som har YAML-leseren til sjekken.
-import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+// En referanse kan stå hvor som helst i config-fila. For systemene står den under `<system>.hemmeligheter.<navn>`, ved
+// siden av oppsettet av systemet; for maskinklienten mot Neo under `neo.byEnv.<miljø>.apiClient.clientSecret`.
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { CONFIG } from "./neo-config.mjs";
 
-export const KILDE = /^azure-keyvault:([A-Za-z0-9-]+)\/([A-Za-z0-9-]+)$/;
-export const REF = '{ "kilde": "azure-keyvault:<hvelv>/<navn>" } (og "fil": true for en nøkkelfil)';
-const isMap = (v) => !!v && typeof v === "object" && !Array.isArray(v);
-export const isRef = (v) => isMap(v) && KILDE.test(String(v.kilde ?? "")) && (v.fil === undefined || typeof v.fil === "boolean") && Object.keys(v).every((k) => ["kilde", "fil"].includes(k));
+export const ENV_FILE = ".env.local";
+export const REF = '{ "$env": "<NAVN>", "kilde": "azure-keyvault:<hvelv>/<navn>" } (og "fil": true for en nøkkelfil)';
 
-const vault = (r) => {
-  const [, hvelv, navn] = KILDE.exec(r.kilde);
-  return { hvelv, navn };
-};
-const az = (exec, args) => exec("az", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
-const azError = (r, e) => new Error(`Fikk ikke hentet ${r.sted ?? r.kilde} fra hvelvet (${r.kilde}): ${String(e.stderr || e.message).trim().split("\n")[0]}. Er du logget inn med az login, og har du tilgang til hvelvet?`);
+export const isRef = (v) => !!v && typeof v === "object" && !Array.isArray(v) && "$env" in v;
+
+// Les .env.local inn i process.env, uten å overskrive det som alt er satt, og uten å skrive noe ut.
+export function loadEnvLocal(root = process.cwd()) {
+  const file = join(root, ENV_FILE);
+  if (!existsSync(file)) return false;
+  for (const line of readFileSync(file, "utf8").split("\n")) {
+    const m = line.match(/^\s*([A-Z][A-Z0-9_]*)\s*=\s*(.*?)\s*$/);
+    if (!m || line.trim().startsWith("#") || process.env[m[1]] !== undefined) continue;
+    process.env[m[1]] = m[2].replace(/^(["'])(.*)\1$/, "$2");
+  }
+  return true;
+}
+
+export class MissingSecret extends Error {
+  constructor(ref) {
+    super(`Hemmeligheten ${ref.$env}${ref.sted ? ` (${ref.sted})` : ""} er ikke satt.${ref.kilde ? ` Den ligger i ${ref.kilde};` : ""} hent den med /forvaltning:hemmeligheter (et menneske kjører hentingen, aldri agenten)`);
+    this.ref = ref;
+  }
+}
+
+// En verdi fra config-fila: en vanlig verdi som den er, en referanse fra miljøet. Feiler med navnet, aldri verdien.
+export function value(v) {
+  if (!isRef(v)) return v;
+  const got = process.env[v.$env];
+  if (got === undefined || got === "") throw new MissingSecret(v);
+  return got;
+}
 
 // Om systemet har en referanse med navnet. For en hemmelighet bare noen kunder har.
 export const has = (data, system, navn) => data?.[system]?.hemmeligheter?.[navn] !== undefined;
@@ -32,59 +49,42 @@ export const has = (data, system, navn) => data?.[system]?.hemmeligheter?.[navn]
 export function ref(data, system, navn) {
   const sted = `${system}.hemmeligheter.${navn}`;
   const r = data?.[system]?.hemmeligheter?.[navn];
-  if (r === undefined) throw new Error(`${sted} står ikke i ${CONFIG}. Legg inn "${navn}": { "kilde": "azure-keyvault:<hvelv>/<navn>" } under ${system}.hemmeligheter`);
+  if (r === undefined) throw new Error(`${sted} står ikke i ${CONFIG}. Legg inn "${navn}": ${REF} under ${system}.hemmeligheter`);
   if (!isRef(r)) throw new Error(`${sted} i ${CONFIG} er ikke en referanse: ${REF}`);
   return { ...r, sted };
 }
 
-// Verdien fra hvelvet. En fil lastes ned til en midlertidig mappe, leses og slettes.
-export function secret(r, { exec = execFileSync } = {}) {
-  const { hvelv, navn } = vault(r);
-  if (!r.fil) {
-    try {
-      return az(exec, ["keyvault", "secret", "show", "--vault-name", hvelv, "--name", navn, "--query", "value", "-o", "tsv"]).replace(/\r?\n$/, "");
-    } catch (e) {
-      throw azError(r, e);
-    }
-  }
-  const dir = mkdtempSync(join(tmpdir(), "neo-hemmelighet-"));
-  try {
-    const file = join(dir, "verdi");
-    az(exec, ["keyvault", "secret", "download", "--vault-name", hvelv, "--name", navn, "--file", file]);
-    return readFileSync(file, "utf8");
-  } catch (e) {
-    throw azError(r, e);
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
+// Verdien til referansen: fra miljøet (.env.local lest inn først), og for en nøkkelfil innholdet i fila variabelen
+// peker på. Ingen verdi skrives ut; en feil sier navnet og kilden.
+export function secret(r, { root = process.cwd() } = {}) {
+  loadEnvLocal(root);
+  const v = value(r);
+  if (!r.fil) return v;
+  const file = join(root, v);
+  if (!existsSync(file)) throw new Error(`Nøkkelfila for ${r.$env}${r.sted ? ` (${r.sted})` : ""} finnes ikke (${v}). Hent den med /forvaltning:hemmeligheter`);
+  return readFileSync(file, "utf8");
 }
 
-// Om personen når referansen, uten å hente verdien ut: bare om den finnes og er slått på.
-export function reach(r, { exec = execFileSync } = {}) {
-  const { hvelv, navn } = vault(r);
-  try {
-    const enabled = az(exec, ["keyvault", "secret", "show", "--vault-name", hvelv, "--name", navn, "--query", "attributes.enabled", "-o", "tsv"]).trim();
-    return enabled === "true" ? { ok: true } : { ok: false, why: "slått av i hvelvet" };
-  } catch (e) {
-    return { ok: false, why: String(e.stderr || e.message).trim().split("\n")[0] };
-  }
+// Alle verdiene som er hemmelige i et svar eller en feilmelding, så de kan sladdes.
+export function secretValues(section) {
+  const out = [];
+  const walk = (x) => {
+    if (isRef(x)) {
+      const got = process.env[x.$env];
+      if (got && got.length >= 4) out.push(got);
+    } else if (x && typeof x === "object") Object.values(x).forEach(walk);
+  };
+  walk(section);
+  return out;
 }
 
-// Alle referansene i config-fila, med hvor de står. Det som ikke er en referanse, er et problem; verdien vises aldri.
-export function configRefs(data) {
-  const list = [];
-  const problems = [];
-  for (const [system, part] of Object.entries(isMap(data) ? data : {})) {
-    if (!isMap(part) || part.hemmeligheter === undefined) continue;
-    const at = `${system}.hemmeligheter`;
-    if (!isMap(part.hemmeligheter)) {
-      problems.push({ sted: at, why: "er et kart fra navnet til referansen" });
-      continue;
-    }
-    for (const [navn, r] of Object.entries(part.hemmeligheter)) {
-      if (isRef(r)) list.push({ ...r, sted: `${at}.${navn}` });
-      else problems.push({ sted: `${at}.${navn}`, why: `ikke en referanse (${REF}). Står verdien her, ta den ut, legg den i hvelvet og bytt den` });
-    }
-  }
-  return { list, problems };
+// Alle referansene i config-fila: hvor hver hemmelighet står, navnet og kilden. Bare navn, aldri verdier.
+export function refs(data) {
+  const out = [];
+  const walk = (x, path) => {
+    if (isRef(x)) out.push({ path, env: x.$env, kilde: x.kilde ?? null, fil: x.fil ?? false });
+    else if (x && typeof x === "object") for (const [k, v] of Object.entries(x)) walk(v, path ? `${path}.${k}` : k);
+  };
+  walk(data, "");
+  return out;
 }

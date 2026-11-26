@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Oppsettet i repoet for hver plugin fra neo-forvaltning som er på: hva pluginen leser fra `.claude/neo.config.json`,
-// hva som er satt, hvor verdien kom fra, og hva som mangler, også MCP-serveren per miljø i Neo, referansene til hvelvet
-// under `<system>.hemmeligheter` og Maskinporten-klientene pluginene viser til. Hva hver plugin trenger, står i
+// hva som er satt, hvor verdien kom fra, og hva som mangler, også Neo per miljø (MCP-serveren for pluginene som går
+// gjennom MCP, maskinklienten i sandkassen for dem som kaller Neo med skript), referansene til hemmelighetene og
+// Maskinporten-klientene pluginene viser til. Hva hver plugin trenger, står i
 // `nokler.json` ved siden av (samlet fra nøkkelfilene til alle pluginene). Bare lesing. Exit 1 når noe påkrevd mangler.
 //
 //   node check-setup.mjs [--json]
@@ -9,7 +10,7 @@ import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { environments, get, load, neo } from "./lib/neo-config.mjs";
-import { ref } from "./lib/hemmeligheter.mjs";
+import { isRef, ref } from "./lib/hemmeligheter.mjs";
 
 export const MARKET = "neo-forvaltning";
 const KEYS = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "nokler.json"), "utf8"));
@@ -46,16 +47,27 @@ const hasRef = (data, path) => {
   }
 };
 
-// Neo per miljø, for en plugin som snakker med Neo: MCP-serveren er påkrevd, adressen vises.
-export function neoRows(data) {
+// Neo per miljø, for en plugin som snakker med Neo. Gjennom MCP er MCP-serveren påkrevd. Med skript (`neoApi`) er
+// adressen og maskinklienten i standardmiljøet (sandkassen) påkrevd: plan og apply virker bare der.
+export function neoRows(data, { api = false } = {}) {
   if (!environments(data).length) return [{ path: "neo.environments", source: "usatt", required: true, ok: false, doc: "Miljøene i Neo: sandkasse og produksjon" }];
+  const unset = (v) => blank(v) || (typeof v === "string" && v.includes("<"));
   const out = [];
+  const standard = get(data, "neo.defaultEnv") ?? "sandkasse";
   for (const env of environments(data)) {
-    for (const k of ["mcpServer", "url"]) {
+    const row = (k, required, doc) => {
       const path = `neo.byEnv.${env}.${k}`;
       const v = get(data, path);
-      const unset = blank(v) || (typeof v === "string" && v.includes("<"));
-      out.push({ path, value: v, source: unset ? "usatt" : "config", required: k === "mcpServer", ok: k === "url" || !unset, doc: k === "mcpServer" ? `MCP-serveren for ${env} i .mcp.json` : `Adressen til Neo for ${env}` });
+      out.push({ path, value: v, source: unset(v) ? "usatt" : "config", required, ok: !required || !unset(v), doc });
+    };
+    if (!api) row("mcpServer", true, `MCP-serveren for ${env} i .mcp.json`);
+    row("url", api && env === standard, `Adressen til Neo for ${env}`);
+    if (api && env === standard) {
+      const base = `neo.byEnv.${env}.apiClient`;
+      const id = get(data, `${base}.clientId`);
+      out.push({ path: `${base}.clientId`, value: id, source: unset(id) ? "usatt" : "config", required: true, ok: !unset(id), doc: `Maskinklienten skriptene kaller ${env} med (API-klienter → Ny API-klient, slaget «Maskin»)` });
+      const sec = get(data, `${base}.clientSecret`);
+      out.push({ path: `${base}.clientSecret`, value: isRef(sec) ? sec.kilde ?? sec.$env : undefined, source: isRef(sec) ? "referanse" : sec === undefined ? "mangler" : "ikke en referanse", required: true, ok: isRef(sec), doc: isRef(sec) ? "Hemmeligheten til maskinklienten" : 'Hemmeligheten til maskinklienten, som referanse: { "$env": "NEO_SANDKASSE_KLIENT_HEMMELIGHET", "kilde": "azure-keyvault:<hvelv>/<navn>" }' });
     }
   }
   return out;
@@ -66,7 +78,7 @@ export function neoRows(data) {
 export function rows(data, plugin, keys = KEYS) {
   const spec = keys[plugin];
   if (!spec) return [{ path: plugin, ok: false, doc: `${plugin} er ikke en plugin i ${MARKET}` }];
-  const out = spec.neo ? neoRows(data) : [];
+  const out = spec.neo ? neoRows(data, { api: !!spec.neoApi }) : [];
   for (const k of spec.keys ?? []) {
     const path = `${plugin}.${k.path}`;
     const v = get(data, path);
@@ -78,7 +90,7 @@ export function rows(data, plugin, keys = KEYS) {
       if (blank(get(data, "maskinporten.miljo"))) out.push({ path: "maskinporten.miljo", source: "usatt", required: true, ok: false, doc: "Miljøet klientene er registrert i" });
       const kp = `maskinporten.hemmeligheter.${v}-nokkel`;
       const r = hasRef(data, kp);
-      out.push({ path: kp, value: r.ok ? get(data, kp).kilde : undefined, source: r.ok ? "referanse" : "mangler", required: true, ok: r.ok, doc: r.ok ? "Nøkkelen til klienten" : r.why });
+      out.push({ path: kp, value: r.ok ? get(data, kp).kilde ?? get(data, kp).$env : undefined, source: r.ok ? "referanse" : "mangler", required: true, ok: r.ok, doc: r.ok ? "Nøkkelen til klienten" : r.why });
     }
   }
   for (const h of spec.hemmeligheter ?? []) {
@@ -87,7 +99,7 @@ export function rows(data, plugin, keys = KEYS) {
       const r = hasRef(data, path);
       // En valgfri referanse kan mangle, men står den, må den være en referanse.
       const absent = get(data, path) === undefined;
-      out.push({ path, value: r.ok ? get(data, path).kilde : undefined, source: r.ok ? "referanse" : absent ? "mangler" : "ikke en referanse", required: !h.valgfri, ok: r.ok || (!!h.valgfri && absent), doc: r.ok ? h.doc : `${h.doc}. ${r.why}` });
+      out.push({ path, value: r.ok ? get(data, path).kilde ?? get(data, path).$env : undefined, source: r.ok ? "referanse" : absent ? "mangler" : "ikke en referanse", required: !h.valgfri, ok: r.ok || (!!h.valgfri && absent), doc: r.ok ? h.doc : `${h.doc}. ${r.why}` });
     }
   }
   return out;

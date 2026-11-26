@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Viser hva oppsettet i repoet vil gjøre i Neo sin sandkasse, fil for fil, så kunden kan godkjenne endringen i en PR før den gjennomføres. Neo prøver hver fil uten å lagre (plan_config gjennom MCP) og sier hva som er nytt, endret, uendret eller avvist. Bare lesing. Kjør på en branch med endringen, og legg planen i PR-en.
+description: Viser hva oppsettet i repoet vil gjøre i Neo sin sandkasse, fil for fil, så kunden kan godkjenne endringen i en PR før den gjennomføres. Et skript sender filene til Neo med maskinklienten; Neo prøver alle filene samlet uten å lagre, så en fil kan peke på det en annen fil lager, og sier hva som er nytt, endret, uendret eller avvist. Bare lesing. Kjør på en branch med endringen, og legg planen i PR-en. Brukes også på én fil mens den skrives.
 ---
 
 # Planen
@@ -8,46 +8,50 @@ description: Viser hva oppsettet i repoet vil gjøre i Neo sin sandkasse, fil fo
 Planen er det kunden godkjenner. Den skal kunne leses av den som eier prosessen, ikke bare av den som har gjort
 endringen.
 
-Neo lager planen. For hver fil prøver Neo skrivingen i sandkassen og ruller den tilbake, så en fil som ikke kan
-gjennomføres (en peker som ikke finnes, en status som står to ganger), står som avvist i planen og ikke som en feil
-under gjennomføringen.
+Neo lager planen. Neo prøver skrivingen av alle filene i sandkassen, i rekkefølgen de skrives, i én transaksjon som
+rulles tilbake. Hver fil ser det filene før den lager, så en løsning bygget fra scratch (et nytt sett og en ny sakstype
+som kobler det) kan planlegges før noe finnes i sandkassen. En fil som ikke kan gjennomføres (en peker som verken
+finnes i sandkassen eller i en annen fil, en status som står to ganger), står som avvist i planen og ikke som en feil
+under gjennomføringen. Skriptet sender filene og samler svarene; ingenting går gjennom modellen.
 
 ## Før du starter
 
 - Planen lages mot **sandkassen**. Neo planlegger og skriver bare der; produksjonen får endringen når kundens
   org-admin promoterer sandkassen i Neo.
-- MCP-serveren for sandkassen: `node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/neo-config.mjs" --miljo sandkasse` (`mcpServer`
-  og `url`).
-- Mappene: `neo-config.mjs --get oppsettDir` og `--get reportsDir`.
-- En flyt som bruker en integrasjon eller sender fra en postboks, skriver den som nøkkel. Hent de gyldige med
-  `list_config_environment` (tokenet står i `ref`) i stedet for å skrive navnet eller adressen for hånd.
+- En flyt som bruker en integrasjon eller sender fra en postboks, skriver den som nøkkel. Hent de gyldige i stedet for
+  å skrive navnet eller adressen for hånd:
 
-## Slik gjør du det
+  ```bash
+  node "${CLAUDE_PLUGIN_ROOT}/scripts/konfig.mjs" miljo
+  ```
 
-1. Filene i rekkefølgen Neo må ha dem:
+  Tokenet står i `ref`.
+
+## Én fil, mens den skrives
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/konfig.mjs" plan --fil <sti under oppsett/>
+```
+
+Skriptet sender alle filene, så fila kan peke på det de andre lager, og viser svaret for fila: `create`, `update` med
+endringene, `unchanged`, eller `rejected` med grunnene. Rett fila til den ikke er avvist.
+
+## Planen til PR-en
+
+1. Lag planen for alle filene:
 
    ```bash
-   node "${CLAUDE_PLUGIN_ROOT}/scripts/rekkefolge.mjs" --manifest <url> <oppsettDir>
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/konfig.mjs" plan
    ```
 
-   Manifestet hentes fra Neo (`<url>/api/config/schema`). En fil i en mappe Neo ikke kjenner, stopper skriptet: flytt
-   den, eller legg den i `oppsett/manuelt/` om den beskriver noe som gjøres for hånd.
-2. Tøm `<reportsDir>/plan-sandkasse/raw/`. For hver fil, i rekkefølgen: kall `plan_config` med `file: { path, text }`,
-   der `path` er stien relativt til `<oppsettDir>` og `text` er innholdet i fila uendret. Lagre svaret uendret i
-   `<reportsDir>/plan-sandkasse/raw/<sti med / byttet med __>.json`.
-3. Kall `config_not_in_files` med `paths`: alle stiene fra steg 1. Lagre svaret i
-   `<reportsDir>/plan-sandkasse/raw/ikke-styrt.json`.
-4. Sett sammen planen:
-
-   ```bash
-   node "${CLAUDE_PLUGIN_ROOT}/scripts/planrapport.mjs" <reportsDir>/plan-sandkasse/raw --md <reportsDir>/plan-sandkasse.md --json <reportsDir>/plan-sandkasse.json
-   ```
-
-   Exit 1 betyr at minst én fil er avvist. Grunnen står i planen; rett fila og lag planen på nytt.
-5. Skriv over planen, i klartekst og per sakstype: hva endres, hvorfor (lenke til raden i `beslutninger.md`), og hva
+   Skriptet sender alle filene i ett kall, spør hva sandkassen har uten fil, og skriver `<reportsDir>/plan-<miljø>.md`
+   og `.json`, i rekkefølgen Neo skriver filene. Exit 1 betyr at minst én fil er avvist; grunnen står i planen. En fil
+   i en mappe Neo ikke kjenner, er avvist: flytt den, eller legg den i `oppsett/manuelt/` om den beskriver noe som
+   gjøres for hånd.
+2. Skriv over planen, i klartekst og per sakstype: hva endres, hvorfor (lenke til kravet eller saken), og hva
    saksbehandlerne vil merke.
-6. Commit `plan-sandkasse.md` og `plan-sandkasse.json` (ikke `raw/`), og legg planen i PR-beskrivelsen. Godkjenningen
-   av PR-en er kundens godkjenning av akkurat denne planen: gjennomføringen sjekker mot `plan-sandkasse.json`.
+3. Commit `plan-<miljø>.md` og `plan-<miljø>.json`, og legg planen i PR-beskrivelsen. Godkjenningen av PR-en er kundens
+   godkjenning av akkurat denne planen: gjennomføringen sjekker mot `plan-<miljø>.json`.
 
 ## Det planen sier
 

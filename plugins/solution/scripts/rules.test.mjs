@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -41,9 +41,9 @@ test("en avslått regel kjøres ikke, og rapporten har rødt først med regelen 
 });
 
 // Mønstrene og sjekkene er ett regelsett: hver sjekk er en regel i mønstrene med samme id, og hver regel som sier at
-// den sjekkes maskinelt, har en sjekk. Mønstrene står i docs/ i repoet, ikke i pluginen.
-const MONSTRE = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "docs", "monstre");
-test("hver sjekk er en regel i mønstrene, og hver regel som sjekkes maskinelt, har en sjekk", { skip: !existsSync(MONSTRE) && "mønstrene er ikke ved siden av" }, () => {
+// den sjekkes maskinelt, har en sjekk. Mønstrene står i docs/ i pluginen, ved siden av skriptet.
+const MONSTRE = join(dirname(fileURLToPath(import.meta.url)), "..", "docs", "monstre");
+test("hver sjekk er en regel i mønstrene, og hver regel som sjekkes maskinelt, har en sjekk", () => {
   for (const r of RULES) {
     const text = readFileSync(join(MONSTRE, r.doc), "utf8");
     assert.match(text, new RegExp(`^id: ${r.name}\\n(?:.*\\n)*?sjekkes: maskinelt`, "m"), `${r.doc}#${r.name} finnes ikke, eller sier ikke at den sjekkes maskinelt`);

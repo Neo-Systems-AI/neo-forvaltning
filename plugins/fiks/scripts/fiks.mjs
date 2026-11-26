@@ -19,7 +19,7 @@
 //
 // Config: `fiks` i .claude/neo.config.json (miljo, klient, integrasjon, svarutKonto, svarinnMottakersystem,
 // folkeregisterRolle). Passordene er referansene under fiks.hemmeligheter (integrasjon-passord,
-// svarinn-passord) og hentes fra hvelvet for kallet.
+// svarinn-passord) og leses fra .env.local.
 import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parse, Usage } from "./lib/argumenter.mjs";

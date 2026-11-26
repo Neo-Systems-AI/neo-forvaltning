@@ -18,20 +18,21 @@ testorganisasjonene og testidentitetene forvalteren bygger med.
 
 ## Referansene i repoet
 
-En referanse sier hvor verdien ligger. Verdien står aldri i en fil. For et system står referansene ved siden av
-oppsettet av systemet i `.claude/neo.config.json`, under `<system>.hemmeligheter`:
+En referanse sier hva verdien heter lokalt (`$env`) og hvor den ligger (`kilde`). Verdien står aldri i en fil. For et
+system står referansene ved siden av oppsettet av systemet i `.claude/neo.config.json`, under `<system>.hemmeligheter`,
+og for maskinklienten mot Neo under `neo.byEnv.sandkasse.apiClient.clientSecret`:
 
 ```json
 "fiks": {
   "miljo": "test",
   "hemmeligheter": {
-    "svarinn-passord": { "kilde": "azure-keyvault:<hvelv>/fiks-svarinn-service-passord" }
+    "svarinn-passord": { "$env": "FIKS_SVARINN_SERVICE_PASSORD", "kilde": "azure-keyvault:<hvelv>/fiks-svarinn-service-passord" }
   }
 },
 "maskinporten": {
   "klienter": { "fiks": { "clientId": "<klient-ID>" } },
   "hemmeligheter": {
-    "fiks-nokkel": { "kilde": "azure-keyvault:<hvelv>/<navn>", "fil": true }
+    "fiks-nokkel": { "$env": "MASKINPORTEN_FIKS_NOKKEL", "kilde": "azure-keyvault:<hvelv>/<navn>", "fil": true }
   }
 }
 ```
@@ -40,18 +41,21 @@ For en persona står de under `hemmeligheter` i personaen i `test/personaer/`:
 
 ```yaml
 hemmeligheter:
-  passord: { kilde: azure-keyvault:<hvelv>/<navn> }
+  passord: { $env: <NAVN>, kilde: azure-keyvault:<hvelv>/<navn> }
 ```
 
-- **Hvor:** under `<system>.hemmeligheter` i config-fila for systemene, og under `hemmeligheter` i hver persona. Ingen
-  andre steder. Navnet til venstre er det pluginen ser etter; README-en til hver plugin sier hvilke den trenger.
-- **`kilde`:** `azure-keyvault:<hvelv>/<navn>`. Key Vault er den eneste kilden.
-- **`fil: true`:** verdien er en fil, for eksempel en nøkkel (PEM).
+- **Hvor:** under `<system>.hemmeligheter` i config-fila for systemene, under `apiClient` for maskinklienten, og under
+  `hemmeligheter` i hver persona. Navnet til venstre er det pluginen ser etter; README-en til hver plugin sier hvilke
+  den trenger.
+- **`$env`:** navnet verdien har i `.env.local` lokalt, og i jobbens hemmeligheter i GitHub.
+- **`kilde`:** `azure-keyvault:<hvelv>/<navn>` er standarden. `1password:op://…` og `manuell` finnes for en kunde
+  uten Key Vault.
+- **`fil: true`:** verdien er en fil, for eksempel en nøkkel (PEM). Den hentes til `.keys/`, og `$env` peker på fila.
 
-**Skriptene henter verdien fra hvelvet ved hvert kall,** med personens egen innlogging (`az login`), og den ligger
-aldri på disk: en fil lastes ned til en midlertidig mappe for kallet og slettes etterpå. Ingen verdi skrives ut. Hvilke
-referanser repoet har, og om du når dem, viser `vis-hemmeligheter.mjs` i pluginen `solution`; den spør bare om
-hemmeligheten finnes og er slått på, aldri etter verdien.
+**Et menneske henter verdiene** fra hvelvet til `.env.local` og `.keys/` med sin egen innlogging
+(`hent-hemmeligheter.mjs --hent`), og skriptene leser dem derfra uten å skrive dem ut. Begge står i `.gitignore`, og
+agenten leser dem aldri: vakten i `forvaltning` stopper det. Hva som er satt, viser `hent-hemmeligheter.mjs --sjekk`,
+bare med navn. Personaenes referanser er for personen som logger inn; ingen skript henter dem.
 
 ## Oppgavene
 

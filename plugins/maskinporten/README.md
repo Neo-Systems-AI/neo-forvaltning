@@ -23,8 +23,8 @@ navnet (`altinn.klient`, `fiks.klient`, `krr.klient`), så Maskinporten-pluginen
     "fiks": { "clientId": "<en annen klient>", "kid": "<valgfri>", "scopes": ["ks:fiks"] }
   },
   "hemmeligheter": {
-    "krr-nokkel": { "kilde": "azure-keyvault:<hvelv>/<navn>", "fil": true },
-    "fiks-nokkel": { "kilde": "azure-keyvault:<hvelv>/<navn>", "fil": true }
+    "krr-nokkel": { "$env": "MASKINPORTEN_KRR_NOKKEL", "kilde": "azure-keyvault:<hvelv>/<navn>", "fil": true },
+    "fiks-nokkel": { "$env": "MASKINPORTEN_FIKS_NOKKEL", "kilde": "azure-keyvault:<hvelv>/<navn>", "fil": true }
   }
 }
 ```
@@ -32,8 +32,8 @@ navnet (`altinn.klient`, `fiks.klient`, `krr.klient`), så Maskinporten-pluginen
 - **`miljo`:** miljøet klientene er registrert i, `test` eller `produksjon`. Et system i et annet miljø enn klientene
   stopper med en feil, så test og produksjon aldri blandes.
 - **Nøkkelen** til hver klient er referansen `<navn>-nokkel` under `hemmeligheter`, med `fil: true`: en PEM i
-  hvelvet. Skriptet henter den for kallet, med
-  personens egen innlogging, og den ligger aldri på disk.
+  hvelvet. Et menneske henter den til `.keys/` (`/forvaltning:hemmeligheter`), og skriptet leser den
+  derfra uten å skrive den ut.
 - **Uten `kid`** brukes thumbprinten av nøkkelen (RFC 7638), slik selvbetjeningen gjør.
 
 ## Det kunden må ha selv

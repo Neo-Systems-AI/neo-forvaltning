@@ -39,7 +39,7 @@ export const REGISTER = "| Id | Hva | Lagret |\n|---|---|---|\n| K1 | Forskrifte
 // Et repo slik det skal være: en løsning med kilde, forståelse, krav som ble en fil, og fila.
 export const GOOD = () => ({
   "kunde.yaml": KUNDE(),
-  ".claude/neo.config.json": JSON.stringify({ ...JSON.parse(CONFIG), maskinporten: { miljo: "test", hemmeligheter: { "altinn-nokkel": { kilde: "azure-keyvault:kv-kunde/altinn-nokkel", fil: true } } } }),
+  ".claude/neo.config.json": JSON.stringify({ ...JSON.parse(CONFIG), maskinporten: { miljo: "test", hemmeligheter: { "altinn-nokkel": { $env: "MASKINPORTEN_ALTINN_NOKKEL", kilde: "azure-keyvault:kv-kunde/altinn-nokkel", fil: true } } } }),
   ".github/CODEOWNERS": "* @eier/godkjennere\n",
   "felles/kilder/kilder.md": "| Id | Hva |\n|---|---|\n| K1 | Organisasjonskartet |\n",
   "felles/forstaelse/roller-og-tilgang.md": "# Roller\n\n- Seksjonen har fem saksbehandlere. [K1]\n",
@@ -55,6 +55,6 @@ export const GOOD = () => ({
   "oppsett/manuelt/README.md": "# Det som gjøres for hånd\n",
   "snapshots/sandkasse/case-types/parkering.yaml": caseType("parkering"),
   "snapshots/sandkasse/ikke-med.md": "# Ikke med i filene\n",
-  "test/personaer/saksbehandler.yaml": "navn: Sara Saksbehandler\nrolle: saksbehandler\nhemmeligheter:\n  passord: { kilde: azure-keyvault:kv-test/sara }\n",
+  "test/personaer/saksbehandler.yaml": "navn: Sara Saksbehandler\nrolle: saksbehandler\nhemmeligheter:\n  passord: { $env: SARA_PASSORD, kilde: azure-keyvault:kv-test/sara }\n",
   "integrasjoner/altinn/hos-kunden.md": "## delegering Deleger tilgangen\n\n```yaml\nstatus: ikke-startet\nhvem: Hovedadministratoren\n```\n",
 });

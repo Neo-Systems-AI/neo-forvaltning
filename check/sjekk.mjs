@@ -29,7 +29,6 @@ export function version() {
 }
 
 // Referansene i personaene, til visningen av hemmelighetene i forvaltning: den bruker YAML-leseren til sjekken.
-export const personaRefs = struktur.personaRefs;
 
 export const CHECKS = [...struktur.CHECKS, ...kilder.CHECKS, ...krav.CHECKS, ...oppsett.CHECKS, ...avvik.CHECKS];
 
@@ -42,6 +41,7 @@ export function run(root, { base = "origin/main" } = {}) {
   f.push(...config.findings);
   f.push(...struktur.checkLayout(root, kunde.type, config.envs));
   f.push(...struktur.checkCodeowners(root));
+  f.push(...struktur.checkCommitted(root));
   f.push(...struktur.checkLosninger(root));
   f.push(...struktur.checkIntegrasjoner(root));
   f.push(...struktur.checkPersonaer(root));

@@ -3,11 +3,12 @@
 Neo Systems sine offentlige plugins til Claude Code: for kommuner, virksomheter og partnere som forvalter oppsettet
 sitt i [Neo](https://neosystems.ai), og for den som lager Altinn-skjemaer.
 
-**Mot Neo**, gjennom Neo sin MCP-server med personens egen innlogging:
+**Mot Neo**: `forvaltning` og `solution` med skript mot Neo sitt API og en maskinklient i sandkassen, `monitoring` og
+`data` gjennom Neo sin MCP-server med personens egen innlogging:
 
 | Plugin | Hva |
 |---|---|
-| [`forvaltning`](./plugins/forvaltning) | Repoet og veien inn og ut av Neo: oppstarten med sandkassen og produksjonen, snapshot (`export_config`), planen fil for fil (`plan_config`) og gjennomføringen etter merge (`apply_config`), config-fila for alle pluginene, hemmelighetene som referanser til hvelvet, og sjekken av repoet |
+| [`forvaltning`](./plugins/forvaltning) | Repoet og veien inn og ut av Neo: oppstarten med maskinklienten i sandkassen, snapshot, planen for alle filene samlet og gjennomføringen etter merge med skript mot Neo sitt API, config-fila for alle pluginene, hemmelighetene som referanser til hvelvet, og sjekken av repoet |
 | [`solution`](./plugins/solution) | Løypa fra en idé til en løsning som er testet i UI og gitt til kunden: research, krav, design, konfig i Neos format i `oppsett/`, testene og funnene, og gjennomgangen av konfigen mot mønstrene |
 | [`monitoring`](./plugins/monitoring) | Flytene og kjøringene i et tidsvindu, og feilsøk av én kjøring |
 | [`data`](./plugins/data) | Spørsmål om sakene, bare lesing, med personopplysninger maskert |
@@ -30,9 +31,10 @@ sitt i [Neo](https://neosystems.ai), og for den som lager Altinn-skjemaer.
 | [`entra`](./plugins/entra) | Microsoft-tenanten: SSO og SCIM med Entra ID, og en felles postboks fra Exchange Online |
 
 De som kaller Neo eller et eksternt system, leser én config-fil i kunderepoet, `.claude/neo.config.json`: miljøene i Neo
-(sandkassen og produksjonen, med MCP-serveren og adressen for hvert) og én del per plugin. Fila har ingen hemmeligheter: referansene til hvelvet står ved siden av
-oppsettet av systemet, under `<system>.hemmeligheter`, og skriptene henter verdien fra hvelvet ved hvert kall, med
-personens egen innlogging. Fila er JSON, så ingen plugin trenger en YAML-leser for å kalle et system.
+(sandkassen og produksjonen, med adressen for hvert, maskinklienten i sandkassen og MCP-serveren for `monitoring` og
+`data`) og én del per plugin. Fila har ingen hemmeligheter: referansene til hvelvet står ved siden av
+oppsettet av systemet, under `<system>.hemmeligheter`, og et menneske henter verdiene til `.env.local` og `.keys/`
+(`forvaltning:hemmeligheter`), der skriptene leser dem. Fila er JSON, så ingen plugin trenger en YAML-leser for å kalle et system.
 
 **Dokumentasjonen** står i pluginen som bruker den (`plugins/<plugin>/docs/`), så den følger pluginens versjon.
 Inngangen er [`docs/`](./docs/README.md): mønstrene for god konfig og oppskriftene for integrasjonene.
@@ -56,7 +58,7 @@ bygget til én fil uten avhengigheter: `plugins/forvaltning/scripts/sjekk.mjs`. 
 henter den samme fila i en låst versjon. Malen har ingen egen kopi av logikken.
 
 Sjekken vurderer ikke innholdet i konfigfilene: den ser at filene i `oppsett/` og `snapshots/` er Neos filer
-(`apiVersion: neo-config/v1`, `kind` og `spec`), og Neo vurderer innholdet i planen (`plan_config`). Den sjekker
+(`apiVersion: neo-config/v1`, `kind` og `spec`), og Neo vurderer innholdet i planen. Den sjekker
 strukturen for typen i `kunde.yaml`, config-fila med sandkassen og produksjonen, kildene på endringen, påstandene i
 forståelsen, kravene og `blir`, personaene, testene og testplanen, og avvikene i `design/`.
 
