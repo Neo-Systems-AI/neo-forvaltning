@@ -28,14 +28,14 @@ export function checkDeviations(root, places, { ids = ruleIds(), status = () => 
         if (it.error || !isMap(it.fields) || !("avvik" in it.fields)) continue;
         const at = { check: "avvik", file, line: it.line };
         const regel = String(it.fields.avvik ?? "");
-        if (!ids.has(regel)) findings.push({ ...at, message: `${it.id}: regelen «${regel}» finnes ikke i mønstrene` });
-        if (!text(it.fields.grunn)) findings.push({ ...at, message: `${it.id}: grunn mangler: hvorfor regelen brytes med vilje` });
+        if (!ids.has(regel)) findings.push({ ...at, message: `${it.id}: regelen «${regel}» finnes ikke i mønstrene. Rett id-en til en regel som finnes (mønstrene i pluginen solution)` });
+        if (!text(it.fields.grunn)) findings.push({ ...at, message: `${it.id}: grunn mangler. Skriv hvorfor regelen brytes med vilje` });
         if (!it.fields.fil) continue;
         const fil = `oppsett/${String(it.fields.fil).replace(/^oppsett\//, "")}`;
         if (existsSync(join(root, fil))) continue;
         const s = place.felles ? undefined : status(place.navn);
         if (place.felles) findings.push({ ...at, level: "warn", message: `${it.id}: ${fil} finnes ikke ennå` });
-        else if (s !== "utkast") findings.push({ ...at, message: `${it.id}: ${fil} finnes ikke. Avviket kan stå før fila mens løsningen er i utkast; nå er den ${s ?? "uten status"}` });
+        else if (s !== "utkast") findings.push({ ...at, message: `${it.id}: ${fil} finnes ikke. Avviket kan stå før fila mens løsningen er i utkast; nå er den ${s ?? "uten status"}. Rett stien, eller lag fila i oppsett/` });
       }
     }
   }

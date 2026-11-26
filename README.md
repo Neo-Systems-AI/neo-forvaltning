@@ -63,6 +63,9 @@ Sjekken vurderer ikke innholdet i konfigfilene: den ser at filene i `oppsett/` o
 strukturen for typen i `kunde.yaml`, config-fila med sandkassen og produksjonen, kildene på endringen, påstandene i
 forståelsen, kravene og `blir`, personaene, testene og testplanen, og avvikene i `design/`.
 
+**En rød melding sier hva som er galt, og hva man gjør:** hvilken fil, hva regelen er, og hva som retter det (flytt,
+rett, legg inn, ta bort, eller kommandoen som gjør det). Den som bare ser PR-en, skal kunne rette det uten å lese koden.
+
 Versjonen står i `check/package.json` (`node sjekk.mjs --versjon`). Når en ny versjon er merget, får merge-commiten
 taggen `sjekk-v<versjon>`, og malen bytter til den i en PR. Malen henter sjekken fra taggen og kontrollerer sha256, så
 en tag som flyttes, stopper i stedet for å gi en annen sjekk. Det er slik fordi kunderepoene ligger på GitHub

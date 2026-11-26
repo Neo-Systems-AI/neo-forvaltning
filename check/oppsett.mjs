@@ -18,9 +18,9 @@ export const MANUELT = "oppsett/manuelt/";
 export function checkConfigFile(rel, text) {
   if (/(^|\/)README\.md$/.test(rel) || /(^|\/)ikke-med\.md$/.test(rel) || rel.startsWith(MANUELT) || rel.endsWith(".gitkeep")) return [];
   if (rel.endsWith(".json")) return [{ check: "oppsett", file: rel, message: "Formen fra før forvaltning 0.2.0. Ta et nytt snapshot (/forvaltning:snapshot) og bygg oppsettet fra filene Neo skriver" }];
-  if (!rel.endsWith(".yaml")) return [{ check: "oppsett", file: rel, message: "Ikke en konfigfil. Oppsettet er .yaml-filer fra Neo; det som gjøres for hånd, står i oppsett/manuelt/" }];
+  if (!rel.endsWith(".yaml")) return [{ check: "oppsett", file: rel, message: "Ikke en konfigfil. Oppsettet er .yaml-filer fra Neo; det som gjøres for hånd, står i oppsett/manuelt/. Ta fila bort, eller flytt den dit" }];
   const missing = [/^apiVersion: neo-config\/v1$/m, /^kind: \S+/m, /^spec:/m].filter((re) => !re.test(text));
-  return missing.length ? [{ check: "oppsett", file: rel, message: "Ikke en konfigfil fra Neo: den må ha apiVersion: neo-config/v1, kind og spec øverst" }] : [];
+  return missing.length ? [{ check: "oppsett", file: rel, message: "Ikke en konfigfil fra Neo: den må ha apiVersion: neo-config/v1, kind og spec øverst. Ta et snapshot (/forvaltning:snapshot) og bygg fila fra den Neo skriver" }] : [];
 }
 
 // Alle filene i oppsett/ og snapshots/, og konfigfilene i oppsett/ (uten unntakene), som kravene kan peke på.

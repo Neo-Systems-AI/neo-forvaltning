@@ -31,32 +31,32 @@ export function checkKrav(root, places, { status = () => undefined } = {}) {
     for (const file of mdFiles(root, `${p.dir}/krav`)) {
       const md = readFileSync(join(root, file), "utf8");
       const withBlock = new Set(items(md).map((r) => r.line));
-      for (const h of headings(md)) if (!withBlock.has(h.line)) f.push({ check: "krav", file, line: h.line, message: `«${h.text}» har ingen yaml-blokk rett under. Et krav er «## <id> <tittel>» med yaml-blokken (flyt, hvorfor, kilde, blir) rett under` });
+      for (const h of headings(md)) if (!withBlock.has(h.line)) f.push({ check: "krav", file, line: h.line, message: `«${h.text}» har ingen yaml-blokk rett under. Et krav er «## <id> <tittel>» med yaml-blokken (flyt, hvorfor, kilde, blir) rett under. Legg blokken rett under overskriften, eller gjør overskriften til en vanlig tekst` });
     }
   }
   for (const r of allRequirements(root, places)) {
     const at = { check: "krav", file: r.file, line: r.line };
     if (r.error) {
-      f.push({ ...at, message: `${r.id}: yaml-blokken kan ikke leses (${r.error})` });
+      f.push({ ...at, message: `${r.id}: yaml-blokken kan ikke leses (${r.error}). Rett YAML-en der feilen sier` });
       continue;
     }
-    if (seen.has(r.id)) f.push({ ...at, message: `Id-en ${r.id} er brukt før, i ${seen.get(r.id)}` });
+    if (seen.has(r.id)) f.push({ ...at, message: `Id-en ${r.id} er brukt før, i ${seen.get(r.id)}. Gi dette kravet en ny id` });
     else seen.set(r.id, r.file);
-    if (!FLYT.includes(r.fields.flyt)) f.push({ ...at, message: `${r.id}: flyt må være ${FLYT.join(", ")}` });
-    if (!text(r.fields.hvorfor)) f.push({ ...at, message: `${r.id}: hvorfor mangler` });
+    if (!FLYT.includes(r.fields.flyt)) f.push({ ...at, message: `${r.id}: flyt må være ${FLYT.join(", ")}. Sett den som passer (formen står i .claude/rules/krav.md)` });
+    if (!text(r.fields.hvorfor)) f.push({ ...at, message: `${r.id}: hvorfor mangler. Skriv hvorfor kravet finnes` });
     const kilde = list(r.fields.kilde).map(String);
-    if (!kilde.length) f.push({ ...at, message: `${r.id}: kilde mangler` });
+    if (!kilde.length) f.push({ ...at, message: `${r.id}: kilde mangler. Vis til kilden kravet bygger på (kilde: [K1]); finnes den ikke, er det et forslag, ikke et krav` });
     const ids = registry(root, r.place.dir);
     for (const k of kilde) {
       if (/^[EK]\d+$/.test(k)) {
-        if (!ids.has(k)) f.push({ ...at, message: `${r.id}: ${k} står ikke i registeret (${r.place.dir}/kilder/kilder.md)` });
-        else if (ids.get(k).trukket) f.push({ ...at, message: `${r.id}: ${k} er trukket tilbake` });
+        if (!ids.has(k)) f.push({ ...at, message: `${r.id}: ${k} står ikke i registeret (${r.place.dir}/kilder/kilder.md). Rett id-en, eller legg kilden inn i registeret` });
+        else if (ids.get(k).trukket) f.push({ ...at, message: `${r.id}: ${k} er trukket tilbake. Bygg kravet på en annen kilde, eller ta det bort` });
         continue;
       }
       const [path, anchor] = k.split("#");
       const target = join(root, r.place.dir, path);
-      if (!existsSync(target)) f.push({ ...at, message: `${r.id}: ${path} finnes ikke (stien er relativ til ${r.place.dir}/)` });
-      else if (anchor && !anchors(readFileSync(target, "utf8")).has(decodeURIComponent(anchor).toLowerCase())) f.push({ ...at, message: `${r.id}: overskriften #${anchor} finnes ikke i ${path}` });
+      if (!existsSync(target)) f.push({ ...at, message: `${r.id}: ${path} finnes ikke (stien er relativ til ${r.place.dir}/). Rett stien` });
+      else if (anchor && !anchors(readFileSync(target, "utf8")).has(decodeURIComponent(anchor).toLowerCase())) f.push({ ...at, message: `${r.id}: overskriften #${anchor} finnes ikke i ${path}. Rett lenken til en overskrift som finnes` });
     }
 
     const blir = list(r.fields.blir);
@@ -68,19 +68,19 @@ export function checkKrav(root, places, { status = () => undefined } = {}) {
     for (const b of blir) {
       const kinds = isMap(b) ? BLIR.filter((k) => k in b) : [];
       if (kinds.length !== 1) {
-        f.push({ ...at, message: `${r.id}: hver linje i blir er én av { fil: <sti> }, { steg: <tekst>, hvorfor: <tekst> } eller { onske: <tekst>, hvorfor: <tekst> }` });
+        f.push({ ...at, message: `${r.id}: hver linje i blir er én av { fil: <sti> }, { steg: <tekst>, hvorfor: <tekst> } eller { onske: <tekst>, hvorfor: <tekst> }. Skriv linja i en av dem` });
         continue;
       }
       const [k] = kinds;
-      if (Object.keys(b).some((x) => ![k, "hvorfor"].includes(x))) f.push({ ...at, message: `${r.id}: blir.${k} har bare ${k} og hvorfor` });
-      if (k !== "fil" && !text(b.hvorfor)) f.push({ ...at, message: `${r.id}: blir.${k} trenger hvorfor: hvorfor kravet ikke ble konfig` });
-      if (!text(String(b[k] ?? ""))) f.push({ ...at, message: `${r.id}: blir.${k} er tom` });
+      if (Object.keys(b).some((x) => ![k, "hvorfor"].includes(x))) f.push({ ...at, message: `${r.id}: blir.${k} har bare ${k} og hvorfor. Ta bort de andre feltene` });
+      if (k !== "fil" && !text(b.hvorfor)) f.push({ ...at, message: `${r.id}: blir.${k} trenger hvorfor. Skriv hvorfor kravet ikke ble konfig` });
+      if (!text(String(b[k] ?? ""))) f.push({ ...at, message: `${r.id}: blir.${k} er tom. Skriv hva kravet ble, eller ta bort linja` });
       if (k === "fil" && text(String(b.fil ?? ""))) {
         const p = blirPath(b.fil);
         used.add(p);
-        if (/^(felles|losninger\/[^/]+)\/oppsett\//.test(p)) f.push({ ...at, message: `${r.id}: blir.fil ${b.fil}: konfigen står i oppsett/ i roten, slik Neo eksporterer den. En løsning og felles/ har ingen egen oppsett/` });
+        if (/^(felles|losninger\/[^/]+)\/oppsett\//.test(p)) f.push({ ...at, message: `${r.id}: blir.fil ${b.fil}: konfigen står i oppsett/ i roten, slik Neo eksporterer den. En løsning og felles/ har ingen egen oppsett/. Flytt filene til oppsett/ i roten, og rett blir i kravene` });
         else if (!/^oppsett\/(?!manuelt\/)[^/]+\/[^/]+\.yaml$/.test(p)) f.push({ ...at, message: `${r.id}: blir.fil ${b.fil} er ikke en konfigfil i oppsett/: oppsett/<mappa for typen>/<navn>.yaml, fra roten. Det som gjøres for hånd, er et steg` });
-        else if (!existsSync(join(root, p))) f.push({ ...at, message: `${r.id}: blir.fil ${b.fil} finnes ikke` });
+        else if (!existsSync(join(root, p))) f.push({ ...at, message: `${r.id}: blir.fil ${b.fil} finnes ikke. Rett stien til fila i oppsett/` });
       }
     }
   }

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Sjekken 3.0.0 for et repo laget fra neo-forvaltning-mal. GENERERT fra check/ i neo-forvaltning med
+// Sjekken 3.1.0 for et repo laget fra neo-forvaltning-mal. GENERERT fra check/ i neo-forvaltning med
 // `node check/build.mjs`: endres der, ikke her. Én fil uten avhengigheter (yaml 2.9.1 er bygget inn).
 import { createRequire as __createRequire } from "node:module";
 const require = __createRequire(import.meta.url);
@@ -7491,7 +7491,7 @@ function readYaml(root, rel, check, f) {
   try {
     return parseYaml(readFileSync(join(root, rel), "utf8"));
   } catch (e) {
-    f.push({ check, file: rel, message: `Kan ikke leses som YAML (${e.message})` });
+    f.push({ check, file: rel, message: `Kan ikke leses som YAML (${e.message}). Rett YAML-en der feilen sier` });
     return void 0;
   }
 }
@@ -7612,45 +7612,45 @@ var PERSONAER = "test/personaer";
 var SECRET_KEY = /(passord|password|secret|hemmelig|token|apikey|api_key|privatekey|private_key|nokkel|nøkkel|^key$|keypem)/i;
 var NOKLER = "N\xF8klene ligger bare i hvelvet, med faste navn som pluginene bestemmer, og config-fila sier bare hvilket hvelv (hvelv). Ta den bort, og legg n\xF8kkelen inn med /forvaltning:nokler";
 var GAMMELT = {
-  "repo.yaml": "Fila heter kunde.yaml, med type (kunde eller standard)",
+  "repo.yaml": "Fila heter kunde.yaml, med type (kunde eller standard). Gi den nytt navn til kunde.yaml, og legg til type",
   state: "Id-ene per milj\xF8 finnes ikke lenger: Neo skriver filene med n\xF8kler (forvaltning 0.2.0). Ta bort state/",
   "profil.yaml": "profil.yaml har ingen form i Neo enn\xE5. Ta den bort",
-  virksomheten: "Det som gjelder hele kunden, st\xE5r i felles/kilder/ og felles/forstaelse/",
-  organisasjon: "Det som er felles, st\xE5r i felles/ (felles/krav/, felles/design/), og konfigen i oppsett/"
+  virksomheten: "Det som gjelder hele kunden, st\xE5r i felles/kilder/ og felles/forstaelse/. Flytt innholdet dit, og ta bort mappa",
+  organisasjon: "Det som er felles, st\xE5r i felles/ (felles/krav/, felles/design/), og konfigen i oppsett/. Flytt innholdet dit, og ta bort mappa"
 };
 var NUMMERERT = { "1-kilder": "kilder", "2-forstaelse": "forstaelse", "3-krav": "krav", "4-design": "design", "5-oppsett": "oppsett", "6-test": "test" };
 var LEDD = ["kilder", "forstaelse", "krav", "design"];
 var ROTEN = ["felles", "losninger", "integrasjoner", "test", "oppsett", "snapshots", "reports"];
 var RUNDE = /^\d{4}-\d{2}-\d{2}(-\d+)?\.md$/;
-var EGEN_OPPSETT = "Konfigen st\xE5r i oppsett/ i roten, slik Neo eksporterer den, og kravene peker p\xE5 fila der (blir: fil: oppsett/\u2026). En l\xF8sning og felles/ har ingen egen oppsett/";
+var EGEN_OPPSETT = "Konfigen st\xE5r i oppsett/ i roten, slik Neo eksporterer den, og kravene peker p\xE5 fila der (blir: fil: oppsett/\u2026). En l\xF8sning og felles/ har ingen egen oppsett/. Flytt filene til oppsett/ i roten, og rett blir i kravene";
 function readKunde(root) {
   const file = "kunde.yaml";
   const f = [];
-  if (!existsSync2(join2(root, file))) return { type: void 0, findings: [{ check: "kunde", file, message: "Mangler. kunde.yaml sier hva repoet er (kunde eller standard), hvem det er for, og hvem som godkjenner og forvalter" }] };
+  if (!existsSync2(join2(root, file))) return { type: void 0, findings: [{ check: "kunde", file, message: "Mangler. kunde.yaml sier hva repoet er (kunde eller standard), hvem det er for, og hvem som godkjenner og forvalter. Kj\xF8r /forvaltning:oppstart, eller kopier den fra neo-forvaltning-mal og fyll den ut" }] };
   const y = readYaml(root, file, "kunde", f);
   if (y === void 0) return { type: void 0, findings: f };
-  if (!isMap(y)) return { type: void 0, findings: [{ check: "kunde", file, message: "kunde.yaml er tom eller ikke et kart" }] };
-  if (!TYPER.includes(y.type)) f.push({ check: "kunde", file, message: `type m\xE5 v\xE6re ${TYPER.join(" eller ")}` });
+  if (!isMap(y)) return { type: void 0, findings: [{ check: "kunde", file, message: "kunde.yaml er tom eller ikke et kart. Kopier den fra neo-forvaltning-mal og fyll den ut" }] };
+  if (!TYPER.includes(y.type)) f.push({ check: "kunde", file, message: `type m\xE5 v\xE6re ${TYPER.join(" eller ")}. Sett type: kunde for \xE9n kommune eller virksomhet, type: standard for standardl\xF8sninger` });
   for (const k of ["kunde", "godkjenner", "forvalter"]) {
-    if (!isMap(y[k])) f.push({ check: "kunde", file, message: `${k} mangler` });
+    if (!isMap(y[k])) f.push({ check: "kunde", file, message: `${k} mangler. Legg det inn i kunde.yaml, slik malen viser` });
     else if (!text(y[k].navn)) f.push({ check: "kunde", level: "warn", file, message: `${k}.navn er ikke fylt ut` });
   }
-  if (!isMap(y.verktoy) || !text(String(y.verktoy.mal ?? "")) || !text(String(y.verktoy.forvaltning ?? ""))) f.push({ check: "kunde", file, message: "verktoy mangler: versjonene av malen og forvaltning repoet er laget for" });
+  if (!isMap(y.verktoy) || !text(String(y.verktoy.mal ?? "")) || !text(String(y.verktoy.forvaltning ?? ""))) f.push({ check: "kunde", file, message: "verktoy mangler: versjonene av malen og forvaltning repoet er laget for. Legg inn verktoy: { mal: <VERSION i malen>, forvaltning: <versjonen av pluginen> }" });
   return { type: TYPER.includes(y.type) ? y.type : void 0, findings: f };
 }
 function checkLayout(root, type, envs = []) {
   const f = [];
   const red = (file, message) => f.push({ check: "repo", file, message });
   for (const [p, why] of Object.entries(GAMMELT)) if (existsSync2(join2(root, p))) red(p, why);
-  if (existsSync2(join2(root, "integrasjoner/README.md"))) red("integrasjoner/README.md", "Lista over det kunden m\xE5 gj\xF8re, lages av sjekken (sjekk.mjs hos-kunden) og committes ikke. Ta den bort");
+  if (existsSync2(join2(root, "integrasjoner/README.md"))) red("integrasjoner/README.md", "Lista over det kunden m\xE5 gj\xF8re, lages av sjekken (sjekk.mjs hos-kunden) og committes ikke. Ta den bort fra git");
   for (const n of dirs(root, ".")) {
     if (n.startsWith(".") || ROTEN.includes(n) || n in GAMMELT) continue;
-    red(n, `En mappe p\xE5 roten er en av ${ROTEN.join(", ")}. Det som ikke har en form, finnes ikke`);
+    red(n, `En mappe p\xE5 roten er en av ${ROTEN.join(", ")}. Det som ikke har en form, finnes ikke. Flytt innholdet dit det h\xF8rer hjemme etter reglene i .claude/rules/, og ta bort mappa`);
   }
   for (const n of entries(root, "snapshots")) {
     if (n === "README.md" || n.startsWith(".")) continue;
-    if (!dirs(root, "snapshots").includes(n)) red(`snapshots/${n}`, "snapshots/ har \xE9n mappe per milj\xF8, med filene Neo eksporterte");
-    else if (envs.length && !envs.includes(n)) red(`snapshots/${n}`, `${n} er ikke et milj\xF8 i neo.environments (${envs.join(", ")})`);
+    if (!dirs(root, "snapshots").includes(n)) red(`snapshots/${n}`, "snapshots/ har \xE9n mappe per milj\xF8, med filene Neo eksporterte. Ta bort fila, og ta et nytt snapshot med /forvaltning:snapshot");
+    else if (envs.length && !envs.includes(n)) red(`snapshots/${n}`, `${n} er ikke et milj\xF8 i neo.environments (${envs.join(", ")}). Ta bort mappa, eller rett navnet til milj\xF8et`);
   }
   const kunde = type !== "standard";
   for (const p of places(root)) {
@@ -7658,20 +7658,20 @@ function checkLayout(root, type, envs = []) {
     for (const n of entries(root, p.dir)) {
       if (allowed.has(n) || n.startsWith(".")) continue;
       const rel = `${p.dir}/${n}`;
-      if (NUMMERERT[n]) red(rel, `Mappene har navn, ikke tall: ${n} heter ${NUMMERERT[n]}`);
-      else if (n === "spor.yaml") red(rel, "Hva hvert krav ble, st\xE5r i kravet selv (blir). Det finnes ingen sporingsfil");
+      if (NUMMERERT[n]) red(rel, `Mappene har navn, ikke tall: ${n} heter ${NUMMERERT[n]}. Gi mappa nytt navn`);
+      else if (n === "spor.yaml") red(rel, "Hva hvert krav ble, st\xE5r i kravet selv (blir). Det finnes ingen sporingsfil. Flytt hver rad til blir i kravet den gjelder, og ta bort fila");
       else if (n === "oppsett") red(rel, EGEN_OPPSETT);
-      else if (p.felles && ["kilder", "forstaelse"].includes(n)) red(rel, "Et repo for standardl\xF8sninger har ingen kunde \xE5 forst\xE5, s\xE5 felles/ har ikke kilder eller forstaelse");
-      else red(rel, `${p.felles ? "felles/" : "En l\xF8sning"} har ${[...allowed].sort().join(", ")}. Det som ikke har en form, finnes ikke`);
+      else if (p.felles && ["kilder", "forstaelse"].includes(n)) red(rel, "Et repo for standardl\xF8sninger har ingen kunde \xE5 forst\xE5, s\xE5 felles/ har ikke kilder eller forstaelse. Flytt det som gjelder \xE9n l\xF8sning, inn i l\xF8sningen, og ta bort mappa");
+      else red(rel, `${p.felles ? "felles/" : "En l\xF8sning"} har ${[...allowed].sort().join(", ")}. Det som ikke har en form, finnes ikke. Flytt innholdet inn i en av dem etter reglene i .claude/rules/, og ta bort ${rel.split("/").pop()}`);
     }
     if (!p.felles) {
       for (const n of entries(root, `${p.dir}/test`)) {
         if (["testcaser", "runder", "testplan.md", "README.md"].includes(n) || n.startsWith(".")) continue;
-        red(`${p.dir}/test/${n}`, "test/ i en l\xF8sning har testcaser/, testplan.md og runder/. Det som ikke har en form, finnes ikke");
+        red(`${p.dir}/test/${n}`, "test/ i en l\xF8sning har testcaser/, testplan.md og runder/. Det som ikke har en form, finnes ikke. Flytt innholdet inn i en av dem, og ta bort resten");
       }
       for (const n of entries(root, `${p.dir}/test/runder`)) {
         if (n.startsWith(".") || RUNDE.test(n)) continue;
-        red(`${p.dir}/test/runder/${n}`, "En runde heter etter datoen, \xC5\xC5\xC5\xC5-MM-DD.md, og \xC5\xC5\xC5\xC5-MM-DD-2.md for neste runde samme dag");
+        red(`${p.dir}/test/runder/${n}`, "En runde heter etter datoen, \xC5\xC5\xC5\xC5-MM-DD.md, og \xC5\xC5\xC5\xC5-MM-DD-2.md for neste runde samme dag. Gi fila nytt navn");
       }
     }
   }
@@ -7681,7 +7681,7 @@ function checkLayout(root, type, envs = []) {
       if (["hos-kunden.md", "README.md"].includes(n) || n.startsWith(".")) continue;
       if (n === "neo.yaml" || n === "miljoer") red(rel, `${n} har ingen form i Neo enn\xE5. Ta den bort`);
       else if (n === "hemmeligheter.yaml") red(rel, NOKLER);
-      else if (!dirs(root, `integrasjoner/${s}`).includes(n)) red(rel, "En integrasjon har hos-kunden.md, og artefaktene systemet trenger i en egen mappe");
+      else if (!dirs(root, `integrasjoner/${s}`).includes(n)) red(rel, "En integrasjon har hos-kunden.md, og artefaktene systemet trenger i en egen mappe. Flytt fila inn i en mappe under integrasjonen");
     }
   }
   return f;
@@ -7689,23 +7689,23 @@ function checkLayout(root, type, envs = []) {
 var MILJOER = ["sandkasse", "produksjon"];
 function readConfig(root) {
   const file = ".claude/neo.config.json";
-  if (!existsSync2(join2(root, file))) return { envs: [], findings: [{ check: "config", file, message: "Mangler. Pluginene leser den; /forvaltning:oppstart lager den" }] };
+  if (!existsSync2(join2(root, file))) return { envs: [], findings: [{ check: "config", file, message: "Mangler. Pluginene leser den. Kj\xF8r /forvaltning:oppstart, eller kopier den fra neo-forvaltning-mal" }] };
   let data;
   try {
     data = JSON.parse(readFileSync2(join2(root, file), "utf8"));
   } catch (e) {
-    return { envs: [], findings: [{ check: "config", file, message: `Ikke gyldig JSON: ${e.message}` }] };
+    return { envs: [], findings: [{ check: "config", file, message: `Ikke gyldig JSON: ${e.message}. Rett fila der feilen sier` }] };
   }
   const f = [];
-  if (data.version !== 1) f.push({ check: "config", file, message: `version m\xE5 v\xE6re 1${data.version === 2 ? ": versjon 2 hadde ett milj\xF8 (neo.url, neo.org, neo.mcpServer). N\xE5 er det sandkasse og produksjon under neo.byEnv" : ""}` });
+  if (data.version !== 1) f.push({ check: "config", file, message: `version m\xE5 v\xE6re 1${data.version === 2 ? ": versjon 2 hadde ett milj\xF8 (neo.url, neo.org, neo.mcpServer). N\xE5 er det sandkasse og produksjon under neo.byEnv" : ""}. Sett version: 1, i formen malen har` });
   const neo = isMap(data.neo) ? data.neo : {};
   const old = ["url", "org", "mcpServer"].filter((k) => k in neo);
-  if (old.length) f.push({ check: "config", file, message: `${old.map((k) => `neo.${k}`).join(", ")} st\xE5r rett under neo. Milj\xF8ene st\xE5r under neo.byEnv.<milj\xF8> med mcpServer og url, og org-en er milj\xF8et` });
+  if (old.length) f.push({ check: "config", file, message: `${old.map((k) => `neo.${k}`).join(", ")} st\xE5r rett under neo. Milj\xF8ene st\xE5r under neo.byEnv.<milj\xF8> med mcpServer og url, og org-en er milj\xF8et. Flytt dem dit, slik malen viser` });
   const envs = Array.isArray(neo.environments) ? neo.environments.map(String) : [];
-  if (!envs.length) f.push({ check: "config", file, message: `neo.environments mangler: ${MILJOER.join(" og ")}` });
-  else for (const e of MILJOER) if (!envs.includes(e)) f.push({ check: "config", file, message: `neo.environments har ikke ${e}. Milj\xF8ene er ${MILJOER.join(" og ")}` });
-  if (neo.defaultEnv !== void 0 && !envs.includes(neo.defaultEnv)) f.push({ check: "config", file, message: `neo.defaultEnv \xAB${neo.defaultEnv}\xBB er ikke et milj\xF8 i neo.environments` });
-  for (const env of Object.keys(isMap(neo.byEnv) ? neo.byEnv : {})) if (!envs.includes(env)) f.push({ check: "config", file, message: `neo.byEnv.${env} er ikke et milj\xF8 i neo.environments` });
+  if (!envs.length) f.push({ check: "config", file, message: `neo.environments mangler. Legg inn "environments": ["${MILJOER.join('", "')}"] under neo` });
+  else for (const e of MILJOER) if (!envs.includes(e)) f.push({ check: "config", file, message: `neo.environments har ikke ${e}. Milj\xF8ene er ${MILJOER.join(" og ")}: legg det til` });
+  if (neo.defaultEnv !== void 0 && !envs.includes(neo.defaultEnv)) f.push({ check: "config", file, message: `neo.defaultEnv \xAB${neo.defaultEnv}\xBB er ikke et milj\xF8 i neo.environments. Sett den til sandkasse` });
+  for (const env of Object.keys(isMap(neo.byEnv) ? neo.byEnv : {})) if (!envs.includes(env)) f.push({ check: "config", file, message: `neo.byEnv.${env} er ikke et milj\xF8 i neo.environments. Ta den bort, eller legg milj\xF8et til i neo.environments` });
   for (const env of envs) {
     const v = isMap(neo.byEnv?.[env]) ? neo.byEnv[env] : {};
     if (!/^https:\/\/[^<>\s]+$/.test(String(v.url ?? ""))) f.push({ check: "config", level: "warn", file, message: `Adressen til Neo for ${env} er ikke fylt ut (neo.byEnv.${env}.url)` });
@@ -7740,7 +7740,7 @@ function checkCommitted(root) {
   } catch {
     return [];
   }
-  return files.filter((p) => /(^|\/)(\.env(\.[^/]*)?|\.keys\/.*)$/.test(p) && !p.endsWith(".example")).map((p) => ({ check: "hemmeligheter", file: p, message: "Hemmeligheter er committet. Fjern fila fra git, og bytt verdiene i hvelvet: de er ikke hemmelige lenger" }));
+  return files.filter((p) => /(^|\/)(\.env(\.[^/]*)?|\.keys\/.*)$/.test(p) && !p.endsWith(".example")).map((p) => ({ check: "hemmeligheter", file: p, message: "Hemmeligheter er committet. Fjern fila fra git (git rm --cached), og be eieren bytte verdiene: de er ikke hemmelige lenger. Legg de nye inn med /forvaltning:nokler" }));
 }
 function checkCodeowners(root) {
   const co = join2(root, ".github/CODEOWNERS");
@@ -7760,7 +7760,7 @@ function secretValues(data, path = "") {
   return out;
 }
 var noSecrets = (data, check, file, f) => {
-  for (const p of secretValues(data)) f.push({ check, file, message: `${p} st\xE5r med verdi. En hemmelighet st\xE5r aldri i repoet; den ligger i hvelvet` });
+  for (const p of secretValues(data)) f.push({ check, file, message: `${p} st\xE5r med verdi. En hemmelighet st\xE5r aldri i repoet. Ta verdien ut, be eieren bytte den (den er ikke hemmelig lenger), og legg den nye inn i hvelvet med /forvaltning:nokler` });
 };
 function solutionStatus(root, navn) {
   try {
@@ -7776,23 +7776,23 @@ function checkLosninger(root) {
   for (const s of dirs(root, "losninger")) {
     const file = `losninger/${s}/losning.yaml`;
     if (!existsSync2(join2(root, file))) {
-      f.push({ check: "losning", file: `losninger/${s}`, message: "losning.yaml mangler: form\xE5let, eieren, statusen, integrasjonene og hva den bygger p\xE5" });
+      f.push({ check: "losning", file: `losninger/${s}`, message: "losning.yaml mangler: form\xE5let, eieren, statusen, integrasjonene og hva den bygger p\xE5. L\xF8ypa i pluginen solution lager den; formen st\xE5r i .claude/rules/losninger.md" });
       continue;
     }
     const y = readYaml(root, file, "losning", f);
     if (y === void 0) continue;
     if (!isMap(y)) {
-      f.push({ check: "losning", file, message: "Fila er tom eller ikke et kart" });
+      f.push({ check: "losning", file, message: "Fila er tom eller ikke et kart. Fyll den ut etter .claude/rules/losninger.md" });
       continue;
     }
     if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(s)) f.push({ check: "losning", file: `losninger/${s}`, message: "Navnet p\xE5 l\xF8sningen har sm\xE5 bokstaver, tall og bindestrek" });
-    for (const k of ["formal", "eier"]) if (!text(y[k])) f.push({ check: "losning", file, message: `${k} mangler` });
-    if (!STATUS_LOSNING.includes(y.status)) f.push({ check: "losning", file, message: `status m\xE5 v\xE6re ${STATUS_LOSNING.join(", ")}` });
-    if (!Array.isArray(y.integrasjoner)) f.push({ check: "losning", file, message: "integrasjoner m\xE5 v\xE6re en liste (tom n\xE5r l\xF8sningen ikke bruker noen)" });
+    for (const k of ["formal", "eier"]) if (!text(y[k])) f.push({ check: "losning", file, message: `${k} mangler. Legg det inn i losning.yaml` });
+    if (!STATUS_LOSNING.includes(y.status)) f.push({ check: "losning", file, message: `status m\xE5 v\xE6re ${STATUS_LOSNING.join(", ")}. Sett den som gjelder` });
+    if (!Array.isArray(y.integrasjoner)) f.push({ check: "losning", file, message: "integrasjoner m\xE5 v\xE6re en liste. Skriv systemene l\xF8sningen bruker, eller integrasjoner: [] n\xE5r den ikke bruker noen" });
     else for (const i of y.integrasjoner) if (!systems.has(String(i))) f.push({ check: "losning", level: "warn", file, message: `Integrasjonen ${i} st\xE5r ikke i integrasjoner/` });
     const b = y["bygger-pa"];
     const valid = b === "egen" || isMap(b) && text(b.standard) && text(String(b.versjon ?? ""));
-    if (!valid && !(y.status === "utkast" && b == null)) f.push({ check: "losning", file, message: `bygger-pa m\xE5 v\xE6re \xABegen\xBB, eller { standard: <navn>, versjon: <versjon> }${y.status === "utkast" ? "" : ", n\xE5r l\xF8sningen er ute av utkast"}` });
+    if (!valid && !(y.status === "utkast" && b == null)) f.push({ check: "losning", file, message: `bygger-pa m\xE5 v\xE6re \xABegen\xBB, eller { standard: <navn>, versjon: <versjon> }${y.status === "utkast" ? "" : ", n\xE5r l\xF8sningen er ute av utkast"}. Sett bygger-pa i losning.yaml` });
   }
   return f;
 }
@@ -7818,15 +7818,15 @@ function checkIntegrasjoner(root) {
   for (const t of all) {
     const at = { check: "integrasjon", file: t.file, line: t.line };
     if (t.error) {
-      f.push({ ...at, message: `${t.id}: yaml-blokken kan ikke leses (${t.error})` });
+      f.push({ ...at, message: `${t.id}: yaml-blokken kan ikke leses (${t.error}). Rett YAML-en der feilen sier` });
       continue;
     }
-    if (refs.has(t.ref)) f.push({ ...at, message: `Id-en ${t.id} er brukt f\xF8r i ${t.file}` });
+    if (refs.has(t.ref)) f.push({ ...at, message: `Id-en ${t.id} er brukt f\xF8r i ${t.file}. Gi denne en ny id` });
     refs.add(t.ref);
-    if (!STATUS_OPPGAVE.includes(t.fields.status)) f.push({ ...at, message: `${t.id}: status m\xE5 v\xE6re ${STATUS_OPPGAVE.join(", ")}` });
-    if (!text(t.fields.hvem)) f.push({ ...at, message: `${t.id}: hvem mangler (rollen hos kunden som gj\xF8r det)` });
+    if (!STATUS_OPPGAVE.includes(t.fields.status)) f.push({ ...at, message: `${t.id}: status m\xE5 v\xE6re ${STATUS_OPPGAVE.join(", ")}. Sett den som gjelder` });
+    if (!text(t.fields.hvem)) f.push({ ...at, message: `${t.id}: hvem mangler. Skriv rollen hos kunden som gj\xF8r det` });
   }
-  for (const t of all) for (const e of t.etter) if (!refs.has(e)) f.push({ check: "integrasjon", file: t.file, line: t.line, message: `${t.id}: venter p\xE5 ${e}, som ikke finnes` });
+  for (const t of all) for (const e of t.etter) if (!refs.has(e)) f.push({ check: "integrasjon", file: t.file, line: t.line, message: `${t.id}: venter p\xE5 ${e}, som ikke finnes. Rett id-en i etter, eller ta den bort` });
   return f;
 }
 var personas = (root) => yamlFiles(root, PERSONAER).map((rel) => ({ rel, id: rel.split("/").pop().replace(/\.ya?ml$/, "") }));
@@ -7836,11 +7836,11 @@ function checkPersonaer(root) {
     const y = readYaml(root, rel, "persona", f);
     if (y === void 0) continue;
     if (!isMap(y)) {
-      f.push({ check: "persona", file: rel, message: "Fila er tom eller ikke et kart" });
+      f.push({ check: "persona", file: rel, message: "Fila er tom eller ikke et kart. Fyll den ut etter .claude/rules/personaer.md" });
       continue;
     }
-    for (const k of ["navn", "rolle"]) if (!text(y[k])) f.push({ check: "persona", file: rel, message: `${k} mangler` });
-    if (y.hemmeligheter != null) f.push({ check: "persona", file: rel, message: "hemmeligheter st\xE5r ikke i en persona: personen logger inn selv, og passordet ligger der testidentiteten forvaltes" });
+    for (const k of ["navn", "rolle"]) if (!text(y[k])) f.push({ check: "persona", file: rel, message: `${k} mangler. Legg det inn i personaen` });
+    if (y.hemmeligheter != null) f.push({ check: "persona", file: rel, message: "hemmeligheter st\xE5r ikke i en persona: personen logger inn selv, og passordet ligger der testidentiteten forvaltes. Ta bort hemmeligheter, og be eieren bytte verdier som har st\xE5tt her" });
     else noSecrets(y, "persona", rel, f);
   }
   return f;
@@ -7854,21 +7854,21 @@ function checkTester(root, kravIder) {
     const y = readYaml(root, rel, "test", f);
     if (y === void 0) continue;
     if (!isMap(y)) {
-      f.push({ check: "test", file: rel, message: "Fila er tom eller ikke et kart" });
+      f.push({ check: "test", file: rel, message: "Fila er tom eller ikke et kart. Fyll den ut etter .claude/rules/test.md" });
       continue;
     }
-    if (!text(y.beskrivelse)) f.push({ check: "test", file: rel, message: "beskrivelse mangler" });
-    if (!isMap(y.forventet)) f.push({ check: "test", file: rel, message: "forventet mangler: det oppsettet skal gj\xF8re med saken" });
+    if (!text(y.beskrivelse)) f.push({ check: "test", file: rel, message: "beskrivelse mangler. Skriv hva testcasen pr\xF8ver" });
+    if (!isMap(y.forventet)) f.push({ check: "test", file: rel, message: "forventet mangler: det oppsettet skal gj\xF8re med saken. Legg inn forventet med kravene testcasen pr\xF8ver (forventet: { krav: [<id>] })" });
     else {
       const ids = list(y.forventet.krav).map(String);
-      if (!ids.length) f.push({ check: "test", file: rel, message: "forventet.krav mangler: kravene testcasen pr\xF8ver" });
-      for (const id of ids) if (!kravIder.has(id)) f.push({ check: "test", file: rel, message: `Kravet ${id} finnes ikke i noen krav/` });
+      if (!ids.length) f.push({ check: "test", file: rel, message: "forventet.krav mangler: kravene testcasen pr\xF8ver. Legg inn id-ene (forventet: { krav: [<id>] })" });
+      for (const id of ids) if (!kravIder.has(id)) f.push({ check: "test", file: rel, message: `Kravet ${id} finnes ikke i noen krav/. Rett id-en, eller skriv kravet` });
     }
     for (const p of list(y.persona).map(String)) if (!known.has(p)) f.push({ check: "test", level: "warn", file: rel, message: `Personaen ${p} finnes ikke (${PERSONAER}/${p}.yaml)` });
     if (rel.startsWith("test/")) {
       const ls = list(y.losninger).map(String);
-      if (ls.length < 2) f.push({ check: "test", file: rel, message: "En test i test/ g\xE5r gjennom flere l\xF8sninger: losninger m\xE5 ha minst to" });
-      for (const l of ls) if (!sols.has(l)) f.push({ check: "test", file: rel, message: `L\xF8sningen ${l} finnes ikke i losninger/` });
+      if (ls.length < 2) f.push({ check: "test", file: rel, message: "En test i test/ g\xE5r gjennom flere l\xF8sninger: losninger m\xE5 ha minst to. Flytt en test for \xE9n l\xF8sning til l\xF8sningens test/testcaser/" });
+      for (const l of ls) if (!sols.has(l)) f.push({ check: "test", file: rel, message: `L\xF8sningen ${l} finnes ikke i losninger/. Rett navnet i losninger` });
     }
     noSecrets(y, "test", rel, f);
   }
@@ -7881,11 +7881,11 @@ function checkTestplan(root, kravIder) {
     if (!existsSync2(join2(root, file))) continue;
     const covered = /* @__PURE__ */ new Set();
     for (const p of points(readFileSync2(join2(root, file), "utf8"))) {
-      if (p.error) f.push({ check: "test", file, line: p.line, message: `${p.id}: yaml-blokken kan ikke leses (${p.error})` });
-      else if (!p.krav.length) f.push({ check: "test", file, line: p.line, message: `${p.id}: krav er tomt: kravene punktet pr\xF8ver` });
+      if (p.error) f.push({ check: "test", file, line: p.line, message: `${p.id}: yaml-blokken kan ikke leses (${p.error}). Rett YAML-en der feilen sier` });
+      else if (!p.krav.length) f.push({ check: "test", file, line: p.line, message: `${p.id}: krav er tomt. Skriv kravene punktet pr\xF8ver (krav: [<id>])` });
       for (const k of p.krav) {
         covered.add(k);
-        if (!kravIder.has(k)) f.push({ check: "test", file, line: p.line, message: `${p.id}: kravet ${k} finnes ikke i noen krav/` });
+        if (!kravIder.has(k)) f.push({ check: "test", file, line: p.line, message: `${p.id}: kravet ${k} finnes ikke i noen krav/. Rett id-en, eller skriv kravet` });
       }
     }
     const own = mdFiles(root, `losninger/${s}/krav`).flatMap((k) => items(readFileSync2(join2(root, k), "utf8")).map((r) => r.id));
@@ -7933,13 +7933,13 @@ function checkKilder(root, places2, { base }) {
   if (ch.error) f.push({ check: "kilder", file: ".", message: ch.error });
   for (const c of ch.list ?? []) {
     if (c.status === "M") {
-      f.push({ check: "kilder", file: c.file, message: "En lagret kilde er endret. En kilde endres aldri: en ny versjon f\xE5r en ny id og en ny fil" });
+      f.push({ check: "kilder", file: c.file, message: "En lagret kilde er endret. En kilde endres aldri: en ny versjon f\xE5r en ny id og en ny fil. Sett fila tilbake (git checkout), og lagre den nye versjonen som en ny kilde" });
       continue;
     }
     const place = places2.find((p) => c.file.startsWith(`${p.dir}/kilder/`));
     const name = c.file.slice(`${place.dir}/kilder/`.length);
     const row = [...regs.get(place.dir).values()].find((r) => r.row.includes(name));
-    if (!row?.trukket) f.push({ check: "kilder", file: c.file, message: `En lagret kilde er slettet. En kilde slettes ikke; den trekkes tilbake med \xABTrukket tilbake: <grunnen>\xBB i raden i ${place.dir}/kilder/kilder.md` });
+    if (!row?.trukket) f.push({ check: "kilder", file: c.file, message: `En lagret kilde er slettet. En kilde slettes ikke; den trekkes tilbake med \xABTrukket tilbake: <grunnen>\xBB i raden i ${place.dir}/kilder/kilder.md. Sett fila tilbake (git checkout), eller trekk kilden tilbake der med grunnen` });
   }
   for (const p of places2) {
     const ids = regs.get(p.dir);
@@ -7948,16 +7948,16 @@ function checkKilder(root, places2, { base }) {
     const register = existsSync3(join3(root, regFile)) ? readFileSync3(join3(root, regFile), "utf8") : "";
     for (const file of filesIn(root, `${p.dir}/kilder/filer`).filter((x) => !x.endsWith(".gitkeep"))) {
       const name = file.slice(`${p.dir}/kilder/`.length);
-      if (!register.includes(`(${name})`) && !register.includes(`\`${name}\``)) f.push({ check: "kilder", file, message: `Fila st\xE5r ikke i registeret (${regFile}). En lagret kilde har en id og opphav` });
+      if (!register.includes(`(${name})`) && !register.includes(`\`${name}\``)) f.push({ check: "kilder", file, message: `Fila st\xE5r ikke i registeret (${regFile}). En lagret kilde har en id og opphav. Legg den inn i registeret med id, lenke og datoene` });
     }
     for (const rel of mdFiles(root, `${p.dir}/forstaelse`)) {
       for (const c of claims(readFileSync3(join3(root, rel), "utf8"))) {
         if (QUESTIONS.test(c.section)) continue;
         const cited = citations(c.text);
         if (!cited.length && /`[\w-]+\.md`/.test(c.text)) continue;
-        if (!cited.length) f.push({ check: "forstaelse", file: rel, line: c.line, message: `P\xE5standen viser ikke til en kilde: \xAB${c.text.split("\n")[0].slice(2, 80)}\xBB` });
+        if (!cited.length) f.push({ check: "forstaelse", file: rel, line: c.line, message: `P\xE5standen viser ikke til en kilde: \xAB${c.text.split("\n")[0].slice(2, 80)}\xBB. Vis til kilden ([K1]), eller flytt den til \xABDet kildene ikke svarer p\xE5\xBB` });
         for (const id of cited) {
-          if (!ids.has(id)) f.push({ check: "forstaelse", file: rel, line: c.line, message: `${id} st\xE5r ikke i registeret (${regFile})` });
+          if (!ids.has(id)) f.push({ check: "forstaelse", file: rel, line: c.line, message: `${id} st\xE5r ikke i registeret (${regFile}). Rett id-en, eller legg kilden inn i registeret` });
           else if (ids.get(id).trukket) f.push({ check: "forstaelse", file: rel, line: c.line, message: `${id} er trukket tilbake (${ids.get(id).grunn || "uten grunn"}). Skriv p\xE5standen fra en annen kilde, eller ta den bort` });
         }
       }
@@ -7987,32 +7987,32 @@ function checkKrav(root, places2, { status = () => void 0 } = {}) {
     for (const file of mdFiles(root, `${p.dir}/krav`)) {
       const md = readFileSync4(join4(root, file), "utf8");
       const withBlock = new Set(items(md).map((r) => r.line));
-      for (const h of headings(md)) if (!withBlock.has(h.line)) f.push({ check: "krav", file, line: h.line, message: `\xAB${h.text}\xBB har ingen yaml-blokk rett under. Et krav er \xAB## <id> <tittel>\xBB med yaml-blokken (flyt, hvorfor, kilde, blir) rett under` });
+      for (const h of headings(md)) if (!withBlock.has(h.line)) f.push({ check: "krav", file, line: h.line, message: `\xAB${h.text}\xBB har ingen yaml-blokk rett under. Et krav er \xAB## <id> <tittel>\xBB med yaml-blokken (flyt, hvorfor, kilde, blir) rett under. Legg blokken rett under overskriften, eller gj\xF8r overskriften til en vanlig tekst` });
     }
   }
   for (const r of allRequirements(root, places2)) {
     const at = { check: "krav", file: r.file, line: r.line };
     if (r.error) {
-      f.push({ ...at, message: `${r.id}: yaml-blokken kan ikke leses (${r.error})` });
+      f.push({ ...at, message: `${r.id}: yaml-blokken kan ikke leses (${r.error}). Rett YAML-en der feilen sier` });
       continue;
     }
-    if (seen.has(r.id)) f.push({ ...at, message: `Id-en ${r.id} er brukt f\xF8r, i ${seen.get(r.id)}` });
+    if (seen.has(r.id)) f.push({ ...at, message: `Id-en ${r.id} er brukt f\xF8r, i ${seen.get(r.id)}. Gi dette kravet en ny id` });
     else seen.set(r.id, r.file);
-    if (!FLYT.includes(r.fields.flyt)) f.push({ ...at, message: `${r.id}: flyt m\xE5 v\xE6re ${FLYT.join(", ")}` });
-    if (!text(r.fields.hvorfor)) f.push({ ...at, message: `${r.id}: hvorfor mangler` });
+    if (!FLYT.includes(r.fields.flyt)) f.push({ ...at, message: `${r.id}: flyt m\xE5 v\xE6re ${FLYT.join(", ")}. Sett den som passer (formen st\xE5r i .claude/rules/krav.md)` });
+    if (!text(r.fields.hvorfor)) f.push({ ...at, message: `${r.id}: hvorfor mangler. Skriv hvorfor kravet finnes` });
     const kilde = list(r.fields.kilde).map(String);
-    if (!kilde.length) f.push({ ...at, message: `${r.id}: kilde mangler` });
+    if (!kilde.length) f.push({ ...at, message: `${r.id}: kilde mangler. Vis til kilden kravet bygger p\xE5 (kilde: [K1]); finnes den ikke, er det et forslag, ikke et krav` });
     const ids = registry(root, r.place.dir);
     for (const k of kilde) {
       if (/^[EK]\d+$/.test(k)) {
-        if (!ids.has(k)) f.push({ ...at, message: `${r.id}: ${k} st\xE5r ikke i registeret (${r.place.dir}/kilder/kilder.md)` });
-        else if (ids.get(k).trukket) f.push({ ...at, message: `${r.id}: ${k} er trukket tilbake` });
+        if (!ids.has(k)) f.push({ ...at, message: `${r.id}: ${k} st\xE5r ikke i registeret (${r.place.dir}/kilder/kilder.md). Rett id-en, eller legg kilden inn i registeret` });
+        else if (ids.get(k).trukket) f.push({ ...at, message: `${r.id}: ${k} er trukket tilbake. Bygg kravet p\xE5 en annen kilde, eller ta det bort` });
         continue;
       }
       const [path, anchor2] = k.split("#");
       const target = join4(root, r.place.dir, path);
-      if (!existsSync4(target)) f.push({ ...at, message: `${r.id}: ${path} finnes ikke (stien er relativ til ${r.place.dir}/)` });
-      else if (anchor2 && !anchors(readFileSync4(target, "utf8")).has(decodeURIComponent(anchor2).toLowerCase())) f.push({ ...at, message: `${r.id}: overskriften #${anchor2} finnes ikke i ${path}` });
+      if (!existsSync4(target)) f.push({ ...at, message: `${r.id}: ${path} finnes ikke (stien er relativ til ${r.place.dir}/). Rett stien` });
+      else if (anchor2 && !anchors(readFileSync4(target, "utf8")).has(decodeURIComponent(anchor2).toLowerCase())) f.push({ ...at, message: `${r.id}: overskriften #${anchor2} finnes ikke i ${path}. Rett lenken til en overskrift som finnes` });
     }
     const blir = list(r.fields.blir);
     if (!blir.length) {
@@ -8023,19 +8023,19 @@ function checkKrav(root, places2, { status = () => void 0 } = {}) {
     for (const b of blir) {
       const kinds = isMap(b) ? BLIR.filter((k2) => k2 in b) : [];
       if (kinds.length !== 1) {
-        f.push({ ...at, message: `${r.id}: hver linje i blir er \xE9n av { fil: <sti> }, { steg: <tekst>, hvorfor: <tekst> } eller { onske: <tekst>, hvorfor: <tekst> }` });
+        f.push({ ...at, message: `${r.id}: hver linje i blir er \xE9n av { fil: <sti> }, { steg: <tekst>, hvorfor: <tekst> } eller { onske: <tekst>, hvorfor: <tekst> }. Skriv linja i en av dem` });
         continue;
       }
       const [k] = kinds;
-      if (Object.keys(b).some((x) => ![k, "hvorfor"].includes(x))) f.push({ ...at, message: `${r.id}: blir.${k} har bare ${k} og hvorfor` });
-      if (k !== "fil" && !text(b.hvorfor)) f.push({ ...at, message: `${r.id}: blir.${k} trenger hvorfor: hvorfor kravet ikke ble konfig` });
-      if (!text(String(b[k] ?? ""))) f.push({ ...at, message: `${r.id}: blir.${k} er tom` });
+      if (Object.keys(b).some((x) => ![k, "hvorfor"].includes(x))) f.push({ ...at, message: `${r.id}: blir.${k} har bare ${k} og hvorfor. Ta bort de andre feltene` });
+      if (k !== "fil" && !text(b.hvorfor)) f.push({ ...at, message: `${r.id}: blir.${k} trenger hvorfor. Skriv hvorfor kravet ikke ble konfig` });
+      if (!text(String(b[k] ?? ""))) f.push({ ...at, message: `${r.id}: blir.${k} er tom. Skriv hva kravet ble, eller ta bort linja` });
       if (k === "fil" && text(String(b.fil ?? ""))) {
         const p = blirPath(b.fil);
         used.add(p);
-        if (/^(felles|losninger\/[^/]+)\/oppsett\//.test(p)) f.push({ ...at, message: `${r.id}: blir.fil ${b.fil}: konfigen st\xE5r i oppsett/ i roten, slik Neo eksporterer den. En l\xF8sning og felles/ har ingen egen oppsett/` });
+        if (/^(felles|losninger\/[^/]+)\/oppsett\//.test(p)) f.push({ ...at, message: `${r.id}: blir.fil ${b.fil}: konfigen st\xE5r i oppsett/ i roten, slik Neo eksporterer den. En l\xF8sning og felles/ har ingen egen oppsett/. Flytt filene til oppsett/ i roten, og rett blir i kravene` });
         else if (!/^oppsett\/(?!manuelt\/)[^/]+\/[^/]+\.yaml$/.test(p)) f.push({ ...at, message: `${r.id}: blir.fil ${b.fil} er ikke en konfigfil i oppsett/: oppsett/<mappa for typen>/<navn>.yaml, fra roten. Det som gj\xF8res for h\xE5nd, er et steg` });
-        else if (!existsSync4(join4(root, p))) f.push({ ...at, message: `${r.id}: blir.fil ${b.fil} finnes ikke` });
+        else if (!existsSync4(join4(root, p))) f.push({ ...at, message: `${r.id}: blir.fil ${b.fil} finnes ikke. Rett stien til fila i oppsett/` });
       }
     }
   }
@@ -8054,9 +8054,9 @@ var MANUELT = "oppsett/manuelt/";
 function checkConfigFile(rel, text2) {
   if (/(^|\/)README\.md$/.test(rel) || /(^|\/)ikke-med\.md$/.test(rel) || rel.startsWith(MANUELT) || rel.endsWith(".gitkeep")) return [];
   if (rel.endsWith(".json")) return [{ check: "oppsett", file: rel, message: "Formen fra f\xF8r forvaltning 0.2.0. Ta et nytt snapshot (/forvaltning:snapshot) og bygg oppsettet fra filene Neo skriver" }];
-  if (!rel.endsWith(".yaml")) return [{ check: "oppsett", file: rel, message: "Ikke en konfigfil. Oppsettet er .yaml-filer fra Neo; det som gj\xF8res for h\xE5nd, st\xE5r i oppsett/manuelt/" }];
+  if (!rel.endsWith(".yaml")) return [{ check: "oppsett", file: rel, message: "Ikke en konfigfil. Oppsettet er .yaml-filer fra Neo; det som gj\xF8res for h\xE5nd, st\xE5r i oppsett/manuelt/. Ta fila bort, eller flytt den dit" }];
   const missing = [/^apiVersion: neo-config\/v1$/m, /^kind: \S+/m, /^spec:/m].filter((re) => !re.test(text2));
-  return missing.length ? [{ check: "oppsett", file: rel, message: "Ikke en konfigfil fra Neo: den m\xE5 ha apiVersion: neo-config/v1, kind og spec \xF8verst" }] : [];
+  return missing.length ? [{ check: "oppsett", file: rel, message: "Ikke en konfigfil fra Neo: den m\xE5 ha apiVersion: neo-config/v1, kind og spec \xF8verst. Ta et snapshot (/forvaltning:snapshot) og bygg fila fra den Neo skriver" }] : [];
 }
 function checkConfigFiles(root) {
   const findings = [];
@@ -8091,14 +8091,14 @@ function checkDeviations(root, places2, { ids = ruleIds(), status = () => void 0
         if (it.error || !isMap(it.fields) || !("avvik" in it.fields)) continue;
         const at = { check: "avvik", file, line: it.line };
         const regel = String(it.fields.avvik ?? "");
-        if (!ids.has(regel)) findings.push({ ...at, message: `${it.id}: regelen \xAB${regel}\xBB finnes ikke i m\xF8nstrene` });
-        if (!text(it.fields.grunn)) findings.push({ ...at, message: `${it.id}: grunn mangler: hvorfor regelen brytes med vilje` });
+        if (!ids.has(regel)) findings.push({ ...at, message: `${it.id}: regelen \xAB${regel}\xBB finnes ikke i m\xF8nstrene. Rett id-en til en regel som finnes (m\xF8nstrene i pluginen solution)` });
+        if (!text(it.fields.grunn)) findings.push({ ...at, message: `${it.id}: grunn mangler. Skriv hvorfor regelen brytes med vilje` });
         if (!it.fields.fil) continue;
         const fil = `oppsett/${String(it.fields.fil).replace(/^oppsett\//, "")}`;
         if (existsSync5(join6(root, fil))) continue;
         const s = place.felles ? void 0 : status(place.navn);
         if (place.felles) findings.push({ ...at, level: "warn", message: `${it.id}: ${fil} finnes ikke enn\xE5` });
-        else if (s !== "utkast") findings.push({ ...at, message: `${it.id}: ${fil} finnes ikke. Avviket kan st\xE5 f\xF8r fila mens l\xF8sningen er i utkast; n\xE5 er den ${s ?? "uten status"}` });
+        else if (s !== "utkast") findings.push({ ...at, message: `${it.id}: ${fil} finnes ikke. Avviket kan st\xE5 f\xF8r fila mens l\xF8sningen er i utkast; n\xE5 er den ${s ?? "uten status"}. Rett stien, eller lag fila i oppsett/` });
       }
     }
   }
@@ -8137,7 +8137,7 @@ function render(root) {
 
 // sjekk.mjs
 function version() {
-  if (true) return "3.0.0";
+  if (true) return "3.1.0";
   return JSON.parse(readFileSync8(join8(dirname2(fileURLToPath2(import.meta.url)), "package.json"), "utf8")).version;
 }
 var CHECKS6 = [...CHECKS, ...CHECKS2, ...CHECKS3, ...CHECKS4, ...CHECKS5];

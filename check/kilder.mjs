@@ -53,13 +53,13 @@ export function checkKilder(root, places, { base }) {
   if (ch.error) f.push({ check: "kilder", file: ".", message: ch.error });
   for (const c of ch.list ?? []) {
     if (c.status === "M") {
-      f.push({ check: "kilder", file: c.file, message: "En lagret kilde er endret. En kilde endres aldri: en ny versjon får en ny id og en ny fil" });
+      f.push({ check: "kilder", file: c.file, message: "En lagret kilde er endret. En kilde endres aldri: en ny versjon får en ny id og en ny fil. Sett fila tilbake (git checkout), og lagre den nye versjonen som en ny kilde" });
       continue;
     }
     const place = places.find((p) => c.file.startsWith(`${p.dir}/kilder/`));
     const name = c.file.slice(`${place.dir}/kilder/`.length);
     const row = [...regs.get(place.dir).values()].find((r) => r.row.includes(name));
-    if (!row?.trukket) f.push({ check: "kilder", file: c.file, message: `En lagret kilde er slettet. En kilde slettes ikke; den trekkes tilbake med «Trukket tilbake: <grunnen>» i raden i ${place.dir}/kilder/kilder.md` });
+    if (!row?.trukket) f.push({ check: "kilder", file: c.file, message: `En lagret kilde er slettet. En kilde slettes ikke; den trekkes tilbake med «Trukket tilbake: <grunnen>» i raden i ${place.dir}/kilder/kilder.md. Sett fila tilbake (git checkout), eller trekk kilden tilbake der med grunnen` });
   }
 
   for (const p of places) {
@@ -71,7 +71,7 @@ export function checkKilder(root, places, { base }) {
     const register = existsSync(join(root, regFile)) ? readFileSync(join(root, regFile), "utf8") : "";
     for (const file of filesIn(root, `${p.dir}/kilder/filer`).filter((x) => !x.endsWith(".gitkeep"))) {
       const name = file.slice(`${p.dir}/kilder/`.length);
-      if (!register.includes(`(${name})`) && !register.includes(`\`${name}\``)) f.push({ check: "kilder", file, message: `Fila står ikke i registeret (${regFile}). En lagret kilde har en id og opphav` });
+      if (!register.includes(`(${name})`) && !register.includes(`\`${name}\``)) f.push({ check: "kilder", file, message: `Fila står ikke i registeret (${regFile}). En lagret kilde har en id og opphav. Legg den inn i registeret med id, lenke og datoene` });
     }
 
     // 3. Forståelsen: hvert punkt viser til en kilde i registeret på samme sted, som ikke er trukket tilbake.
@@ -81,9 +81,9 @@ export function checkKilder(root, places, { base }) {
         const cited = citations(c.text);
         // En henvisning til en annen dimensjon («står i `03-forlop.md`») er ikke en påstand, og trenger ingen kilde.
         if (!cited.length && /`[\w-]+\.md`/.test(c.text)) continue;
-        if (!cited.length) f.push({ check: "forstaelse", file: rel, line: c.line, message: `Påstanden viser ikke til en kilde: «${c.text.split("\n")[0].slice(2, 80)}»` });
+        if (!cited.length) f.push({ check: "forstaelse", file: rel, line: c.line, message: `Påstanden viser ikke til en kilde: «${c.text.split("\n")[0].slice(2, 80)}». Vis til kilden ([K1]), eller flytt den til «Det kildene ikke svarer på»` });
         for (const id of cited) {
-          if (!ids.has(id)) f.push({ check: "forstaelse", file: rel, line: c.line, message: `${id} står ikke i registeret (${regFile})` });
+          if (!ids.has(id)) f.push({ check: "forstaelse", file: rel, line: c.line, message: `${id} står ikke i registeret (${regFile}). Rett id-en, eller legg kilden inn i registeret` });
           else if (ids.get(id).trukket) f.push({ check: "forstaelse", file: rel, line: c.line, message: `${id} er trukket tilbake (${ids.get(id).grunn || "uten grunn"}). Skriv påstanden fra en annen kilde, eller ta den bort` });
         }
       }
