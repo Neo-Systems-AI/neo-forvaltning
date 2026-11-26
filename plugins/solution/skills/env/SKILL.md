@@ -11,4 +11,6 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/lib/neo-config.mjs" --check
 
 - **Kilden** står på hver linje: `config` er valgt i fila, `plugin-standard` følger med pluginen, `usatt` mangler.
 - **Mangler fila**, kjør `/forvaltning:oppstart`, eller kopier `.claude/neo.config.json` fra `neo-forvaltning-mal`.
-- **Fila har ingen hemmeligheter.** Innloggingen mot Neo er personens egen, gjennom `/mcp`.
+- **Fila har ingen hemmeligheter.** `uttrekk.mjs` kaller Neo med maskinklienten i sandkassen
+  (`neo.byEnv.sandkasse.apiClient`). Hemmeligheten står bare som en referanse (`$env`), og verdien leses fra miljøet
+  eller `.env.local`. Er klienten ikke registrert, kjør `/forvaltning:oppstart`.

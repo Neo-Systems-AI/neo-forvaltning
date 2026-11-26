@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { checkPath, unwrap, write } from "./skriv-eksport.mjs";
+import { checkPath, write } from "./skriv-eksport.mjs";
 import { differences, markdown, summary } from "./planrapport.mjs";
 
 const tmp = () => mkdtempSync(join(tmpdir(), "forvaltning-"));
@@ -29,11 +29,6 @@ test("en fil Neo ikke lenger har, fjernes; en lik fil røres ikke", () => {
   assert.deepEqual(r.uendret, ["case-types/byggesak.yaml"]);
   assert.deepEqual(r.fjernet, ["workflows/gammel.yaml"]);
   assert.equal(existsSync(join(dir, "workflows/gammel.yaml")), false);
-});
-
-test("MCP-innpakningen pakkes ut", () => {
-  const inner = svar([]);
-  assert.deepEqual(unwrap({ content: [{ type: "text", text: JSON.stringify(inner) }] }), inner);
 });
 
 test("ok:false skriver ingenting og sier hva som må rettes i Neo", () => {
