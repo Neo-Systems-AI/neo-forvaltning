@@ -79,8 +79,8 @@ relasjonstabellen og veiviseren på runden → vedtak i hver sak.
 
 - **Deterministisk:** inntaket av hver søknad, oppgavene og framdriften «X av Y ferdig».
 - **Agenten:** foreslår hvilke søknader som hører til runden, og vurderer hver søknad for seg mot kriteriene.
-- **Mennesket:** godtar relasjonene, kontrollerer vurderingene, sammenligner og rangerer, fordeler i møtet og fatter
-  vedtakene.
+- **Mennesket:** godtar relasjonene, kontrollerer vurderingene, sammenligner og rangerer, holder rammen mot summen og
+  fordeler i møtet, fatter vedtakene og sender dem fra hver sak.
 
 ## Avhengighetene
 
@@ -98,9 +98,8 @@ relasjonstabellen og veiviseren på runden → vedtak i hver sak.
 - En flyt kan ikke opprette eller skrive en relasjon (`../monstre/04-relasjoner.md#relasjoner-lages-av-mennesker`).
 - Relasjonstabellen kan ikke sorteres i visningen (`../monstre/04-relasjoner.md#visning-per-fase`).
 - Eksterne vurderere kan ikke få tilgang bare til sine saker (`../monstre/14-tilgang.md#eksterne-vurderere`).
-
-## Hull i reglene
-
-- Utlysningen av runden.
-- En ramme som skal holdes mot summen av tildelingene.
-- Utsending av mange vedtak samtidig.
+- Utlysningen skjer utenfor Neo, på kundens nettside og i Altinn-appen. Neo starter med innsendingene.
+- Neo kan ikke summere et felt over sakene i en runde, så rammen holdes mot summen av tildelingene i tildelingsmøtet.
+- Vedtakene sendes fra hver sak. Handlingen som sender vedtaket, henger på dokumentet
+  ([Vedtak med begrunnelse](vedtak-med-begrunnelse.md)), og «Kjør handling på valgte» i sakslista kjører handlinger på
+  saker, opptil 100 per gang.

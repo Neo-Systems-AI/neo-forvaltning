@@ -110,7 +110,8 @@ opphav: skrevet
   relasjoner til en avsluttet sak.
 - **Hvorfor:** All skriving i en sak i `AVSLUTTET` avvises (`CASE_CLOSED`), bortsett fra å bytte status, arkivere eller
   kassere. Det gjelder også relasjonene og bekreftelsene i veiviseren. Kommer en klage etter at saken er avsluttet,
-  blir den en egen klagesak (`01-sakstype.md#klage-som-egen-sakstype`).
+  blir den en egen klagesak (`01-sakstype.md#klage-som-egen-sakstype`). Skal den knyttes til vedtaket,
+  saksbehandleren flytter vedtakssaken ut av «Avsluttet», knytter relasjonen og setter den tilbake.
 
 ## en-ventestatus Én ventestatus, og venteoppgaver som sier hva det ventes på
 

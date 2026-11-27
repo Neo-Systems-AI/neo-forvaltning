@@ -24,7 +24,7 @@ finn saken på instansen, legg svaret i saksdata, kvitter ut venteoppgaven, sett
 - Appen i Altinn, én per slag innsending.
 - Forespørselen ut: handlingen og flyten som sender det forhåndsutfylte skjemaet.
 - Instansen på saken: et tekstfelt per slag forespørsel.
-- Ventestatusen, venteoppgaven og fristen.
+- Ventestatusen, venteoppgaven og fristen, og oppgaven når fristen er ute.
 - Svaret inn: strømmen filtrert på appen, og flyten som oppdaterer saken.
 - Brevet som følger forespørselen, når det trengs.
 
@@ -67,6 +67,13 @@ finn saken på instansen, legg svaret i saksdata, kvitter ut venteoppgaven, sett
 8. **Skriv en egen hendelse** når forespørselen er sendt og når svaret er kommet, om det skal telles.
    Regler: `../monstre/07-flyt.md#flyt-egen-hendelse`, `../monstre/13-innsikt.md#tall-krever-hendelse`
    Blir: `oppsett/flow-event-types/`
+9. **Gi saksbehandleren valget når fristen går ut uten svar.** Flyten som sendte forespørselen, venter med «Vent» til
+   fristen er ute, leser venteoppgaven på nytt med «Hent oppgaver», og lager oppgaven «Fristen er ute: <hva det ventes
+   på>» hvis venteoppgaven fortsatt er åpen. Saksbehandleren velger mellom å purre med en ny frist og å avgjøre saken på
+   det som foreligger. Varselet før fristen kommer fra venteoppgaven, ikke fra flyten.
+   Regler: `../monstre/06-oppgaver.md#frist-ute-gir-oppgave`, `../monstre/06-oppgaver.md#frist-varsles-av-neo`,
+   `../monstre/07-flyt.md#flyt-handling-leser-objektet`
+   Blir: `oppsett/workflows/` og `oppsett/task-template-sets/`
 
 ## Eksempel: tilsagn og avtale etter vedtaket
 
@@ -75,15 +82,16 @@ utbetalingsplanen og vilkårene er rader i saksdata (`../monstre/05-felt-og-saks
 `../monstre/05-felt-og-saksdata.md#flere-rader-er-saksdata`). Tilsagnsbrevet er et eget brev med dokumentfelt, uten å
 gjenta begrunnelsen (`../monstre/09-maler.md#mal-brev-etter-vedtaket`, `../monstre/09-maler.md#mal-dokumentfelt`).
 Flyten sender brevet og akseptskjemaet, setter saken i «Venter på aksept av tilsagn» og lager venteoppgaven med
-akseptfristen. Aksepten kommer som en egen innsending som finner saken på instansen. Skal avtalen signeres, går
-signeringen gjennom eSignering ([eSignering](../esignering.md)). Hendelsen `tilsagn.gitt` skrives når tilsagnet er sendt.
+akseptfristen. Aksepten kommer som en egen innsending som finner saken på instansen. Skal avtalen signeres, skjer
+det utenfor flyten (se Grensene). Hendelsen `tilsagn.gitt` skrives når tilsagnet er sendt.
 
 ## Hvem gjør hva
 
 - **Deterministisk:** forespørselen i Altinn, lenken i tråden, instansfeltet, ventestatusen, venteoppgaven, mottaket av
   svaret, journalføringen, kvitteringen og hendelsen.
 - **Agenten:** kan skrive utkast til brevet som følger forespørselen, og oppsummere svaret i saksdata.
-- **Mennesket:** bestemmer at forespørselen skal ut, setter fristen og vilkårene, og vurderer et svar med forbehold.
+- **Mennesket:** bestemmer at forespørselen skal ut, setter fristen og vilkårene, vurderer et svar med forbehold, og
+  velger mellom purring med ny frist og avgjørelse på det som foreligger når fristen er ute.
 
 ## Avhengighetene
 
@@ -105,8 +113,5 @@ signeringen gjennom eSignering ([eSignering](../esignering.md)). Hendelsen `tils
   (`../monstre/11-integrasjoner.md#ettersending-som-skjema`).
 - En `frist` som er bundet til en tom verdi, stopper noden (`../monstre/11-integrasjoner.md#ettersending-som-skjema`).
 - Malen kan ikke gjenta en rad per vilkår eller utbetaling (`../monstre/09-maler.md#mal-ingen-lister`).
-
-## Hull i reglene
-
-- Ingen regel sier hva som skjer med saken når fristen går ut uten svar.
-- Ingen regel sier hvordan signeringen med eSignering bygges i flyten.
+- Neo har ingen node for eSignering ennå, så en avtale som skal signeres, kan ikke sendes til signering fra flyten.
+  Tilgangen til eSignering har egen behandlingstid hos Digdir ([eSignering](../esignering.md)).

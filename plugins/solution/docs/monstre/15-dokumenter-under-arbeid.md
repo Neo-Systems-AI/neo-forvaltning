@@ -106,7 +106,8 @@ opphav: skrevet
   som lager oppgaven til godkjenneren.
 - **Ikke gjør:** Ikke be saksbehandleren først sette statusen og så starte handlingen.
 - **Hvorfor:** Statusen og det som skjer (godkjennerens oppgave, versjonen) skal følges ad. Noden peker på statusen med
-  id, som skrives om til kundens kopi ved utrulling; finnes den ikke, stopper kjøringen.
+  navnet i fila (`ref:artifactStatus:<gruppe>/<etikett>`), og id-en skrives om ved promoteringen; finnes den ikke,
+  stopper kjøringen.
 
 ## send-bare-ferdig Flyten som sender et dokument ut, sjekker at det står i kategorien Ferdig
 
@@ -221,4 +222,4 @@ opphav: forslag
 - **Gjør:** Bruk blokkstatus i maleditoren når en mal skrives om og noen skal godkjenne teksten før den publiseres.
 - **Ikke gjør:** Ikke regn med at en status i malen gjelder i dokumentet som lages fra den.
 - **Hvorfor:** Innholdet kopieres fra malen, men opphavet til låsen (hvem som låste, og innholdet da) gjør det ikke. Et
-  nytt dokument er ikke sjekket av noen i denne saken. Om en status fra malen likevel vises i dokumentet, er ikke prøvd.
+  nytt dokument er ikke sjekket av noen i denne saken.

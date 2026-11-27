@@ -13,7 +13,7 @@ Still spørsmålene i rekkefølge. Det første ja avgjør.
 | 1 | Er det én ting som får sitt eget utfall og har sitt eget løp? | **Én sak**, med en sakstype etter tingen | `en-sak-en-ting` |
 | 2 | Skiller bare oppgavene (og kriteriene) mellom slagene? | **Et variantfelt** på sakstypen | `variant-som-felt` |
 | 3 | Skiller hvem som fatter vedtaket, produktet, livssyklusen eller tilgangen? | **To sakstyper**, knyttet med en relasjon om de hører sammen | `egen-sakstype-nar` |
-| 4 | Er det en klage eller en søknad om endring av et vedtak? | **En egen klagesakstype** med en relasjon fra vedtaket | `klage-som-egen-sakstype` |
+| 4 | Er det en klage, en søknad om endring, en omgjøring, et krav om tilbakebetaling eller en sanksjon? | **En egen sakstype** med en relasjon fra vedtaket | `klage-som-egen-sakstype` |
 | 5 | Har ordningen eller runden eget arbeid med frister på tvers av sakene? | **En egen sakstype for runden** med en relasjon til hver sak | `runde-som-egen-sakstype` |
 | 6 | Trengs bare en egen liste? | **Ingen sakstype.** En lagret visning med filter | `egen-sakstype-nar` |
 
@@ -127,7 +127,7 @@ opphav: praksis
   endring av feltet på en sak gir nye oppgaver.
 - **Hvorfor:** Variasjonsaksen brukes bare når oppgavemalene legges i saken.
 
-## klage-som-egen-sakstype En klage er alltid en egen sak, med en relasjon fra vedtaket
+## klage-som-egen-sakstype En klage, og hvert nytt vedtak om et vedtak, er en egen sak med en relasjon fra vedtaket
 
 ```yaml
 id: klage-som-egen-sakstype
@@ -139,16 +139,19 @@ opphav: praksis
 
 - **Gjør:** Lag en egen klagesakstype, også når klagen gjelder vårt eget vedtak, og når vi er sekretariat for et annet
   organ. Knytt klagesaken til vedtakssaken med en relasjon som går fra vedtaket til klagen, og legg klagens utfall på
-  relasjonen. La Neo foreslå relasjonen (`04-relasjoner.md#neo-finner-relasjonene`). En søknad om endring av et vedtak
-  er det samme: en egen sak med relasjon.
-- **Ikke gjør:** Ikke legg klagen som statuser i vedtakssaken. Ikke gjenåpne en avsluttet vedtakssak for å knytte en
-  klage som kom etter fristen; den blir en egen klagesak, også når den avvises. Ikke regn med at en flyt kan knytte en
+  relasjonen. La Neo foreslå relasjonen (`04-relasjoner.md#neo-finner-relasjonene`). Det samme gjelder alt som gir et nytt
+  vedtak om et vedtak: en søknad om endring, en omgjøring av eget tiltak (forvaltningsloven § 35), et krav om
+  tilbakebetaling og en sanksjon. Hver blir en egen sak med relasjon fra vedtaket.
+- **Ikke gjør:** Ikke legg klagen som statuser i vedtakssaken. Ikke behandle klagen eller det nye vedtaket i
+  vedtakssaken. En klage som kom etter fristen, blir også en egen klagesak, også når den avvises. Ikke regn med at en flyt kan knytte en
   innkommet klage til vedtaket.
-- **Hvorfor:** Klagen har egne felt, oppgaver, frister og statuser, og ofte en annen eier. Arkivet speiler
+- **Hvorfor:** Klagen og det nye vedtaket har egne felt, oppgaver, frister og statuser, og ofte en annen eier. Arkivet speiler
   saksbehandlingen: klagesaken får sin egen saksmappe, og parten spør etter klagesaken sin. Vedtakssaken venter på
   klagefristen før den avsluttes, så en klage innen fristen kan knyttes til den
-  (`02-status.md#venter-pa-klagefrist`). En relasjon til en avsluttet sak avvises i dag (`CASE_CLOSED`); at den
-  tillates, er et ønske til Neo. Relasjonen lages av et menneske, for hånd eller ved å godta et forslag
+  (`02-status.md#venter-pa-klagefrist`). En relasjon til en avsluttet sak avvises (`CASE_CLOSED`). For en klage etter
+  fristen, og for et nytt vedtak etter at vedtakssaken er avsluttet, flytter saksbehandleren vedtakssaken ut av
+  «Avsluttet», knytter relasjonen og setter den tilbake. Relasjonen lages av et menneske, for hånd eller ved å godta et
+  forslag
   (`04-relasjoner.md#relasjoner-lages-av-mennesker`).
 
 ```yaml

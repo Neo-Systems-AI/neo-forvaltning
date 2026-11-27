@@ -81,15 +81,19 @@ hvert eksternt system (webhook eller egen flyt) og Innsikt.
 ## Hvem gjør hva
 
 - **Deterministisk:** oppgaven, raden i saksdata, den egne hendelsen, leveringen til hvert system, og stoppet ved
-  konkurs.
+  konkurs. Neo overleverer vedtaket og beløpet én gang.
 - **Agenten:** har ingen rolle i selve overleveringen.
 - **Mennesket:** utløser overleveringen eller kvitterer ut oppgaven når den er gjort for hånd, og følger opp et stopp.
+- **Økonomisystemet:** attestasjon og anvisning av utbetalingen skjer der, etter kundens økonomireglement og med
+  funksjonene økonomisystemet har.
 
 ## Avhengighetene
 
 - Krever [Vedtak med begrunnelse](vedtak-med-begrunnelse.md). Ofte også en aksept fra parten
   ([Innhenting fra parten med et Altinn-skjema](innhenting-med-altinn-skjema.md)) eller en godkjent rapport før neste
   utbetaling ([Oppfølging med rapporter og frister](oppfolging-med-rapporter-og-frister.md)).
+- En tilbakebetaling er ikke en overlevering, men en egen sak med relasjon fra vedtaket og et eget vedtak
+  (`../monstre/01-sakstype.md#klage-som-egen-sakstype`, [Oppfølging med rapporter og frister](oppfolging-med-rapporter-og-frister.md)).
 - [Innsikt og nøkkeltall](innsikt-og-nokkeltall.md): den egne hendelsen er felles kilde for Innsikt og overleveringen.
   «Innvilget mot utbetalt» krever både vedtakshendelsen og den egne hendelsen, med beløpet som tall.
 - [Opplysninger fra registre og kart](registre-og-kart.md) for stoppet ved konkurs.
@@ -98,11 +102,8 @@ hvert eksternt system (webhook eller egen flyt) og Innsikt.
 
 - Neo har integrasjoner mot arkivet, Altinn, SvarUt og registrene, men ikke mot et økonomisystem
   (`../monstre/07-flyt.md#flyt-overlevering-uten-integrasjon`).
+- Neo gjør ikke attestasjon eller anvisning; det gjør økonomisystemet etter kundens økonomireglement.
 - En hendelse som kommer mens strømmen står på pause, leveres ikke senere (`../monstre/07-flyt.md#strom-pause-er-tap`).
 - I en sandkasse sendes ingen webhook (`../monstre/07-flyt.md#webhook-abonnent-taaler-gjentak`).
 - Innsikt har ingen kobling til et økonomisystem og ingen summering over saksdata.
 - En lagret visning har ingen sum (`../monstre/12-visninger.md#ko-i-lista-sum-i-innsikt`).
-
-## Hull i reglene
-
-- Hvordan attestasjon og anvisning av en utbetaling gjøres, og hvordan en tilbakebetaling behandles.

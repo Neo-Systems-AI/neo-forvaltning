@@ -1,10 +1,10 @@
 # Organisasjonsnivået
 
-Noen innstillinger gjelder hele organisasjonen og følger ikke en sakstype eller en Løsning: KI-reglene for hele
-organisasjonen, modellpolicyen og modellvalget, menyen og grensen for flytkjøringer. De er ikke konfig og settes i hver
-organisasjon for seg. Reglene er festet på det de virker på: agenten, sakstypens KI-regler og modell, dokumentene og
-flytene. Oppsettet skriver ned hva som skal settes på organisasjonsnivå, og hvorfor, så det kan gjøres etter
-utrullingen.
+Noen innstillinger gjelder hele organisasjonen og står ikke i en sakstype eller en annen fil: KI-reglene for hele
+organisasjonen, modellpolicyen og modellvalget, menyen og grensen for flytkjøringer. De er ikke filer og settes opp i Neo
+i hver organisasjon for seg (steg i Neo). Reglene er festet på det de virker på: agenten, sakstypens KI-regler og
+modell, dokumentene og flytene. Kravene skriver ned hva som skal settes på organisasjonsnivå, og hvorfor, så det kan
+gjøres etter promoteringen.
 
 Hjemmelskatalogen og partnerens ressursmaler hører ikke til oppsettet. Kunden setter dem ikke.
 
@@ -13,7 +13,7 @@ Hjemmelskatalogen og partnerens ressursmaler hører ikke til oppsettet. Kunden s
 | Spørsmålet | Ja betyr |
 |---|---|
 | Skal en KI-funksjon være av for hele organisasjonen? | **Bryteren** på KI-siden (`ki-bryter-eller-regel`) |
-| Skal den være av for noen saker, og følger det av sakstypens innhold? | En **regel på sakstypen**, som følger Løsningen (`ki-regel-pa-sakstypen-nar-den-folger-sakstypen`) |
+| Skal den være av for noen saker, og følger det av sakstypens innhold? | En **regel på sakstypen**, som står i sakstype-fila (`ki-regel-pa-sakstypen-nar-den-folger-sakstypen`) |
 | Går det på tvers av sakstyper, eller gjelder det en ansvarlig? | En **regel på organisasjonen** (`ki-bryter-eller-regel`) |
 | Har organisasjonen krav til hvor dataene behandles? | **Modellpolicyen** før modellvalget (`modellpolicy-for-modellvalget`) |
 | Trenger sakstypen en annen modell enn standarden? | **`defaultAgentModelId`** med en grunn; ellers tom (`modell-arves-fra-organisasjonen`) |
@@ -47,11 +47,11 @@ opphav: skrevet
 ```
 
 - **Gjør:** Legg en regel som følger av sakstypens innhold (skjermede søknader uten nettsøk) på sakstypen, så den
-  følger Løsningen. Bruk organisasjonens regel for det som går på tvers, eller som trenger en ansvarlig.
-- **Ikke gjør:** Ikke legg en regel som skal følge en Løsning til alle kunder, på organisasjonsnivå. Ikke bruk sakstype
+  står i sakstype-fila. Bruk organisasjonens regel for det som går på tvers, eller som trenger en ansvarlig.
+- **Ikke gjør:** Ikke legg en regel som skal følge sakstypen til alle kunder, på organisasjonsnivå. Ikke bruk sakstype
   eller ansvarlig i en betingelse på sakstypen.
-- **Hvorfor:** Sakstypens regler er konfig og følger sakstypen ved utrulling og kopi. Organisasjonens regler må settes
-  i hver organisasjon. Sakstypen er gitt i en sakstyperegel, og et medlem finnes ikke i en annen org.
+- **Hvorfor:** Sakstypens regler står i fila og følger sakstypen ved promoteringen og når filene kopieres til et
+  kunderepo. Organisasjonens regler må settes i hver organisasjon. Sakstypen er gitt i en sakstyperegel, og et medlem finnes ikke i en annen org.
 
 ```yaml
 aiCapabilityRules:

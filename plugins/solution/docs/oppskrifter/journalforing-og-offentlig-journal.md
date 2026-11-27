@@ -81,6 +81,8 @@ saken → saksmappen og journalpostene i arkivet → offentlig journal fra arkiv
   journalføringen som et steg før sendingen.
 - [Endring og klage](endring-og-klage.md): klagesaken får sin egen saksmappe, ikke saksmappen til vedtaket.
 - Sakstittelen settes i inntaket, så regelen om personnavn må med der.
+- [Innsynsbegjæring etter offentleglova](innsynsbegjaering.md): en begjæring om innsyn behandles som en egen innsynssak,
+  med sin egen saksmappe.
 
 ## Grensene
 
@@ -93,7 +95,3 @@ saken → saksmappen og journalpostene i arkivet → offentlig journal fra arkiv
 - Documaster stopper ikke en avslutning med journalposter på R; flyten må gjøre det
   (`../monstre/11-integrasjoner.md#avslutning-s-og-a`).
 - Ingen jobb kasserer KI-forslagene ennå.
-
-## Hull i reglene
-
-- Behandlingen av en innsynsbegjæring.

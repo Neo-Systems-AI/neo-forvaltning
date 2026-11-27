@@ -63,13 +63,21 @@ hendelse.
     Regler: `../monstre/12-visninger.md#ko-i-lista-sum-i-innsikt`, `../monstre/12-visninger.md#sorter-etter-jobben`,
     `../monstre/13-innsikt.md#nokkeltall-for-arbeidsmengde`
     Blir: steg i Neo: lagre visningen av køen
+11. **Gjør et krav om tilbakebetaling eller en sanksjon til en egen sak** med relasjon fra vedtaket. Det nye vedtaket
+    fattes i den nye saken ([Vedtak med begrunnelse](vedtak-med-begrunnelse.md)), og kan påklages som andre vedtak
+    ([Endring og klage](endring-og-klage.md)). Er vedtakssaken avsluttet, flytter saksbehandleren den ut av
+    «Avsluttet», knytter relasjonen og setter den tilbake.
+    Regler: `../monstre/01-sakstype.md#klage-som-egen-sakstype`, `../monstre/04-relasjoner.md#relasjoner-lages-av-mennesker`,
+    `../monstre/02-status.md#avsluttet-er-last`, `../monstre/13-innsikt.md#standardtall-for-saksbehandling`
+    Blir: `design/` og `oppsett/case-types/`
 
 ## Hvem gjør hva
 
 - **Deterministisk:** oppgavene med fristene fra vedtaket, mottaket, journalføringen og kvitteringen av rapporten, og
   hendelsen.
 - **Agenten:** vurderer rapporten mot vilkårene i vedtaket og fyller vurderingsmalen med sitat.
-- **Mennesket:** godkjenner rapporten, purrer, og avgjør om noe skal kreves tilbake eller følges opp med et nytt pålegg.
+- **Mennesket:** godkjenner rapporten, purrer, avgjør om noe skal kreves tilbake eller følges opp med et nytt pålegg,
+  og knytter den nye saken til vedtaket.
 
 ## Avhengighetene
 
@@ -79,6 +87,8 @@ hendelse.
   eget instansfelt for rapportskjemaet.
 - [Overlevering til et eksternt system etter vedtaket](overlevering-til-eksternt-system.md) når en utbetaling avhenger av
   en godkjent rapport.
+- [Endring og klage](endring-og-klage.md): tilbakebetalingen og sanksjonen bygges som en klagesak, med egen sakstype og
+  relasjon fra vedtaket.
 - [Innsikt og nøkkeltall](innsikt-og-nokkeltall.md): `rapport.mottatt` må skrives for at mottatte rapporter kan telles.
 
 ## Grensene
@@ -87,8 +97,3 @@ hendelse.
 - Forfalte frister vises per ansatt i Nøkkeltall, ikke som tall over tid
   (`../monstre/13-innsikt.md#standardtall-for-saksbehandling`).
 - Bare én utsendt forespørsel av samme slag kan stå ute om gangen (`../monstre/11-integrasjoner.md#ettersending-som-skjema`).
-
-## Hull i reglene
-
-- Hvordan en tilbakebetaling eller en sanksjon behandles; reglene nevner bare tallet
-  (`../monstre/13-innsikt.md#standardtall-for-saksbehandling`).

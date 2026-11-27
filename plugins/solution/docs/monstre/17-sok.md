@@ -3,7 +3,8 @@
 Et søk i «Søk» (`organizationSearch`) er et navn, en plass i lista og en flyt. Flyten starter med utløseren «Søk»
 (`SearchRequested`), søker i en kilde (sakene med «Søk i saker», arkivet, et register) og gir treffene tilbake med
 «Returner søketreff». Det er én mekanisme for alle søk, og org-en bestemmer hvilke som finnes. Neo leverer to: «Saker» i
-Grunnoppsett og «Arkiv» i Documaster-Løsningen.
+katalogløsningen «Grunnoppsett for saksbehandling» og «Arkiv» i katalogløsningen «Documaster». Begge tas i bruk i Neo
+(steg i Neo). Et eget søk er ikke en fil: flyten står i `oppsett/workflows/`, og søket settes opp i Neo.
 
 Søket er for å finne én ting. «Søk i saker» leser tittel, saksnummer, status og saksfeltene, ikke saksdata,
 dokumenter eller relasjoner. En kø folk går tilbake til, er en lagret visning.
@@ -25,14 +26,15 @@ dokumenter eller relasjoner. En kø folk går tilbake til, er en lagret visning.
 id: sok-ta-i-bruk-standarden
 klasse: standard
 gjelder: [organizationSearch, solution]
-krever: [00-navn-pakking-og-versjoner.md#losning-per-bruksomrade]
+krever: [00-navn-pakking-og-versjoner.md#katalogen-tas-inn-med-en-pr]
 opphav: skrevet
 ```
 
-- **Gjør:** Ta i bruk «Saker» med Grunnoppsett og «Arkiv» med Documaster-Løsningen. Lag et eget søk bare for en kilde
-  eller et utvalg de ikke dekker.
+- **Gjør:** Ta i bruk «Saker» med katalogløsningen «Grunnoppsett for saksbehandling» og «Arkiv» med katalogløsningen
+  «Documaster», i sandkassen (`00-navn-pakking-og-versjoner.md#katalogen-tas-inn-med-en-pr`). Lag et eget søk bare for en kilde eller et utvalg de ikke dekker.
 - **Ikke gjør:** Ikke lag en kopi av «Søk i saker» for å endre gruppenavnet.
-- **Hvorfor:** Standardsøkene følger Løsningene og får rettelsene deres. En kopi gjør ikke det.
+- **Hvorfor:** Standardsøkene er vedlikeholdt av Neo, og en ny versjon kan tas inn på samme vei som resten av
+  katalogløsningen. En kopi har ingen versjon å ta inn.
 
 ## sok-ikke-for-ko Søk er for å finne én ting; en liste du går tilbake til, er en lagret visning
 
@@ -89,7 +91,8 @@ krever: [00-navn-pakking-og-versjoner.md#flyter-lander-som-utkast]
 opphav: skrevet
 ```
 
-- **Gjør:** Aktiver flyten etter at Løsningen er rullet ut.
+- **Gjør:** Aktiver flyten i Neo når den er gjennomført og promotert, eller når katalogløsningen er tatt i bruk (steg i
+  Neo).
 - **Ikke gjør:** Ikke meld fra om et nytt søk før flyten er slått på.
 - **Hvorfor:** Flyten lander som utkast. Søket står i «Søk» med en gang, men som utilgjengelig til flyten er aktiv.
 
@@ -102,10 +105,11 @@ gjelder: [organizationSearch.position, organizationSearch.enabled]
 opphav: skrevet
 ```
 
-- **Gjør:** Sett `position` så søkene fra ulike Løsninger ikke kolliderer, og la `enabled` stå på. La org-ens
+- **Gjør:** Sett `position` så søkene fra ulike løsninger ikke kolliderer, og la `enabled` stå på. La org-ens
   administrator flytte, gi nytt navn og slå av.
-- **Ikke gjør:** Ikke prøv å endre rekkefølgen hos en kunde med en ny utrulling.
-- **Hvorfor:** En ny kopi får plassen og bryteren fra malen; en kopi som alt finnes, er administratorens.
+- **Ikke gjør:** Ikke prøv å endre rekkefølgen i produksjonen med en ny promotering.
+- **Hvorfor:** Et nytt søk får plassen og bryteren fra sandkassen ved promoteringen; et søk som alt finnes i
+  produksjonen, er administratorens.
 
 ## sok-ser-som-medlemmet Søket viser bare det den som søker, kan se
 
@@ -203,5 +207,6 @@ opphav: skrevet
 - **Gjør:** Sett `caseTypeId` når søket bare skal gi saker av én type, og navngi søket etter den. La feltet stå tomt for
   alle sakstyper.
 - **Ikke gjør:** Ikke filtrer treffene etter søket i flyten. Ikke pek feltet på en variabel som kan være tom.
-- **Hvorfor:** Noden søker da bare i sakstypen, og antallet stemmer. Sakstypen skrives om ved utrulling. En variabel som
-  gir ingen sakstype, stopper steget i stedet for å søke i alt.
+- **Hvorfor:** Noden søker da bare i sakstypen, og antallet stemmer. Sakstypen står med navnet i fila
+  (`ref:caseType:<slug>`) og skrives om ved promoteringen. En variabel som gir ingen sakstype, stopper steget i stedet for
+  å søke i alt.

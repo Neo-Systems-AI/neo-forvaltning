@@ -134,5 +134,5 @@ journalføring og utsending → egen hendelse → neste oppgaver → «Venter p�
 - Neo har ikke tekstbiter (`../monstre/16-skriving.md#standardformulering-i-malen`).
 - En flyt kan ikke opprette en relasjon; et menneske knytter klagesaken til vedtaket
   (`../monstre/04-relasjoner.md#relasjoner-lages-av-mennesker`).
-- En relasjon kan ikke knyttes til en avsluttet sak (`CASE_CLOSED`). En klage etter fristen blir en egen klagesak uten
-  relasjon, til Neo tillater det (`../monstre/02-status.md#avsluttet-er-last`).
+- En relasjon kan ikke knyttes til en avsluttet sak (`CASE_CLOSED`). For en klage etter fristen saksbehandleren flytter vedtakssaken ut av «Avsluttet», knytter relasjonen og setter den tilbake
+  (`../monstre/02-status.md#avsluttet-er-last`).

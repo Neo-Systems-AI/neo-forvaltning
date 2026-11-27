@@ -375,7 +375,7 @@ opphav: forslag
   innvilgelse».
 - **Ikke gjør:** Ikke gjenta begrunnelsen fra vedtaket i brevet som følger.
 - **Hvorfor:** Et dokument per forvaltningshandling gjør det klart hva som er sendt når, og hva som er arkivert mot
-  hvilket steg. Mønsteret er ikke prøvd i drift.
+  hvilket steg.
 
 Eksempel: et tilsagn om tilskudd. Beløpet er et tallfelt på saken; utbetalingsplanen og vilkårene er rader i saksdata,
 som agenten eller saksbehandleren skriver inn i brevet (`mal-ingen-lister`). Akseptfristen er et dokumentfelt satt fra

@@ -39,6 +39,7 @@ riktig, står i en regel i [mønstrene](../monstre/README.md), og oppskriften vi
 | [Overlevering til et eksternt system](overlevering-til-eksternt-system.md) | Vedtaket skal føre til noe i et annet system, én gang og etterprøvbart | Det skal utbetales, registreres eller oversendes |
 | [Endring og klage](endring-og-klage.md) | Klagen eller endringen er en egen sak, med frister, og spores til vedtaket | Vedtaket kan påklages eller endres, eller vi er sekretariat for et klageorgan |
 | [Journalføring og offentlig journal](journalforing-og-offentlig-journal.md) | Alt inn og ut journalføres riktig, og arkivet speiler saksbehandlingen | Organisasjonen har arkivplikt |
+| [Innsynsbegjæring etter offentleglova](innsynsbegjaering.md) | En begjæring om innsyn blir en egen sak, avgjøres innen fristen og får et svar med hjemmel og klageadgang | Organisasjonen er omfattet av offentleglova, eller kravene nevner innsyn eller eInnsyn |
 | [Runde med tildeling på tvers av sakene](runde-med-tildeling.md) | Søknader til en felles frist skal vurderes, sammenlignes og fordeles | Kravene nevner felles frist, ramme, rangering eller tildelingsmøte |
 | [Behandling i møte eller utvalg](behandling-i-mote.md) | Saker skal på agendaen til et møte og få utfall per punkt | Et møte, utvalg eller en nemnd behandler flere saker samlet |
 | [Fordeling og arbeidskøer](fordeling-og-arbeidskoer.md) | Lederen skal fordele, og alle skal finne sitt arbeid og det som venter | Mer enn én person jobber med sakene |

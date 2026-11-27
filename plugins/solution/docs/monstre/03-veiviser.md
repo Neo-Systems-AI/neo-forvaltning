@@ -385,10 +385,11 @@ gjelder: [caseType.wizard, solution]
 opphav: praksis
 ```
 
-- **Gjør:** Lag veiviseren i organisasjonen som bruker sakstypen, og publiser den.
-- **Ikke gjør:** Ikke regn med at en veiviser følger med en Løsning eller kan lages som partnermal.
-- **Hvorfor:** Veiviseren er unik per sakstype og eier, og den er ikke med i sakstypen som kopieres ved utrulling. Saken
-  leser den publiserte versjonen, aldri utkastet.
+- **Gjør:** Lag én fil i `oppsett/case-wizards/` per sakstype. Publiser veiviseren i Neo etter gjennomføringen (steg i
+  Neo).
+- **Ikke gjør:** Ikke regn med at gjennomføringen publiserer veiviseren. Ikke la en betingelse peke på saksbehandleren.
+- **Hvorfor:** Veiviseren er unik per sakstype, og fila bærer utkastet. Saken leser den publiserte versjonen, aldri
+  utkastet. En betingelse på saksbehandleren peker på et medlem, og da kan ikke veiviseren skrives som fil.
 
 ## veiviser-for-runden Arbeidet på tvers av sakene går i en veiviser på runden
 

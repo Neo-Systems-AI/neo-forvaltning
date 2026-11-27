@@ -15,10 +15,10 @@ Den passer ikke når opplysningen bare finnes i dokumentene parten sendte; da er
 
 ## Klossene
 
-Integrasjonen mot registeret → flyten som slår opp → kontakten til parten og saksdata med oppslagene → saksbehandleren
+Katalogløsningen for registeret, med integrasjonen der registeret krever den → flyten som slår opp → kontakten til parten og saksdata med oppslagene → saksbehandleren
 vurderer.
 
-- Integrasjonen mot registeret, med Maskinporten-klienten for de lukkede registrene
+- Katalogløsningen for hvert register, og integrasjonen for KRR og Folkeregisteret
 - Flyten som slår opp og skriver
 - Saksdatamalen med en tabell for oppslagene
 - Kartlagene på sakstypen og agentverktøyene
@@ -28,11 +28,15 @@ vurderer.
 1. **Gjør parten til sakspart**, ikke til felt.
    Regler: `../monstre/05-felt-og-saksdata.md#parten-er-sakspart`
    Blir: `design/`
-2. **Sett opp integrasjonen mot registeret i Neo**, og la flyten bruke den. Enhetsregisteret trenger ingen integrasjon.
-   Kontakt- og reservasjonsregisteret og Folkeregisteret krever kundens Maskinporten-klient og integrasjonen som velger
-   den. Hver node i flyten er bundet til integrasjonen den skal bruke.
-   Regler: `../monstre/11-integrasjoner.md#en-klient-mange-integrasjoner`
-   Blir: steg i Neo: legg inn Maskinporten-klienten og integrasjonen mot registeret
+2. **Ta i bruk katalogløsningen for hvert register kunden trenger**, i sandkassen, og ta filene inn med en PR.
+   Enhetsregisteret trenger ingen integrasjon. Kontakt- og reservasjonsregisteret krever kundens KRR-integrasjon med
+   kundens Maskinporten-klient. Folkeregisteret krever kundens KS Fiks-integrasjon og kommunens Fiks-rolle i noden. Hver
+   node i flyten er bundet til integrasjonen den skal bruke.
+   Regler: `../monstre/11-integrasjoner.md#registre-fra-katalogen`,
+   `../monstre/00-navn-pakking-og-versjoner.md#katalogen-tas-inn-med-en-pr`,
+   `../monstre/11-integrasjoner.md#en-klient-mange-integrasjoner`
+   Blir: steg i Neo: ta i bruk katalogløsningene i sandkassen, og legg inn KRR-integrasjonen og KS Fiks-integrasjonen
+   når de trengs
 3. **Skriv registerdataene på kontakten**, og forgren på konkurs der det skal stoppe saken.
    Regler: `../monstre/11-integrasjoner.md#registre-skriver-pa-kontakten`
    Blir: `oppsett/workflows/`
@@ -81,8 +85,3 @@ vurderer.
 - «Opprett kartlag» oppretter alltid et nytt lag; flyten må finne laget fra forrige kjøring selv
   (`../monstre/07-flyt.md#flyt-kartoppslag-i-saksdata`).
 - Oppslaget i Enhetsregisteret tar ikke med underenheter (`../monstre/11-integrasjoner.md#registre-skriver-pa-kontakten`).
-
-## Hull i reglene
-
-- Hvilke registre som krever en integrasjon i Neo, og hvordan den settes opp per register. Regelen
-  `../monstre/11-integrasjoner.md#registre-fra-katalogen` beskriver registrene som katalogløsninger.

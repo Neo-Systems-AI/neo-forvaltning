@@ -102,8 +102,8 @@ opphav: skrevet
   fra Opprett.
 - **Ikke gjør:** Ikke finn noe på tittel, etikett eller visningsnavn, heller ikke en oppgave på tittelen eller en
   saksdata på overskriften.
-- **Hvorfor:** Id-en til oppsettet skrives om ved deploy og følger med til en ny organisasjon. Et navn kan endres og er
-  ikke unikt. Hent-nodene filtrerer derfor bare på mal og id.
+- **Hvorfor:** I fila skrives valget som en peker med navnet (`ref:<type>:<navn>`), og Neo gjør den om til id-en. Ved
+  promoteringen skrives id-en om til produksjonens objekt. En tittel eller etikett kan endres og er ikke unik. Hent-nodene filtrerer derfor bare på mal og id.
 
 ## flyt-en-per-sakstype Lag flyten for én sakstype; del den bare når flere sakstyper trenger nøyaktig det samme
 
@@ -651,7 +651,7 @@ opphav: forslag
   «HTTP-forespørsel». Skriv det som er overlevert, som rader i en saksdatamal.
 - **Ikke gjør:** Ikke la en overlevering skje uten et spor i saken.
 - **Hvorfor:** Neo har integrasjoner mot arkivet, Altinn, SvarUt og registrene, men ikke mot et økonomisystem.
-  Hendelsen gjør overleveringen synlig og tellbar. Vi har ikke sett mønsteret prøvd for økonomi.
+  Hendelsen gjør overleveringen synlig og tellbar.
 
 Eksempel: En utbetaling av tilskudd. Saksbehandleren utløser utbetalingen med en handling på oppgaven «Utbetal
 tilskuddet». Flyten stopper hvis parten er under konkurs (det står på kontakten), legger til en rad i tabellen
@@ -943,8 +943,7 @@ opphav: forslag
 - **Ikke gjør:** Ikke sett en strøm på pause for å holde igjen hendelser til mottakeren er klar. Ikke sett strømmen bak
   en flyt på pause for å stoppe flyten; deaktiver flyten.
 - **Hvorfor:** Hver hendelse tas én gang og leveres bare til aktive strømmer med minst én aktiv abonnent. En hendelse som
-  kom mens strømmen var av, blir ikke levert når den slås på igjen, og Innsikt teller den ikke. Det er utledet av
-  hvordan leveringen virker, ikke prøvd.
+  kom mens strømmen var av, blir ikke levert når den slås på igjen, og Innsikt teller den ikke.
 
 ## webhook-abonnent-taaler-gjentak En webhook-abonnent har én mottaker, nøkkelen i headeren, og en mottaker som tåler samme hendelse to ganger
 

@@ -40,16 +40,22 @@ milepæl for foreløpig svar → handling på dokumentet → flyt: PDF, journalf
 3. **Del kilden til oppgavene**, og kopier dem inn i settet til hver sakstype som utfører plikten.
    Regler: `../monstre/06-oppgaver.md#oppgave-deling-etter-kilde`, `../monstre/06-oppgaver.md#oppgave-ett-sett-per-sakstype`
    Blir: `oppsett/task-template-sets/`
-4. **Gjør fristen for foreløpig svar til en milepæl** som regnes fra mottaket.
+4. **Gjør fristen for foreløpig svar til en milepæl** som regnes fra mottaket, og gi den en ansvarlig når saken
+   tildeles.
    Regler: `../monstre/02-status.md#rekkefolgen-er-lopet`, `../monstre/06-oppgaver.md#oppgave-milepael`,
-   `../monstre/06-oppgaver.md#oppgave-frist`
+   `../monstre/06-oppgaver.md#oppgave-frist`, `../monstre/06-oppgaver.md#oppgave-ansvarlig-tom`,
+   `../monstre/06-oppgaver.md#frist-varsles-av-neo`
    Blir: `oppsett/task-template-sets/`
-5. **Send brevet fra en handling** saksbehandleren trykker på. Flyten fryser brevet til PDF, journalfører det før
+5. **Sett varslingsoppsettet «Frister»** med hvor mange virkedager før fristen Neo skal varsle. Neo varsler den
+   ansvarlige i appen og på e-post når milepælen nærmer seg og når den er passert; ingen flyt trengs.
+   Regler: `../monstre/06-oppgaver.md#frist-varsles-av-neo`
+   Blir: steg i Neo: sett varslingsoppsettet «Frister» (én gang for organisasjonen)
+6. **Send brevet fra en handling** saksbehandleren trykker på. Flyten fryser brevet til PDF, journalfører det før
    sending og legger det i søknadens dialog.
    Regler: `../monstre/07-flyt.md#flyt-forvaltningshandling`, `../monstre/09-maler.md#mal-fryses-ved-utsending`,
    `../monstre/11-integrasjoner.md#utgaende-journalfores-for-sending`, `../monstre/11-integrasjoner.md#dialogen-er-soknadens`
    Blir: `oppsett/workflows/`, og steg i Neo: aktiver flyten.
-6. **For forhåndsvarselet: vent på uttalelsen** med samme ventestatus og venteoppgave som ved mangel. Skal uttalelsen
+7. **For forhåndsvarselet: vent på uttalelsen** med samme ventestatus og venteoppgave som ved mangel. Skal uttalelsen
    komme som et skjema i Altinn, bygges mottaket som i
    [Innhenting fra parten med et Altinn-skjema](innhenting-med-altinn-skjema.md).
    Regler: `../monstre/02-status.md#en-ventestatus`, `../monstre/06-oppgaver.md#oppgave-venter`,
@@ -58,7 +64,7 @@ milepæl for foreløpig svar → handling på dokumentet → flyt: PDF, journalf
 
 ## Hvem gjør hva
 
-- **Deterministisk:** milepælen for foreløpig svar, PDF-en, utsendingen, journalføringen, ventestatusen og
+- **Deterministisk:** milepælen for foreløpig svar og varselet før den, PDF-en, utsendingen, journalføringen, ventestatusen og
   venteoppgaven.
 - **Agenten:** kan skrive utkast til brevet og oppsummere uttalelsen i saksdatamalen. Saksbehandleren kontrollerer.
 - **Mennesket:** avgjør at brevet skal ut, og hvordan uttalelsen vektes i vedtaket.
@@ -76,7 +82,3 @@ milepæl for foreløpig svar → handling på dokumentet → flyt: PDF, journalf
 - Neo har ikke tekstbiter; standardteksten må stå i malen (`../monstre/16-skriving.md#standardformulering-i-malen`).
 - Et foreløpig svar sendes ikke av en tidsplan eller en hendelse; det er en forvaltningshandling et menneske starter
   (`../monstre/07-flyt.md#flyt-forvaltningshandling`).
-
-## Hull i reglene
-
-- Ingen regel sier hvordan saksbehandleren varsles når milepælen for foreløpig svar nærmer seg.

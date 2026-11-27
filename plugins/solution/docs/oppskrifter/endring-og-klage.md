@@ -10,8 +10,9 @@ Når saken ender i et enkeltvedtak som kan påklages (nesten alltid), eller når
 endring etter vedtaket.
 
 En klage er alltid en egen klagesak med en relasjon til vedtaket. Klagen har sine egne felt, oppgaver og frister, og
-det gjelder både når vi er underinstans for vårt eget vedtak og når vi er sekretariat for et annet organ. En søknad om
-endring mens vedtakssaken står åpen, går i vedtakssaken.
+det gjelder både når vi er underinstans for vårt eget vedtak og når vi er sekretariat for et annet organ. En omgjøring
+av eget tiltak (forvaltningsloven § 35) er på samme måte en egen sak med relasjon fra vedtaket. En søknad om endring mens
+vedtakssaken står åpen, går i vedtakssaken.
 
 Mennesket vurderer klagen. Flyten tar imot, setter status og lager oppgavene.
 
@@ -26,6 +27,7 @@ til klagen → nytt vedtak eller oversendelse i klagesaken.
 - Relasjonsinstruksen som foreslår vedtaket klagen gjelder
 - Inntaket av klagen
 - Vedtaksmalen og oversendelsesbrevet i klagesaken
+- Flyten som sender oversendelsen med SvarUt
 
 ## Slik bygges den
 
@@ -64,8 +66,8 @@ til klagen → nytt vedtak eller oversendelse i klagesaken.
    vedtakssaken når fristen er ute.
    Regler: `../monstre/02-status.md#venter-pa-klagefrist`, `../monstre/02-status.md#avsluttet-er-last`
    Blir: `oppsett/case-types/`
-8. **Gjør en klage etter fristen også til en ny klagesak**, også når den avvises. Den kan ikke knyttes til en avsluttet
-   vedtakssak i dag (se Grensene). Å gjenåpne vedtakssaken er saksbehandlerens eget valg, ikke en del av løpet.
+8. **Gjør en klage etter fristen også til en ny klagesak**, også når den avvises. En relasjon kan ikke knyttes til en
+   avsluttet sak, så saksbehandleren flytter vedtakssaken ut av «Avsluttet», knytter relasjonen og setter den tilbake. Vedtaket gjenåpnes ikke for å behandles på nytt; det er klagesaken som behandler klagen.
    Regler: `../monstre/02-status.md#avsluttet-er-last`
    Blir: `design/`
 9. **Vurder klagen og fatt nytt vedtak i klagesaken** med vedtaksmalen og utsendingen fra
@@ -76,7 +78,21 @@ til klagen → nytt vedtak eller oversendelse i klagesaken.
 10. **Lag oversendelsesbrevet** til klageinstansen som et brev, ikke et vedtak.
     Regler: `../monstre/09-maler.md#mal-typen`
     Blir: `oppsett/document-templates/`
-11. **Ta imot en søknad om endring** som en egen innsending i vedtakssaken mens den står åpen, og bestem i flyten hva
+11. **Send oversendelsen til klageinstansen med SvarUt.** Ta i bruk katalogløsningen «Send med SvarUt» i sandkassen,
+    og ta filene inn med en PR. Flyten bak handlingen lager brevet som PDF, journalfører det som utgående før sendingen,
+    og sender med noden «Send med SvarUt» med `mottakertype: organisasjon`, klageinstansens organisasjonsnummer i
+    `mottaker.digitalId` og en ekstern referanse.
+    Regler: `../monstre/00-navn-pakking-og-versjoner.md#katalogen-tas-inn-med-en-pr`,
+    `../monstre/07-flyt.md#flyt-svarut-ekstern-referanse`, `../monstre/11-integrasjoner.md#svarut-med-ekstern-referanse`,
+    `../monstre/11-integrasjoner.md#utgaende-journalfores-for-sending`, `../monstre/09-maler.md#mal-fryses-ved-utsending`
+    Blir: `oppsett/workflows/`
+12. **Gjør en omgjøring av eget tiltak til en egen sak** med relasjon fra vedtaket, som en klagesak. Er vedtakssaken
+    avsluttet, flytter saksbehandleren den ut av «Avsluttet», knytter relasjonen og setter den tilbake. Det nye vedtaket
+    fattes i den nye saken med utsendingen fra [Vedtak med begrunnelse](vedtak-med-begrunnelse.md).
+    Regler: `../monstre/01-sakstype.md#klage-som-egen-sakstype`, `../monstre/04-relasjoner.md#relasjoner-lages-av-mennesker`,
+    `../monstre/02-status.md#avsluttet-er-last`
+    Blir: `design/` og `oppsett/case-types/`
+13. **Ta imot en søknad om endring** som en egen innsending i vedtakssaken mens den står åpen, og bestem i flyten hva
     som skjer med oppgavene som alt står.
     Regler: `../monstre/11-integrasjoner.md#en-app-per-innsending`, `../monstre/07-flyt.md#flyt-oppgaven-finnes`
     Blir: `oppsett/workflows/`
@@ -84,11 +100,12 @@ til klagen → nytt vedtak eller oversendelse i klagesaken.
 ## Hvem gjør hva
 
 - **Deterministisk:** mottaket av klagen og opprettelsen av klagesaken, statusen, klageoppgavene med frist,
-  journalføringen, kvitteringen, og lukkingen av vedtakssaken når klagefristen er ute.
+  journalføringen, kvitteringen, sendingen av oversendelsen med SvarUt, og lukkingen av vedtakssaken når klagefristen
+  er ute.
 - **Agenten:** oppsummerer anførslene i en tabell i saksdata, foreslår relasjonen til vedtaket, og skriver utkast til
   nytt vedtak eller oversendelse.
 - **Mennesket:** godtar relasjonen, vurderer om klagen skal tas til følge, fatter nytt vedtak eller sender saken videre,
-  og velger selv om en avsluttet vedtakssak skal gjenåpnes.
+  bestemmer om et vedtak skal omgjøres av eget tiltak, og velger selv om en avsluttet vedtakssak skal gjenåpnes.
 
 ## Avhengighetene
 
@@ -107,12 +124,7 @@ til klagen → nytt vedtak eller oversendelse i klagesaken.
 
 - En flyt kan ikke opprette, lese eller skrive en relasjon, så klagesaken knyttes til vedtaket av et menneske
   (`../monstre/04-relasjoner.md#relasjoner-lages-av-mennesker`).
-- En relasjon kan ikke knyttes til en avsluttet sak (409 `CASE_CLOSED`), så en klage etter fristen står uten relasjon
-  til vedtaket (`../monstre/02-status.md#avsluttet-er-last`). Ønske til Neo: at en relasjon kan knyttes til en avsluttet
-  sak uten å gjenåpne den.
+- En relasjon kan ikke knyttes til en avsluttet sak (409 `CASE_CLOSED`). For en klage etter fristen og en omgjøring
+  etter at vedtakssaken er avsluttet, flytter saksbehandleren vedtakssaken ut av «Avsluttet», knytter relasjonen og
+  setter den tilbake (`../monstre/02-status.md#avsluttet-er-last`).
 - Relasjonsvisningen viser sakens felt slik de er nå, ikke da klagen ble behandlet (`../monstre/04-relasjoner.md#frys-pa-kanten`).
-
-## Hull i reglene
-
-- Hvordan et vedtak omgjøres av eget tiltak.
-- Hvordan oversendelsen til klageinstansen sendes.

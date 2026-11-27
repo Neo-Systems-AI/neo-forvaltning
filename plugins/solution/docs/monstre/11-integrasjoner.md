@@ -30,9 +30,9 @@ Substatusen i Altinn kommer i tillegg til en forsendelse, aldri i stedet for den
 
 | Hva | Hvem | Regelen |
 |---|---|---|
-| Saksmappen | Én flyt per sakstype: Documaster-løsningen eller inntaket | `en-som-oppretter-saksmappen` |
+| Saksmappen | Én flyt per sakstype: flyten fra katalogløsningen «Documaster» eller inntaket | `en-som-oppretter-saksmappen` |
 | En Altinn-innsending (søknad, ettersending, klage, rapport) | Inntaksflyten, som inngående journalpost (I) | `altinn-journalfores-i-inntaket` |
-| En henvendelse lagt i sak fra innboksen | Documaster-løsningen | `arkiv-fra-katalogen` |
+| En henvendelse lagt i sak fra innboksen | Flyten fra katalogløsningen «Documaster» | `arkiv-fra-katalogen` |
 | Et brev eller en melding med saksbehandlerens innhold | Flyten som sender, som utgående journalpost (U), før sendingen | `utgaende-journalfores-for-sending` |
 | En fast kvittering uten saksbehandlerens innhold | Ingen | `utgaende-journalfores-for-sending` |
 | Avslutningen | Neo setter S; arkivet setter A | `avslutning-s-og-a` |
@@ -308,17 +308,19 @@ opphav: skrevet
 id: arkiv-fra-katalogen
 klasse: valg
 gjelder: [solution, stream, SlaOppITabell]
-krever: [05-felt-og-saksdata.md#losningens-data-i-saksdata, 09-maler.md#mal-dokumentfelt]
+krever: [00-navn-pakking-og-versjoner.md#katalogen-tas-inn-med-en-pr, 05-felt-og-saksdata.md#losningens-data-i-saksdata, 09-maler.md#mal-dokumentfelt]
 opphav: skrevet
 ```
 
-- **Gjør:** Ta i bruk Løsningen «Documaster». I kundens kopi: velg integrasjonen i nodene, filtrer strømmen «Saker til
+- **Gjør:** Sett opp integrasjonen mot Documaster i Neo ([Documaster](../../../documaster/docs/documaster.md)), og ta i
+  bruk katalogløsningen «Documaster» i sandkassen. Ta filene inn i `oppsett/` med en PR, og gjør resten i filene: velg
+  integrasjonen i nodene, filtrer strømmen «Saker til
   arkivet» på sakstypene som skal arkiveres, fyll tabellen for arkivverdier (én rad per sakstype: arkivdel, klasse,
   administrativ enhet, skjerming), valgene i dokumentfeltet «Dokumenttype» og tabellen over dokumenttyper som arkiveres
   (journalposttype U, N eller X).
 - **Ikke gjør:** Ikke bygg egne flyter for saksmappen, dokumentene og henvendelsene. Ikke legg arkivverdiene i en
   instruks.
-- **Hvorfor:** Løsningen oppretter saksmappen, journalfører dokumentene og henvendelsene som legges i saken, og avslutter
+- **Hvorfor:** Katalogløsningen oppretter saksmappen, journalfører dokumentene og henvendelsene som legges i saken, og avslutter
   saksmappen. En dokumenttype som ikke står i tabellen, arkiveres ikke. En instruks leses av agenten, ikke av flyten.
   Documaster er det eneste arkivet med en ferdig løsning.
 
@@ -480,15 +482,19 @@ OppslagEnhetsregisteret:
 id: registre-fra-katalogen
 klasse: valg
 gjelder: [solution, OppslagEnhetsregisteret, OppslagKrr, OppslagFolkeregister]
+krever: [00-navn-pakking-og-versjoner.md#katalogen-tas-inn-med-en-pr]
 opphav: skrevet
 ```
 
-- **Gjør:** Ta i bruk «Enhetsregisteret», «Kontakt- og reservasjonsregisteret» og «Folkeregisteret» som Løsninger, etter
-  hva kunden trenger. Enhetsregisteret trenger ingen integrasjon; KRR og Folkeregisteret krever at kunden har satt opp
-  tilgangen ([Kontakt- og reservasjonsregisteret](../../../krr/docs/krr.md), [KS Fiks](../../../fiks/docs/fiks.md)).
-- **Ikke gjør:** Ikke kopier registerflytene inn i sakstypens egen Løsning. Ikke regn med at en sending sjekker KRR av seg
+- **Gjør:** Ta i bruk katalogløsningene «Enhetsregisteret», «Kontakt- og reservasjonsregisteret» og «Folkeregisteret»
+  i sandkassen, etter hva kunden trenger, og ta filene inn med en PR. Enhetsregisteret trenger ingen integrasjon: noden
+  «Oppslag i Enhetsregisteret» kaller det åpne API-et. KRR krever kundens KRR-integrasjon med kundens Maskinporten-klient
+  ([Kontakt- og reservasjonsregisteret](../../../krr/docs/krr.md)). Folkeregisteret krever kundens KS Fiks-integrasjon
+  og kommunens Fiks-rolle i noden ([KS Fiks](../../../fiks/docs/fiks.md)). Integrasjonene settes opp i Neo.
+- **Ikke gjør:** Ikke kopier registerflytene inn i filene til en løsning. Ikke regn med at en sending sjekker KRR av seg
   selv.
-- **Hvorfor:** Kunden tar i bruk det den trenger og får oppdateringene. KRR leses bare når en flyt gjør oppslaget.
+- **Hvorfor:** Hvert register er én felles flyt på kontakten, som alle løsningene bruker
+  (`00-navn-pakking-og-versjoner.md#felles-er-en-fil`). KRR leses bare når en flyt gjør oppslaget.
 
 ## en-klient-mange-integrasjoner Integrasjonene velger Maskinporten-klienten, og hver node er bundet til én integrasjon
 
@@ -547,14 +553,14 @@ opphav: skrevet
 id: postboks-med-samme-adresse
 klasse: felle
 gjelder: [EmailNotification.sender]
-krever: [00-navn-pakking-og-versjoner.md#losning-har-det-den-peker-pa]
+krever: [00-navn-pakking-og-versjoner.md#oppsettet-har-det-flyten-peker-pa]
 opphav: skrevet
 ```
 
-- **Gjør:** Bruk standard avsender i noden når det går. Sender en Løsning fra en bestemt postboks, koble en postboks med
-  samme adresse i hver organisasjon som tar Løsningen i bruk.
+- **Gjør:** Bruk standard avsender i noden når det går. Sender en flyt fra en bestemt postboks, koble en postboks med
+  samme adresse i sandkassen og i produksjonen.
 - **Ikke gjør:** Ikke pek på en postboks som bare finnes hos partneren.
-- **Hvorfor:** Ved utrulling slås postboksen opp på adressen. Finnes den ikke, står det som et gap.
+- **Hvorfor:** Ved promoteringen slås postboksen opp på adressen. Finnes den ikke, står det som et gap.
 
 ## kartkilder-bare-det-som-brukes Slå på bare kartkildene sakstypene og flytene bruker
 

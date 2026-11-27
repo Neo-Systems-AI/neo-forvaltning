@@ -19,7 +19,7 @@ tilsagn, bygges med [Innhenting fra parten med et Altinn-skjema](innhenting-med-
 Handling på kontrolloppgaven → flyt (mangelbrev, journalpost, forespørsel ut, venteoppgave, ventestatus) → svaret inn
 (Altinn eller e-post) → flyten lukker venteoppgaven og setter saken tilbake til behandling.
 
-- Ventestatusen og venteoppgaven
+- Ventestatusen og venteoppgaven, og oppgaven når fristen er ute
 - Mangelbrevet
 - Flyten som sender forespørselen, og flyten som tar imot svaret
 - Altinn-delen: [Innhenting fra parten med et Altinn-skjema](innhenting-med-altinn-skjema.md)
@@ -58,13 +58,22 @@ Handling på kontrolloppgaven → flyt (mangelbrev, journalpost, forespørsel ut
 8. **Kryss av i vurderingen når parten ikke svarte**, så vedtaket kan si det.
    Regler: `../monstre/05-felt-og-saksdata.md#prosa-i-text-fakta-i-fields`
    Blir: `oppsett/case-data-templates/`
+9. **Gi saksbehandleren valget når fristen går ut uten svar.** Flyten som sendte forespørselen, venter med «Vent» til
+   fristen er ute, leser venteoppgaven på nytt med «Hent oppgaver», og lager oppgaven «Fristen er ute: <hva det ventes
+   på>» hvis venteoppgaven fortsatt er åpen. Saksbehandleren velger mellom å purre med en ny frist og å avgjøre saken på
+   det som foreligger; avgjøres den, krysses det av i steg 8. Varselet før fristen kommer fra venteoppgaven, ikke fra
+   flyten.
+   Regler: `../monstre/06-oppgaver.md#frist-ute-gir-oppgave`, `../monstre/06-oppgaver.md#frist-varsles-av-neo`,
+   `../monstre/07-flyt.md#flyt-handling-leser-objektet`
+   Blir: `oppsett/workflows/` og `oppsett/task-template-sets/`
 
 ## Hvem gjør hva
 
 - **Deterministisk:** utsendingen, journalføringen, ventestatusen, venteoppgaven, at svaret finner saken, og at saken går
   tilbake til behandling når ingenting står ute.
 - **Agenten** kan skrive utkast til mangelbrevet fra malen og behandlingsregelen. Saksbehandleren går gjennom det.
-- **Mennesket** bestemmer hva det spørres om, trykker på handlingen, og vurderer svaret.
+- **Mennesket** bestemmer hva det spørres om, trykker på handlingen, vurderer svaret, og velger mellom purring med ny
+  frist og avgjørelse på det som foreligger når fristen er ute.
 
 ## Avhengighetene
 
@@ -83,8 +92,3 @@ Handling på kontrolloppgaven → flyt (mangelbrev, journalpost, forespørsel ut
 - Grensene for Altinn-delen (én forespørsel av samme slag om gangen, reglene i tråden) står i
   [Innhenting fra parten med et Altinn-skjema](innhenting-med-altinn-skjema.md).
 - E-postnoden har ett forsøk, og det finnes ingen reserveavsender (`../monstre/07-flyt.md#flyt-epost-ut-fra-postboksen`).
-
-## Hull i reglene
-
-- Hva som skjer når fristen på venteoppgaven går ut: purring, ny frist eller avgjørelse på det som foreligger, og om en
-  flyt med noden «Vent» skal sette det i gang.

@@ -51,15 +51,20 @@ gjøres derfor før visningene.
    Regler: `../monstre/06-oppgaver.md#oppgave-ansvarlig-tom`, `../monstre/07-flyt.md#flyt-tildeling-fra-variabel`,
    `../monstre/10-skjema-og-innboks.md#tildel-en-person`, `../monstre/14-tilgang.md#ansvarlig-ser-sin-sak`
    Blir: `oppsett/workflows/` når en flyt tildeler, ellers steg i Neo: lederen tildeler i saken
-5. **Gi oppgavene frister**, så Nøkkeltall viser arbeidsmengden og fristene per ansatt. Nøkkeltall leser kategorien
+5. **La en flyt fordele etter et felt** når organisasjonen fordeler etter fagområde. «Slå opp i tabell» gjør fagområdet
+   om til et medlem, og «Tildel sak» tildeler saken til det medlemmet. Kunden fyller tabellen, og et fagområde uten rad
+   stopper flyten.
+   Regler: `../monstre/07-flyt.md#flyt-tabell-for-oppslag`, `../monstre/07-flyt.md#flyt-tildeling-fra-variabel`
+   Blir: `oppsett/workflows/`
+6. **Gi oppgavene frister**, så Nøkkeltall viser arbeidsmengden og fristene per ansatt. Nøkkeltall leser kategorien
    fra steg 1 og fristene; ingen rapport trengs.
    Regler: `../monstre/06-oppgaver.md#oppgave-frist`, `../monstre/13-innsikt.md#nokkeltall-for-arbeidsmengde`
    Blir: `oppsett/task-template-sets/`
-6. **Bruk standardsøket for saker** til å finne én sak. Lag ikke søk for køer.
+7. **Bruk standardsøket for saker** til å finne én sak. Lag ikke søk for køer.
    Regler: `../monstre/17-sok.md#sok-ta-i-bruk-standarden`, `../monstre/17-sok.md#sok-ikke-for-ko`,
    `../monstre/17-sok.md#sok-finner-pa-saksfelt`, `../monstre/17-sok.md#sok-ser-som-medlemmet`
    Blir: steg i Neo: standardsøket er slått på
-7. **Lag et eget søk** bare for en kilde eller et utvalg standardsøket ikke dekker, som en flyt fra «Søk» til
+8. **Lag et eget søk** bare for en kilde eller et utvalg standardsøket ikke dekker, som en flyt fra «Søk» til
    «Returner søketreff».
    Regler: `../monstre/17-sok.md#sok-navn-er-kilden`, `../monstre/17-sok.md#sok-en-sakstype`,
    `../monstre/17-sok.md#sok-felt-bare-det-kilden-kan`, `../monstre/17-sok.md#sok-en-bane-per-sporsmal`,
@@ -69,9 +74,9 @@ gjøres derfor før visningene.
 
 ## Hvem gjør hva
 
-- **Deterministisk:** køene, sorteringen, Nøkkeltall og en tildeling en flyt gjør etter en fast regel.
+- **Deterministisk:** køene, sorteringen, Nøkkeltall og en tildeling en flyt gjør etter et felt, som fagområdet.
 - **Agenten:** har ingen rolle i køene.
-- **Mennesket:** lederen fordeler. Saksbehandleren tar saker fra køen og lager private visninger for egne behov.
+- **Mennesket:** lederen fordeler, også etter belastning eller tur, og fyller tabellen flyten fordeler etter. Saksbehandleren tar saker fra køen og lager private visninger for egne behov.
 
 ## Avhengighetene
 
@@ -91,7 +96,5 @@ gjøres derfor før visningene.
 - Et filter på et felt som ikke finnes, gir en tom liste uten feilmelding (`../monstre/12-visninger.md#felt-i-filteret-ma-finnes`).
 - En henvendelse kan ikke tildeles et team, og mottakeren får ikke varsel (`../monstre/10-skjema-og-innboks.md#tildel-en-person`).
 - En visning gir ingen tilgang (`../monstre/12-visninger.md#visning-gir-ikke-tilgang`).
-
-## Hull i reglene
-
-- Hvordan en flyt fordeler saker automatisk: etter fagområde, belastning eller tur.
+- «Tildel sak» tildeler bare en person, ikke et team eller en rolle (`../monstre/07-flyt.md#flyt-tildeling-fra-variabel`).
+- Ingen node fordeler etter belastning eller tur. Den fordelingen gjør lederen.
