@@ -22,7 +22,8 @@ pluginen [`forvaltning`](../forvaltning/README.md).
 
 01 tas én gang per repo; resten per løsning. 08 og 09 går i runder, med 05,
 06 og 07 imellom, til funnene er tatt. Promoteringen fra sandkassen til produksjonen gjør kundens org-admin i Neo.
-Publiseringen av en løsning står ikke i løypa før Neo har den.
+Å pakke løsningen som en Løsning i Neo er ikke en del av løypa: i dag lager bare Neo og partnere Løsninger,
+og kunden tar dem i bruk fra katalogen.
 
 **07–09 har sitt hjem her.** Testene for konfig i Neo skrives, kjøres og sorteres med disse skillene; det finnes ingen
 egen kopi andre steder. Testcasene og personaene lages i sandkassen av et menneske, til Neo har et API for det; 07

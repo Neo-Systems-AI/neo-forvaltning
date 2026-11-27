@@ -204,7 +204,7 @@ opphav: praksis
   innsyn (forvaltningsloven §§ 18 og 27–29), som fast tekst i hver vedtaksmal.
 - **Ikke gjør:** Ikke la klageadgangen være en veiledning saksbehandleren må huske å fylle.
 - **Hvorfor:** Opplysningene er påkrevd i hvert enkeltvedtak og er de samme hver gang. En mal kan ikke ta inn tekst fra en
-  annen mal, så seksjonen må stå i hver vedtaksmal, og partneren holder dem like.
+  annen mal, så seksjonen må stå i hver vedtaksmal, og den som bygger, holder dem like.
 
 ## mal-ingen-fast-frist En frist i brevet er en verdi på brevet, satt av den som sender det
 

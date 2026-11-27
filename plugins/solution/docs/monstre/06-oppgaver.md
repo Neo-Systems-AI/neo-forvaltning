@@ -89,7 +89,7 @@ opphav: praksis
 - **Gjør:** Sett steget på hver oppgave, med gruppens og stegets navn. Legg oppgavene i rekkefølgen de gjøres;
   rekkefølgen i lista er rekkefølgen i saken.
 - **Ikke gjør:** Ikke lag en status for hvert stykke arbeid.
-- **Hvorfor:** Steget pekes ut med navnene og slås opp i sakstypens statusløp ved deploy. Uten steg lander oppgavene
+- **Hvorfor:** Steget pekes ut med navnene og slås opp i sakstypens statusløp når fila skrives i Neo. Uten steg lander oppgavene
   under «uten steg», og saksbehandleren mister orienteringen status og oppgaver skal gi sammen.
 
 ```yaml

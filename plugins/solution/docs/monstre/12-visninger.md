@@ -96,8 +96,8 @@ opphav: praksis
 
 - **Gjør:** Filtrer «Mine …» på `@me` i `assignedTo` (saker), `responsible` eller `responsibleOrAssigned` (oppgaver).
 - **Ikke gjør:** Ikke legg en bestemt person i filteret.
-- **Hvorfor:** Medlemmer er ikke konfig og kan ikke skrives om til en annen org. Utrullingen avviser en visning med en
-  person i filteret, og visningen slutter å virke når personen bytter jobb.
+- **Hvorfor:** Medlemmer er ikke konfig og kan ikke skrives om til en annen org. Neo avviser en fil med en person i
+  filteret i planen, og visningen slutter å virke når personen bytter jobb.
 
 ```yaml
 name: Mine åpne saker
