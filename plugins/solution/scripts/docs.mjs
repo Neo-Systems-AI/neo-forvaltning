@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Hvor dokumentasjonen til pluginen ligger (mønstrene for god konfig og eSignering), så skillene leser samme versjon
+// Hvor dokumentasjonen til pluginen ligger (mønstrene for god konfig, oppskriftene og eSignering), så skillene leser samme versjon
 // som pluginen. Dokumentasjonen står i `docs/` i plugin-mappa og følger med når pluginen installeres.
 //
-//   node docs.mjs [monstre]     skriver stien, eller feiler med hvorfor
+//   node docs.mjs [monstre | oppskrifter]   skriver stien, eller feiler med hvorfor
 import { existsSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";

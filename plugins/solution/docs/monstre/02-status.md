@@ -15,7 +15,7 @@ av seg selv.
 | Står saken på noen andre under behandlingen? | **Én status** i `VENTER`, med venteoppgaver | `en-ventestatus` |
 | Må parten gjøre noe etter vedtaket før saken går videre? | **En egen status** i `VENTER` | `venting-etter-vedtaket` |
 | Gjentar det seg et ukjent antall ganger (utbetalinger, rapporter)? | **Ingen status.** Rader i saksdata, oppgaver og hendelser | `venting-etter-vedtaket` |
-| Er det en klage på vårt eget vedtak? | **Klagesporet** som statuser sist i løpet | `klage-i-samme-sak` |
+| Er det en klage på vedtaket? | **Ingen status.** En egen klagesak; vedtakssaken venter på klagefristen | `venter-pa-klagefrist` |
 | Er det at et brev er sendt? | **Ingen status.** Brevet står i saken | `status-har-en-leser` |
 | Beskriver det noe utenfor saken (utlysningen, runden)? | **Ingen status.** Eventuelt en egen sakstype | `status-om-saken` |
 
@@ -105,12 +105,12 @@ opphav: skrevet
 
 - **Gjør:** Legg alt som skal gjøres med saken, før statusen i `AVSLUTTET`: siste brev, siste steg i veiviseren,
   effektueringen, journalføringen. Bruk `AKTIV` for statuser der saken fortsatt skal endres, selv om de ligger sent.
-  Gjenåpne saken, opprett en ny eller avvis forslaget når en relasjon peker på en lukket sak.
+  Opprett en ny sak eller avvis forslaget når en relasjon peker på en lukket sak.
 - **Ikke gjør:** Ikke sett en status til `AVSLUTTET` hvis noen skal skrive i saken etterpå. Ikke regn med å knytte nye
   relasjoner til en avsluttet sak.
 - **Hvorfor:** All skriving i en sak i `AVSLUTTET` avvises (`CASE_CLOSED`), bortsett fra å bytte status, arkivere eller
   kassere. Det gjelder også relasjonene og bekreftelsene i veiviseren. Kommer en klage etter at saken er avsluttet,
-  gjenåpnes saken ved at statusen byttes til «Klage mottatt».
+  blir den en egen klagesak (`01-sakstype.md#klage-som-egen-sakstype`).
 
 ## en-ventestatus Én ventestatus, og venteoppgaver som sier hva det ventes på
 
@@ -222,29 +222,33 @@ opphav: skrevet
   navnet. Navnet er nøkkelen i gruppen og overskrives ikke ved oppdatering, og en oppdatering som fjerner en status noe
   står i, avvises. Et omdøpt navn gir ingen feil før noe kjører.
 
-## klage-i-samme-sak Klagen går i samme sak når vi er underinstans
+## venter-pa-klagefrist Etter vedtaket venter saken på klagefristen, og flyten avslutter den når fristen er ute
 
 ```yaml
-id: klage-i-samme-sak
+id: venter-pa-klagefrist
 klasse: valg
-gjelder: [caseType.statusGroups, caseType.statusGroups.options]
-krever: [01-sakstype.md#klage-som-egen-sakstype]
+gjelder: [caseType.statusGroups.options, caseType.statusGroups.options.category, Vent, Vent.varighet, Vent.enhet]
+krever: [01-sakstype.md#klage-som-egen-sakstype, en-vedtaksstatus]
 opphav: praksis
 ```
 
-- **Gjør:** Legg klagesporet som egne statuser sist i løpet: «Klage mottatt» (`AKTIV`), «Oversendt klageinstans»
-  (`VENTER`). La flyten som tar imot klagen, sette statusen og lage klageoppgavene med fristen fra da. Fatt nytt vedtak
-  med samme mal og samme utsending som det første; oversendelsen til klageinstansen er et brev, ikke et vedtak.
-- **Ikke gjør:** Ikke lag en egen sakstype for klagen når klagen gjelder vårt eget vedtak.
-- **Hvorfor:** Underinstansen vurderer sitt eget vedtak på nytt, i samme sak og med samme grunnlag.
+- **Gjør:** Legg en status etter vedtaket, «Venter på klagefrist» (`VENTER`). La flyten som sender vedtaket, sette den,
+  vente med «Vent» i klagefristen og postgangen, lese statusen på nytt, og sette saken til «Avsluttet» bare om den
+  fortsatt står i «Venter på klagefrist». En klage innen fristen flytter ikke vedtakssaken: klagen blir en egen
+  klagesak, relasjonen knyttes mens vedtakssaken venter, og flyten lukker vedtakssaken når fristen er ute.
+- **Ikke gjør:** Ikke avslutt saken når vedtaket sendes. Ikke la noen gå over sakene for hånd for å lukke dem. Ikke hold
+  vedtakssaken åpen mens klagen behandles.
+- **Hvorfor:** En klage innen fristen skal kunne knyttes til vedtakssaken med en relasjon, og en avsluttet sak tar ikke
+  imot nye relasjoner (`avsluttet-er-last`). Det er klagesaken som bærer klagen videre, så vedtakssaken har ingenting
+  igjen å gjøre etter fristen. Flyten lukker alle saker likt, så ingen blir stående åpne. Har saksbehandleren selv flyttet
+  saken, for eksempel for å omgjøre vedtaket, lar flyten den stå.
 
 ```yaml
-# Eksempel: klagesporet etter vedtaksfasen
-statusGroups: [..., {label: Klage}, {label: Avsluttet}]
+# Eksempel: etter vedtaksfasen
 statusOptions:
-  - { groupLabel: Klage,     label: Klage mottatt,          sequence: 9,  category: AKTIV }
-  - { groupLabel: Klage,     label: Oversendt klageinstans, sequence: 10, category: VENTER }
-  - { groupLabel: Avsluttet, label: Avsluttet,              sequence: 11, category: AVSLUTTET }
+  - { groupLabel: Vedtak,    label: Vedtak fattet,          sequence: 7, category: AKTIV }
+  - { groupLabel: Vedtak,    label: Venter på klagefrist,   sequence: 8, category: VENTER }
+  - { groupLabel: Avsluttet, label: Avsluttet,              sequence: 9, category: AVSLUTTET }
 ```
 
 ## fire-farger Fire farger med fire betydninger

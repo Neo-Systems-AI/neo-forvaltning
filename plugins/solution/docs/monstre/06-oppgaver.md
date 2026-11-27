@@ -302,7 +302,7 @@ gjelder: [caseType.taskTemplateSets, caseType.taskTemplateSets.taskTemplateSet, 
 opphav: praksis
 ```
 
-- **Gjør:** Lag ett sett per sakstype. Trenger flere sakstyper de samme oppgavene (klagesporet, foreløpig svar), lag en
+- **Gjør:** Lag ett sett per sakstype. Trenger flere sakstyper de samme oppgavene (foreløpig svar, forhåndsvarsel), lag en
   kopi i hvert sett og hold kilden samlet i én definisjon du kopierer fra.
 - **Ikke gjør:** Ikke knytt samme sett til flere sakstyper.
 - **Hvorfor:** Oppgavens steg er én rad i én sakstypes statusløp. På en annen sakstype får oppgaven ikke steget sitt, og

@@ -858,6 +858,39 @@ flowEventType:
       options: [{ key: drift, label: "Driftstilskudd" }, { key: prosjekt, label: "Prosjekttilskudd" }]
 ```
 
+## flyt-hendelse-og-saksdata-fra-samme-verdier Den egne hendelsen og raden i saksdata skrives i samme flyt, fra de samme verdiene
+
+```yaml
+id: flyt-hendelse-og-saksdata-fra-samme-verdier
+klasse: valg
+gjelder: [SkrivHendelse, SkrivHendelse.hendelsestype, flowEventType.fields, caseDataTemplate]
+krever: [flyt-egen-hendelse, flyt-saksdata-adresse]
+opphav: praksis
+```
+
+- **Gjør:** Når det som skjedde både skal stå i saken og telles eller leveres videre, les verdiene én gang i flyten, og
+  skriv raden i saksdata og den egne hendelsen fra de samme variablene i samme gren.
+- **Ikke gjør:** Ikke la én flyt skrive raden og en annen skrive hendelsen. Ikke skriv den ene fra en verdi den andre
+  ikke har, og ikke regn ut beløpet på nytt for den ene.
+- **Hvorfor:** Raden er det saksbehandleren ser i saken, og hendelsen er det Innsikt teller og de andre systemene får.
+  Skrives de fra hver sin kilde, kan de si noe ulikt, og ingen merker det før tallene ikke stemmer.
+
+## system-lytter-pa-hendelsen Et eksternt system lytter på den egne hendelsen, og legges ikke inn i flyten som skriver den
+
+```yaml
+id: system-lytter-pa-hendelsen
+klasse: valg
+gjelder: [stream, stream.subscribers, webhookSubscriber, HendelseMottatt, HTTPForespørsel]
+krever: [flyt-egen-hendelse, flyt-strom-sender-det-som-trengs, webhook-abonnent-taaler-gjentak]
+opphav: praksis
+```
+
+- **Gjør:** Gi hvert eksterne system sin egen abonnent på strømmen med den egne hendelsen: en webhook når systemet tar
+  imot hendelsen slik den er, ellers en egen flyt på «Hendelse mottatt» som kaller systemets API.
+- **Ikke gjør:** Ikke legg kallet til et nytt system inn i flyten som fatter vedtaket eller skriver hendelsen.
+- **Hvorfor:** Flyten for vedtaket endres ikke når et system kommer til eller går bort. Hvert system feiler for seg: et
+  API som er nede, stopper ikke vedtaket, raden eller de andre mottakerne.
+
 ## flyt-strom-sender-det-som-trengs En strøm til et annet system sender bare feltene mottakeren trenger
 
 ```yaml

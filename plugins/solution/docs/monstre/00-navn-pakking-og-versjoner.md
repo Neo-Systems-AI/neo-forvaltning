@@ -140,7 +140,7 @@ krever: [06-oppgaver.md#oppgave-ett-sett-per-sakstype]
 opphav: forslag
 ```
 
-- **Gjør:** Kall settet det samme som sakstypen. Et delt sett (for eksempel klagesporet) får navnet på sporet.
+- **Gjør:** Kall settet det samme som sakstypen. Et delt sett (for eksempel foreløpig svar) får navnet på det det gjør.
 - **Ikke gjør:** Ikke kall settet «Standard» eller «Oppgaver».
 - **Hvorfor:** Settet velges i en liste der alle sakstypers sett står.
 
@@ -336,5 +336,5 @@ opphav: forslag
 - { tittel: "Test — innvilget i sin helhet",   tsk_utfall: innvilget }
 - { tittel: "Test — avslag",                    tsk_utfall: avslag }
 - { tittel: "Test — venter på ettersending",    status: "Venter på svar" }
-- { tittel: "Test — klage på avslag",           status: "Klage mottatt" }
+- { tittel: "Test — venter på klagefrist",    status: "Venter på klagefrist" }
 ```

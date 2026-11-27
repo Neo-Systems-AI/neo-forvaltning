@@ -8,8 +8,8 @@ description: Bygger konfigen til en løsning som filer i Neos eget format i opps
 Konfigen er løsningen slik Neo skal ha den, i filene Neo selv leser og skriver. Den bygges fra kravene med mønstrene,
 aldri ved å kopiere dagens prosess eller et annet oppsett, og hvert krav sier hva det ble.
 
-**Inn:** kravene, designet og `losning.yaml`, det som er felles i `felles/`, mønstrene for god konfig i
-`${CLAUDE_PLUGIN_ROOT}/docs/monstre/`, skjemaet fra Neo, og det som alt står i `oppsett/`. **Ut:** filene i `oppsett/`
+**Inn:** kravene, designet og `losning.yaml` (med oppskriftene designet valgte), det som er felles i `felles/`,
+oppskriftene i `${CLAUDE_PLUGIN_ROOT}/docs/oppskrifter/`, mønstrene for god konfig i `${CLAUDE_PLUGIN_ROOT}/docs/monstre/`, skjemaet fra Neo, og det som alt står i `oppsett/`. **Ut:** filene i `oppsett/`
 i roten av repoet, og `blir` på hvert krav.
 
 ## Formatet
@@ -28,6 +28,8 @@ i roten av repoet, og `blir` på hvert krav.
   `felles/krav/` peker på den. Ett objekt i Neo, én fil.
 - **Det formatet ikke har ennå,** og det som er miljø og ikke konfig (team, roller, tilgang), står i designet som et
   steg et menneske gjør i Neo, på kravet det oppfyller (`blir: { steg, hvorfor }`).
+- **Bygg etter oppskriftene designet valgte,** i rekkefølgen stegene står. Hvert steg sier hva det blir: en fil i
+  `oppsett/`, et valg i `design/`, eller et steg i Neo. Reglene steget viser til, er de som gjelder for klossen.
 
 ## Mønstrene
 

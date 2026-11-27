@@ -42,6 +42,9 @@ for den som står i skjermen.
   runden, merket som ønske til Neo, og går til den som forvalter (i `kunde.yaml`), som tar det videre til Neo. Kravet
   får ønsket som det det ble (`blir: { onske, hvorfor }`), til produktet har det.
 - **Test:** rettingen i testplanen eller testcasen.
+- **Oppskrift:** en kombinasjon av klosser som virket i runden, og som ingen oppskrift har ennå, foreslås som en ny
+  oppskrift i pluginen (eller som en endring i en som finnes), så neste løsning får den. Forslaget sier behovet, når den
+  passer, klossene og hvordan de kobles, og reglene. Kunnskap om én kloss som mangler, blir en regel i flaten.
 
 Under pakkene: sammenhengene (hvilke pakker henger sammen eller må komme i en rekkefølge), og det personen avgjør.
 Høy alvorlighet og det som har gått tilbake, først.

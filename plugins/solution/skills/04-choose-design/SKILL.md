@@ -8,7 +8,8 @@ description: Gjør de store valgene for en løsning fra kravene - hva den bygger
 Designet er de få valgene som former alt oppsettet etterpå. Tas de underveis i byggingen, tas de ett objekt om gangen
 og blir ulike. Tas de her, med personen, bygges alt etter de samme.
 
-**Inn:** kravene, forståelsen, det som gjelder hele kunden, og mønstrene for god konfig i
+**Inn:** kravene, forståelsen, det som er felles, oppskriftene i `${CLAUDE_PLUGIN_ROOT}/docs/oppskrifter/` (hvordan
+klossene i Neo settes sammen for behov man kjenner igjen), og mønstrene for god konfig i
 `${CLAUDE_PLUGIN_ROOT}/docs/monstre/` (les `grunnregler.md` og beslutningstabellene øverst i flatene). **Ut:** `design/` i
 løsningen, valgene som gjelder på tvers i `felles/design/`, og `losning.yaml` (hva løsningen bygger på og hvilke
 integrasjoner den bruker).
@@ -28,14 +29,18 @@ integrasjoner den bruker).
 ## Slik gjør du det
 
 1. **Les kravene som en helhet.** Hvilke krav trekker i hver sin retning, og hvilke valg avgjør mange krav samtidig?
-2. **Sjekk det som finnes.** Finnes en standardløsning fra Neo for prosessen, er den utgangspunktet: tilpass den, og
+2. **Finn oppskriftene som passer.** Gå gjennom «Når den passer» i oppskriftene mot kravene, og skriv i `design/` hvilke
+   løsningen bygger på og hvorfor. «Grunnoppsettet for en sakstype» gjelder alltid. Et krav ingen oppskrift dekker, er
+   et valg du legger fram selv. En kombinasjon som virker, og som ingen oppskrift har, foreslås som en ny oppskrift etter
+   testen.
+3. **Sjekk det som finnes.** Finnes en standardløsning fra Neo for prosessen, er den utgangspunktet: tilpass den, og
    bygg bare det som skiller kunden. En løsning som bygger på en standard, er en full kopi av filene med versjonen
    notert: Neo krever hele fila. Finnes noe i `felles/` alt, brukes det.
-3. **Team og roller er miljø, ikke konfig.** Designet sier hvilke som trengs og hva de skal kunne; et menneske setter
+4. **Team og roller er miljø, ikke konfig.** Designet sier hvilke som trengs og hva de skal kunne; et menneske setter
    dem opp i Neo.
-4. **Legg fram hvert valg** med alternativene, hvilke krav hvert av dem dekker og hva det koster (for saksbehandleren,
+5. **Legg fram hvert valg** med alternativene, hvilke krav hvert av dem dekker og hva det koster (for saksbehandleren,
    for kunden og for oppsettet), og anbefalingen. Et valg som bryter en grunnregel, sier hvorfor.
-5. **Skriv valgene som tilstand** i `design/`: valget, hvorfor, og kravene det dekker. Det som er avgjort, står der det
+6. **Skriv valgene som tilstand** i `design/`: valget, hvorfor, og kravene det dekker. Det som er avgjort, står der det
    gjelder; diskusjonen står i PR-en. **Et avvik fra en regel i mønstrene** er et item med regelens id og grunnen, så
    sjekken ikke melder det på nytt:
 
@@ -48,7 +53,7 @@ integrasjoner den bruker).
    grunn: Den gamle og den nye står side om side til de gamle sakene er avsluttet.
    ```
    ````
-6. **Oppdater `losning.yaml`** med grunnlaget (`bygger-pa`: egen, eller en standardløsning med versjon) og
+7. **Oppdater `losning.yaml`** med grunnlaget (`bygger-pa`: egen, eller en standardløsning med versjon) og
    integrasjonene. Grunnlaget kreves når løsningen går ut av `utkast`. En integrasjon løsningen bruker, får sin mappe i
    `integrasjoner/` om den ikke finnes.
 

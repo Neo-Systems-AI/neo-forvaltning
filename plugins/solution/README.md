@@ -68,13 +68,20 @@ test/personaer/               testbrukerne, felles for alle løsningene
 |---|---|
 | `scripts/rules.mjs` | Reglene i mønstrene som kan sjekkes maskinelt, kjørt på konfigen slik den kjører i et miljø. Hver regel har samme id som i mønstrene |
 | `scripts/uttrekk.mjs` | Henter det reglene leser (sakstypene, feltene og flytene) rett fra Neo sitt API med maskinklienten i `neo.byEnv.<miljø>.apiClient` |
-| `scripts/docs.mjs` | Hvor mønstrene står i pluginen |
+| `scripts/docs.mjs` | Hvor mønstrene og oppskriftene står i pluginen |
 
 ## Dokumentasjonen
 
 | Fil | Hva |
 |---|---|
-| [`docs/monstre/`](docs/monstre/README.md) | Mønstrene for god konfig: grunnreglene, og reglene per flate med beslutningstabellene |
+| [`docs/monstre/`](docs/monstre/README.md) | Reglene for god konfig: grunnreglene, og reglene per flate med beslutningstabellene |
+| [`docs/oppskrifter/`](docs/oppskrifter/README.md) | Oppskriftene: hvordan klossene i Neo settes sammen for behov man kjenner igjen, med reglene hver kloss følger |
+
+**Tre begreper, ett sted hver.** En **regel** er én vurdering om én kloss i konfigen (id, hva den gjelder, gjør, ikke
+gjør, hvorfor). En **flate** er alle reglene for én del av konfigen i én fil, med en beslutningstabell øverst; samlingen
+av flatene heter mønstrene. En **oppskrift** setter klossene sammen for et kjent behov (godkjenning, innhenting fra
+parten, vedtak …): hvilke klosser, hvordan de kobles, i hvilken rekkefølge, og hva hvert steg blir. Den har ingen
+kunnskap av egen; den viser til reglene. 04 velger oppskriftene, og 05 bygger etter dem.
 | [`docs/esignering.md`](docs/esignering.md) | eSignering hos Digdir |
 
 ## Config
