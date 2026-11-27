@@ -308,12 +308,13 @@ opphav: skrevet
 id: arkiv-fra-katalogen
 klasse: valg
 gjelder: [solution, stream, SlaOppITabell]
-krever: [00-navn-pakking-og-versjoner.md#katalogen-tas-inn-med-en-pr, 05-felt-og-saksdata.md#losningens-data-i-saksdata, 09-maler.md#mal-dokumentfelt]
+krever: [00-navn-pakking-og-versjoner.md#endringer-i-neo-tas-inn, 05-felt-og-saksdata.md#losningens-data-i-saksdata, 09-maler.md#mal-dokumentfelt]
 opphav: skrevet
 ```
 
 - **Gjør:** Sett opp integrasjonen mot Documaster i Neo ([Documaster](../../../documaster/docs/documaster.md)), og ta i
-  bruk katalogløsningen «Documaster» i sandkassen. Ta filene inn i `oppsett/` med en PR, og gjør resten i filene: velg
+  bruk katalogløsningen «Documaster» i sandkassen. Gjør resten i kopien, i Neo eller i filene, og ta det inn i
+  repoet: velg
   integrasjonen i nodene, filtrer strømmen «Saker til
   arkivet» på sakstypene som skal arkiveres, fyll tabellen for arkivverdier (én rad per sakstype: arkivdel, klasse,
   administrativ enhet, skjerming), valgene i dokumentfeltet «Dokumenttype» og tabellen over dokumenttyper som arkiveres
@@ -482,12 +483,12 @@ OppslagEnhetsregisteret:
 id: registre-fra-katalogen
 klasse: valg
 gjelder: [solution, OppslagEnhetsregisteret, OppslagKrr, OppslagFolkeregister]
-krever: [00-navn-pakking-og-versjoner.md#katalogen-tas-inn-med-en-pr]
+krever: [00-navn-pakking-og-versjoner.md#endringer-i-neo-tas-inn]
 opphav: skrevet
 ```
 
 - **Gjør:** Ta i bruk katalogløsningene «Enhetsregisteret», «Kontakt- og reservasjonsregisteret» og «Folkeregisteret»
-  i sandkassen, etter hva kunden trenger, og ta filene inn med en PR. Enhetsregisteret trenger ingen integrasjon: noden
+  i sandkassen, etter hva kunden trenger, og ta filene inn i repoet. Enhetsregisteret trenger ingen integrasjon: noden
   «Oppslag i Enhetsregisteret» kaller det åpne API-et. KRR krever kundens KRR-integrasjon med kundens Maskinporten-klient
   ([Kontakt- og reservasjonsregisteret](../../../krr/docs/krr.md)). Folkeregisteret krever kundens KS Fiks-integrasjon
   og kommunens Fiks-rolle i noden ([KS Fiks](../../../fiks/docs/fiks.md)). Integrasjonene settes opp i Neo.

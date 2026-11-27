@@ -2,7 +2,8 @@
 
 En oppskrift sier hvordan byggeklossene i Neo settes sammen for et behov man kjenner igjen i saksbehandlingen:
 hvilke klosser, hvordan de kobles, i hvilken rekkefølge, og hva hvert steg blir (en fil i `oppsett/`, et valg i
-`design/`, eller et steg et menneske gjør i Neo). En oppskrift har ingen kunnskap av egen: hvordan én kloss bygges
+`design/`, eller et steg et menneske gjør i Neo). En fil i `oppsett/` er det samme objektet som lages i Neo; det kan
+bygges i filene eller i Neo, og oppskriften og reglene gjelder likt. En oppskrift har ingen kunnskap av egen: hvordan én kloss bygges
 riktig, står i en regel i [mønstrene](../monstre/README.md), og oppskriften viser til regelens id.
 
 | | Svarer på | Står |

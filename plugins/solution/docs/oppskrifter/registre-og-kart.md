@@ -33,7 +33,7 @@ vurderer.
    kundens Maskinporten-klient. Folkeregisteret krever kundens KS Fiks-integrasjon og kommunens Fiks-rolle i noden. Hver
    node i flyten er bundet til integrasjonen den skal bruke.
    Regler: `../monstre/11-integrasjoner.md#registre-fra-katalogen`,
-   `../monstre/00-navn-pakking-og-versjoner.md#katalogen-tas-inn-med-en-pr`,
+   `../monstre/00-navn-pakking-og-versjoner.md#endringer-i-neo-tas-inn`,
    `../monstre/11-integrasjoner.md#en-klient-mange-integrasjoner`
    Blir: steg i Neo: ta i bruk katalogløsningene i sandkassen, og legg inn KRR-integrasjonen og KS Fiks-integrasjonen
    når de trengs

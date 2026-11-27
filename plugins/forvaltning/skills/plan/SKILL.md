@@ -16,6 +16,9 @@ under gjennomføringen. Skriptet sender filene og samler svarene; ingenting går
 
 ## Før du starter
 
+- Ta snapshot først (`/forvaltning:snapshot`). Er noe endret i Neo siden forrige snapshot, tas det inn i `oppsett/`
+  før planen lages. Planen sender alle filene, og en fil som er eldre enn sandkassen, ville satt endringen i Neo
+  tilbake.
 - Planen lages mot **sandkassen**. Neo planlegger og skriver bare der; produksjonen får endringen når kundens
   org-admin promoterer sandkassen i Neo.
 - En flyt som bruker en integrasjon eller sender fra en postboks, skriver den som nøkkel. Hent de gyldige i stedet for

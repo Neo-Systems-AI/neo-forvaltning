@@ -28,9 +28,9 @@ Neo skriver filene selv (`GET /api/config/export`). Formen, nøklene og pekerne 
      skrives. Vis problemene til personen; de rettes i Neo, og så tas snapshotet på nytt.
    - **Maskinklienten mangler eller avvises:** se `/forvaltning:env` og `node … konfig.mjs token`.
 3. Filene og `ikke-med.md` committes, med meldingen `snapshot: <miljø> <dato>`.
-4. Si kort hva som er endret siden forrige snapshot (`git diff --stat`). En endring ingen har gjort gjennom repoet, er
-   et avvik: skriv det i PR-en med snapshotet, så kunden kan avgjøre om det skal tas inn i oppsettet eller rulles
-   tilbake.
+4. Si kort hva som er endret siden forrige snapshot (`git diff --stat`). En endring som er gjort i Neo og ikke gjennom
+   repoet, er like gyldig: kunden endrer ofte i Neo. Ta den inn i `oppsett/` i samme PR, så neste plan ikke skriver den
+   tilbake. Bare om kunden sier at endringen var en feil, rettes den i Neo i stedet.
 
 ## Sandkassen og produksjonen
 

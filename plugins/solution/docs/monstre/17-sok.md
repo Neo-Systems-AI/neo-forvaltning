@@ -26,12 +26,12 @@ dokumenter eller relasjoner. En kø folk går tilbake til, er en lagret visning.
 id: sok-ta-i-bruk-standarden
 klasse: standard
 gjelder: [organizationSearch, solution]
-krever: [00-navn-pakking-og-versjoner.md#katalogen-tas-inn-med-en-pr]
+krever: [00-navn-pakking-og-versjoner.md#endringer-i-neo-tas-inn]
 opphav: skrevet
 ```
 
 - **Gjør:** Ta i bruk «Saker» med katalogløsningen «Grunnoppsett for saksbehandling» og «Arkiv» med katalogløsningen
-  «Documaster», i sandkassen (`00-navn-pakking-og-versjoner.md#katalogen-tas-inn-med-en-pr`). Lag et eget søk bare for en kilde eller et utvalg de ikke dekker.
+  «Documaster», i sandkassen (`00-navn-pakking-og-versjoner.md#endringer-i-neo-tas-inn`). Lag et eget søk bare for en kilde eller et utvalg de ikke dekker.
 - **Ikke gjør:** Ikke lag en kopi av «Søk i saker» for å endre gruppenavnet.
 - **Hvorfor:** Standardsøkene er vedlikeholdt av Neo, og en ny versjon kan tas inn på samme vei som resten av
   katalogløsningen. En kopi har ingen versjon å ta inn.

@@ -5,8 +5,8 @@ det Neo leverer tas inn, hvordan en endring kommer fra sandkassen til produksjon
 er i bruk. Les denne før de andre filene: navnet er det vanskeligste å endre etterpå.
 
 Filene peker på hverandre med navn (`ref:<type>:<navn>`). De gjennomføres i kundens sandkasse etter en godkjent PR, og
-kundens org-admin promoterer fra sandkassen til produksjonen i Neo. Ingenting i oppsettet endres av seg selv: alt som
-kommer fra Neo, går gjennom sandkassen og en PR (`katalogen-tas-inn-med-en-pr`).
+kundens org-admin promoterer fra sandkassen til produksjonen i Neo. Oppsettet kan like gjerne endres i Neo; reglene
+gjelder likt, og det som er endret i Neo, tas inn i repoet før neste plan (`endringer-i-neo-tas-inn`).
 
 ## Kortversjonen
 
@@ -15,7 +15,7 @@ kommer fra Neo, går gjennom sandkassen og en PR (`katalogen-tas-inn-med-en-pr`)
 | Peker en fil på objektet? | Bestem navnet først, og endre det ikke etterpå | `navn-er-nokkelen` |
 | Bruker flere løsninger det (et felt uten sakstype, et statussett, en innboks-tagg)? | Én felles fil i `oppsett/` | `felles-er-en-fil` |
 | Peker en flyt på det? | Det finnes som fil i `oppsett/`, eller er satt opp i Neo før gjennomføringen | `oppsettet-har-det-flyten-peker-pa` |
-| Kommer det fra Neo (en katalogløsning, et objekt fra biblioteket, en ny versjon)? | Tas inn i sandkassen og går gjennom en PR | `katalogen-tas-inn-med-en-pr` |
+| Er noe endret i Neo (i UI, en katalogløsning, en ny versjon)? | Tas inn i `oppsett/` før neste plan | `endringer-i-neo-tas-inn` |
 | Er det noe Neo ikke skriver som fil (skjema, strøm, visning, søk, Innsikt, tilgang)? | Et steg i Neo, i sandkassen, og promoteres | `endre-i-sandboxen` |
 | Er organisasjonen i bruk? | Endringen gjennomføres og prøves i sandkassen, og promoteres | `endre-i-sandboxen`, `test-i-sandboxen` |
 | Er en ny flyt gjennomført eller promotert? | Les gapene og aktiver | `flyter-lander-som-utkast` |
@@ -181,27 +181,26 @@ opphav: skrevet
   produksjonens objekter, og mangler produksjonen en integrasjon eller en postboks, står det som et gap på flyten til
   det er satt opp der. Et objekt ingen leser, har ingen jobb hos kunden heller.
 
-## katalogen-tas-inn-med-en-pr Det Neo leverer, tas inn i sandkassen og går gjennom en PR, også en ny versjon
+## endringer-i-neo-tas-inn Oppsettet kan endres både i Neo og i repoet; det som er endret i Neo, tas inn før neste plan
 
 ```yaml
-id: katalogen-tas-inn-med-en-pr
+id: endringer-i-neo-tas-inn
 klasse: felle
-gjelder: [solution]
+gjelder: [solution, workflow, caseType]
 krever: [endre-i-sandboxen]
 opphav: skrevet
 ```
 
-- **Gjør:** Ta i bruk en katalogløsning fra Neo («Grunnoppsett for saksbehandling», «Documaster», registrene, SvarUt og
-  SvarInn) eller et objekt fra biblioteket i sandkassen. Ta snapshot, og legg filene som kom inn, i `oppsett/` med en PR.
-  Fra da er filene kilden, som for alt annet. Tilbyr Neo en ny versjon («Adopter endringer»), trykk den bare i
-  sandkassen, etter at noen har lest hva som endres. Snapshotet etterpå er endringen i PR-en, og den promoteres når
-  PR-en er godkjent.
-- **Ikke gjør:** Ikke ta i bruk en katalogløsning eller adopter en ny versjon i produksjonen. Ikke adopter en ny versjon
-  uten å se hva den endrer i flytene og feltene kunden alt bruker.
-- **Hvorfor:** En ny versjon kan endre flyter, felt og statuser som er i bruk i mange saker. Neo oppgraderer ikke noe av
-  seg selv, men knappene finnes i hver organisasjon, også i produksjonen. I sandkassen prøves endringen før den
-  promoteres. PR-en holder filene lik sandkassen: står den nye versjonen ikke i `oppsett/`, viser neste plan den som en
-  endring og gjennomføringen setter den tilbake.
+- **Gjør:** Endre oppsettet der det passer den som gjør det: i Neo (i UI, med «Ta i bruk» av en katalogløsning eller et
+  objekt fra biblioteket, med «Adopter endringer»), eller i filene i repoet. Har organisasjonen et repo, ta snapshot før
+  hver plan, og legg det som er endret i Neo, inn i `oppsett/` med en PR før endringen fra repoet planlegges. Les hva en
+  ny versjon fra Neo endrer i flytene og feltene kunden alt bruker, før den adopteres.
+- **Ikke gjør:** Ikke lag en plan på filer som er eldre enn sandkassen. Ikke behandle en endring gjort i Neo som en feil;
+  det er en like god vei.
+- **Hvorfor:** Planen sender alle filene i `oppsett/`, og en fil som ikke er lik sandkassen, blir skrevet. Er noe endret
+  i Neo og ikke tatt inn, setter gjennomføringen det tilbake uten at noen har bestemt det. Neo endrer ingenting av seg
+  selv: «Ta i bruk» og «Adopter endringer» er valg et menneske tar. En organisasjon uten repo endrer bare i Neo, og
+  reglene gjelder likt.
 
 ## Versjoner og publisering
 
@@ -239,13 +238,13 @@ opphav: skrevet
 Eksempel: slik kommer et oppsett i drift hos en kunde.
 
 1. Bestem navnene (`navn-er-nokkelen`).
-2. Ta i bruk katalogløsningene kunden trenger, i sandkassen, og ta filene inn med en PR (`katalogen-tas-inn-med-en-pr`).
+2. Ta i bruk katalogløsningene kunden trenger, i sandkassen, og ta filene inn i repoet (`endringer-i-neo-tas-inn`).
 3. Bygg filene i `oppsett/`, det felles én gang (`felles-er-en-fil`), og få planen godkjent i PR-en.
 4. Gjennomfør i sandkassen. Gjør stegene i Neo der: skjemaene, strømmene, visningene, søkene, Innsikt og tilgangen.
    Les gapene, aktiver flytene, og publiser veiviseren og saksdatainstruksene.
 5. Prøv med testsaker for hver gren (`test-i-sandboxen`, `en-testsak-per-gren`).
 6. Kundens org-admin promoterer til produksjonen. Les gapene der, og aktiver.
-7. Endre senere på samme vei: en PR, gjennomføring i sandkassen, prøving og promotering.
+7. Endre senere i repoet eller i Neo. Det som endres i Neo, tas inn i repoet før neste plan.
 
 ## hendelsestypen-brytes-ikke En publisert hendelsestype endres ved å legge til, ikke ved å bytte ut
 

@@ -82,7 +82,7 @@ til klagen → nytt vedtak eller oversendelse i klagesaken.
     og ta filene inn med en PR. Flyten bak handlingen lager brevet som PDF, journalfører det som utgående før sendingen,
     og sender med noden «Send med SvarUt» med `mottakertype: organisasjon`, klageinstansens organisasjonsnummer i
     `mottaker.digitalId` og en ekstern referanse.
-    Regler: `../monstre/00-navn-pakking-og-versjoner.md#katalogen-tas-inn-med-en-pr`,
+    Regler: `../monstre/00-navn-pakking-og-versjoner.md#endringer-i-neo-tas-inn`,
     `../monstre/07-flyt.md#flyt-svarut-ekstern-referanse`, `../monstre/11-integrasjoner.md#svarut-med-ekstern-referanse`,
     `../monstre/11-integrasjoner.md#utgaende-journalfores-for-sending`, `../monstre/09-maler.md#mal-fryses-ved-utsending`
     Blir: `oppsett/workflows/`
