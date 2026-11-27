@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "forvaltning",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Oppsettet i Neo som filer, og repoet det står i: oppstarten av et repo fra neo-forvaltning-mal med maskinklienten i sandkassen, config-fila for alle pluginene, snapshot, plan og gjennomføring i sandkassen med skript mot Neo sitt API, hemmelighetene fra kundens hvelv (bare navn, aldri verdier), og sjekken av repoet som malens CI henter i en låst versjon.",
   "author": {
     "name": "Neo Systems AS",

@@ -4,7 +4,8 @@ En lagret visning (`savedView`) er et navngitt utvalg av en liste: filtre, sorte
 oppsettet er den en arbeidskø eller et oppslag i saksoversikten, «Oppgaver» eller «Dokumenter». Den gir ingen tilgang
 og regner ingen summer: lista viser hvilke saker, Innsikt viser hvor mange og hvor mye.
 
-Visningene i en Løsning er alltid globale. Private og delte visninger er brukernes egne og hører ikke til oppsettet.
+Visningene oppsettet setter opp, er globale. De er ikke filer: de lages i Neo i sandkassen (steg i Neo) og promoteres
+med resten. Private og delte visninger er brukernes egne og hører ikke til oppsettet.
 Visningene av relasjonstabellen står på sakstypen, i [04-relasjoner.md](04-relasjoner.md).
 
 ## Kortversjonen
@@ -31,12 +32,12 @@ opphav: praksis
 ```
 
 - **Gjør:** Lag en visning for hver felles kø eller oppslag noen har en jobb i: mitt arbeid, det ingen har tatt, det
-  som venter på andre, det som står igjen etter vedtaket, det avsluttede. Rekkefølgen i Løsningen er rekkefølgen
+  som venter på andre, det som står igjen etter vedtaket, det avsluttede. Rekkefølgen i oppsettet er rekkefølgen
   brukeren ser.
 - **Ikke gjør:** Ikke lag en visning per person, per saksbehandler eller per uke, og ikke en for én persons behov. Det
   er filtre brukeren setter selv, eller en privat visning hen lager selv.
-- **Hvorfor:** Visningene står i én meny. Mange like visninger gjør at ingen finner køen sin. Bare globale visninger kan
-  ligge i en Løsning, så alt i oppsettet er felles.
+- **Hvorfor:** Visningene står i én meny. Mange like visninger gjør at ingen finner køen sin. Bare globale visninger
+  promoteres, så alt i oppsettet er felles.
 
 Eksempel: køene for saksbehandlerne av en søknad om tilskudd.
 
@@ -59,9 +60,9 @@ opphav: skrevet
 ```
 
 - **Gjør:** Sett `entityType` til `case`, `task` eller `document`. Legg visningene av relasjonstabellen på sakstypen.
-- **Ikke gjør:** Ikke legg en visning for en annen flate i en Løsning.
-- **Hvorfor:** Utrullingen vet bare for disse tre hvilke kolonner som bærer id-er som må skrives om. En visning for en
-  annen flate avvises når Løsningen rulles ut.
+- **Ikke gjør:** Ikke lag en visning i oppsettet for en annen flate.
+- **Hvorfor:** Promoteringen vet bare for disse tre hvilke kolonner som bærer id-er som må skrives om. En visning for en
+  annen flate avvises når den promoteres.
 
 ## kategori-foran-status Filtrer på statuskategorien når du mener åpen, venter eller avsluttet
 
@@ -77,7 +78,7 @@ opphav: praksis
   køen er ett bestemt steg, som «Til utbetaling». Si i beskrivelsen at «ikke avsluttet» også tar med saker uten status.
 - **Ikke gjør:** Ikke list opp alle de åpne statusene én for én.
 - **Hvorfor:** Kategorien er gyldig i enhver org og for enhver sakstype. En ny status med riktig kategori havner i riktig
-  kø uten at visningen endres. Statusene er id-er som må skrives om ved utrulling.
+  kø uten at visningen endres. Statusene er id-er som må skrives om ved promoteringen.
 
 ```yaml
 filterParams:
@@ -95,8 +96,8 @@ opphav: praksis
 
 - **Gjør:** Filtrer «Mine …» på `@me` i `assignedTo` (saker), `responsible` eller `responsibleOrAssigned` (oppgaver).
 - **Ikke gjør:** Ikke legg en bestemt person i filteret.
-- **Hvorfor:** Medlemmer er ikke konfig og kan ikke skrives om til en annen org. Utrullingen avviser en visning med en
-  person i filteret, og visningen slutter å virke når personen bytter jobb.
+- **Hvorfor:** Medlemmer er ikke konfig og kan ikke skrives om til en annen org. Neo avviser en fil med en person i
+  filteret i planen, og visningen slutter å virke når personen bytter jobb.
 
 ```yaml
 name: Mine åpne saker
@@ -136,11 +137,12 @@ gjelder: [savedView.filterParams, savedView.sortParams, customFieldDefinition]
 opphav: skrevet
 ```
 
-- **Gjør:** Ta feltet med i samme Løsning som visningen, så utrullingen kan skrive om id-en. Sjekk visningene når et
-  felt slettes eller byttes ut.
+- **Gjør:** Ha feltet i filene og promoter det sammen med visningen, så promoteringen kan skrive om id-en. Sjekk
+  visningene når et felt slettes eller byttes ut.
 - **Ikke gjør:** Ikke la en visning stå med et felt som er tatt ut av oppsettet.
 - **Hvorfor:** Et filter på et felt som ikke finnes, gir null rader, og en sortering på det faller til standarden
-  (sist opprettet først). Lista ser tom eller tilfeldig ut, uten feilmelding.
+  (sist opprettet først). Lista ser tom eller tilfeldig ut, uten feilmelding. Finnes ikke feltet i produksjonen, avvises
+  visningen ved promoteringen.
 
 ## sorter-etter-jobben Sorter etter det som skal tas først
 
@@ -231,10 +233,10 @@ opphav: skrevet
 ```
 
 - **Gjør:** Sett `isDefault` på én visning per flate, som regel «Mine åpne saker» uten sakstype i filteret.
-- **Ikke gjør:** Ikke sett standard på en visning for én sakstype, og ikke regn med at standarden i Løsningen vinner hos
-  en org som alt har en.
-- **Hvorfor:** Standarden er det en ny bruker ser. En kopi blir standard bare når org-en ikke alt har en; utrullingen
-  overskriver aldri kundens valg.
+- **Ikke gjør:** Ikke sett standard på en visning for én sakstype, og ikke regn med at standarden i sandkassen vinner i
+  en produksjon som alt har en.
+- **Hvorfor:** Standarden er det en ny bruker ser. En visning blir standard bare når produksjonen ikke alt har en;
+  promoteringen overskriver aldri kundens valg.
 
 ## beskrivelsen-er-definisjonen Skriv i beskrivelsen hva som er med, hva som ikke er det, og rekkefølgen
 
@@ -267,7 +269,7 @@ opphav: forslag
 
 - **Gjør:** «Tilskudd — venter på søker». En visning på tvers av sakstyper får navn uten sakstype: «Til fordeling».
 - **Ikke gjør:** Ikke bruk «Standardvisning» eller «Standard visning», som er reservert, og ikke interne koder.
-- **Hvorfor:** Menyen blander visninger fra flere Løsninger, og navnet er det eneste som skiller dem. Navnet er høyst
+- **Hvorfor:** Menyen blander visninger fra flere løsninger, og navnet er det eneste som skiller dem. Navnet er høyst
   100 tegn.
 
 ## fast-periode-i-navnet En visning over en periode får faste datoer og året i navnet

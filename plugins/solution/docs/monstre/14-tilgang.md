@@ -12,7 +12,7 @@ Regelen gjelder alle leseveier (saken, lister, søk, relasjoner, agenten, API-et
 Unntakene er en kjøring uten bruker, som ser hele org-en, og Innsikt, som leser alle hendelser
 (`13-innsikt.md#innsikt-ser-alle-saker`).
 
-Roller, tilgangsgrupper og koblingen til Entra er ikke konfig: de følger ikke en Løsning og settes i hver org. Reglene
+Roller, tilgangsgrupper og koblingen til Entra er ikke filer: de settes opp i Neo i hver org (steg i Neo). Reglene
 under er derfor festet på sakstypen, den ansvarlige og leserne, som er det tilgangen virker på.
 
 ## Kortversjonen
@@ -21,7 +21,7 @@ Still spørsmålene i rekkefølge. Det første som svarer ja, avgjør.
 
 | Spørsmålet | Ja betyr |
 |---|---|
-| Har sakene innhold bare noen skal se (personal, helse, varsling, egne ansatte)? | **Tilgangsgruppe** på sakstypen, satt i org-en etter utrullingen (`apen-som-standard`, `tilgangen-settes-i-org-en`) |
+| Har sakene innhold bare noen skal se (personal, helse, varsling, egne ansatte)? | **Tilgangsgruppe** på sakstypen, satt i org-en etter promoteringen (`apen-som-standard`, `tilgangen-settes-i-org-en`) |
 | Trenger to slags saker ulik tilgang? | **To sakstyper**, hver med sin gruppe (`tilgang-skiller-sakstyper`) |
 | Skal én person utenfor gruppa behandle én sak? | Gjør hen **ansvarlig** for saken (`ansvarlig-ser-sin-sak`) |
 | Kan noen være inhabil? | En **oppgave** om habiliteten tidlig i saksgangen (`inhabilitet-som-oppgave`) |
@@ -61,7 +61,7 @@ opphav: forslag
 - **Hvorfor:** En begrenset sakstype skjuler sakene for alle utenfor gruppa, også lederen som fordeler og kollegaen som
   skal hjelpe, og hver begrensning må vedlikeholdes når folk kommer og går.
 
-## tilgangen-settes-i-org-en En begrensning følger ikke Løsningen og må settes i org-en etter utrullingen
+## tilgangen-settes-i-org-en En begrensning er ikke en fil og må settes i org-en etter promoteringen
 
 ```yaml
 id: tilgangen-settes-i-org-en
@@ -71,10 +71,10 @@ krever: [14-tilgang.md#apen-som-standard]
 opphav: skrevet
 ```
 
-- **Gjør:** Skriv i oppsettet hvilke sakstyper som skal begrenses og hvem som skal i gruppa. Opprett gruppene og koble
-  dem til sakstypen i org-en rett etter utrullingen, før de første sakene kommer inn.
-- **Ikke gjør:** Ikke regn med at en begrensning i sandboxen eller malen blir med.
-- **Hvorfor:** Tilgangsgruppene er ikke en del av sakstypen som kopieres. En sakstype som rulles ut, er åpen for alle med
+- **Gjør:** Skriv i kravene hvilke sakstyper som skal begrenses og hvem som skal i gruppa (steg i Neo). Opprett gruppene
+  og koble dem til sakstypen i produksjonen rett etter promoteringen, før de første sakene kommer inn.
+- **Ikke gjør:** Ikke regn med at en begrensning i sandkassen blir med.
+- **Hvorfor:** Tilgangsgruppene er ikke en del av sakstype-fila og promoteres ikke. En ny sakstype er åpen for alle med
   rollen til noen begrenser den.
 
 ## tilgang-skiller-sakstyper Når tilgangen skal være ulik, er det to sakstyper

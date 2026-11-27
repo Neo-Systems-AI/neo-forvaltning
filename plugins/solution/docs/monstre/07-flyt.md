@@ -102,8 +102,8 @@ opphav: skrevet
   fra Opprett.
 - **Ikke gjør:** Ikke finn noe på tittel, etikett eller visningsnavn, heller ikke en oppgave på tittelen eller en
   saksdata på overskriften.
-- **Hvorfor:** Id-en til oppsettet skrives om ved deploy og følger med til en ny organisasjon. Et navn kan endres og er
-  ikke unikt. Hent-nodene filtrerer derfor bare på mal og id.
+- **Hvorfor:** I fila skrives valget som en peker med navnet (`ref:<type>:<navn>`), og Neo gjør den om til id-en. Ved
+  promoteringen skrives id-en om til produksjonens objekt. En tittel eller etikett kan endres og er ikke unik. Hent-nodene filtrerer derfor bare på mal og id.
 
 ## flyt-en-per-sakstype Lag flyten for én sakstype; del den bare når flere sakstyper trenger nøyaktig det samme
 
@@ -651,7 +651,7 @@ opphav: forslag
   «HTTP-forespørsel». Skriv det som er overlevert, som rader i en saksdatamal.
 - **Ikke gjør:** Ikke la en overlevering skje uten et spor i saken.
 - **Hvorfor:** Neo har integrasjoner mot arkivet, Altinn, SvarUt og registrene, men ikke mot et økonomisystem.
-  Hendelsen gjør overleveringen synlig og tellbar. Vi har ikke sett mønsteret prøvd for økonomi.
+  Hendelsen gjør overleveringen synlig og tellbar.
 
 Eksempel: En utbetaling av tilskudd. Saksbehandleren utløser utbetalingen med en handling på oppgaven «Utbetal
 tilskuddet». Flyten stopper hvis parten er under konkurs (det står på kontakten), legger til en rad i tabellen
@@ -858,6 +858,39 @@ flowEventType:
       options: [{ key: drift, label: "Driftstilskudd" }, { key: prosjekt, label: "Prosjekttilskudd" }]
 ```
 
+## flyt-hendelse-og-saksdata-fra-samme-verdier Den egne hendelsen og raden i saksdata skrives i samme flyt, fra de samme verdiene
+
+```yaml
+id: flyt-hendelse-og-saksdata-fra-samme-verdier
+klasse: valg
+gjelder: [SkrivHendelse, SkrivHendelse.hendelsestype, flowEventType.fields, caseDataTemplate]
+krever: [flyt-egen-hendelse, flyt-saksdata-adresse]
+opphav: praksis
+```
+
+- **Gjør:** Når det som skjedde både skal stå i saken og telles eller leveres videre, les verdiene én gang i flyten, og
+  skriv raden i saksdata og den egne hendelsen fra de samme variablene i samme gren.
+- **Ikke gjør:** Ikke la én flyt skrive raden og en annen skrive hendelsen. Ikke skriv den ene fra en verdi den andre
+  ikke har, og ikke regn ut beløpet på nytt for den ene.
+- **Hvorfor:** Raden er det saksbehandleren ser i saken, og hendelsen er det Innsikt teller og de andre systemene får.
+  Skrives de fra hver sin kilde, kan de si noe ulikt, og ingen merker det før tallene ikke stemmer.
+
+## system-lytter-pa-hendelsen Et eksternt system lytter på den egne hendelsen, og legges ikke inn i flyten som skriver den
+
+```yaml
+id: system-lytter-pa-hendelsen
+klasse: valg
+gjelder: [stream, stream.subscribers, webhookSubscriber, HendelseMottatt, HTTPForespørsel]
+krever: [flyt-egen-hendelse, flyt-strom-sender-det-som-trengs, webhook-abonnent-taaler-gjentak]
+opphav: praksis
+```
+
+- **Gjør:** Gi hvert eksterne system sin egen abonnent på strømmen med den egne hendelsen: en webhook når systemet tar
+  imot hendelsen slik den er, ellers en egen flyt på «Hendelse mottatt» som kaller systemets API.
+- **Ikke gjør:** Ikke legg kallet til et nytt system inn i flyten som fatter vedtaket eller skriver hendelsen.
+- **Hvorfor:** Flyten for vedtaket endres ikke når et system kommer til eller går bort. Hvert system feiler for seg: et
+  API som er nede, stopper ikke vedtaket, raden eller de andre mottakerne.
+
 ## flyt-strom-sender-det-som-trengs En strøm til et annet system sender bare feltene mottakeren trenger
 
 ```yaml
@@ -910,8 +943,7 @@ opphav: forslag
 - **Ikke gjør:** Ikke sett en strøm på pause for å holde igjen hendelser til mottakeren er klar. Ikke sett strømmen bak
   en flyt på pause for å stoppe flyten; deaktiver flyten.
 - **Hvorfor:** Hver hendelse tas én gang og leveres bare til aktive strømmer med minst én aktiv abonnent. En hendelse som
-  kom mens strømmen var av, blir ikke levert når den slås på igjen, og Innsikt teller den ikke. Det er utledet av
-  hvordan leveringen virker, ikke prøvd.
+  kom mens strømmen var av, blir ikke levert når den slås på igjen, og Innsikt teller den ikke.
 
 ## webhook-abonnent-taaler-gjentak En webhook-abonnent har én mottaker, nøkkelen i headeren, og en mottaker som tåler samme hendelse to ganger
 

@@ -14,7 +14,7 @@ Still spørsmålene i rekkefølge. Det første som svarer ja, avgjør.
 | # | Spørsmålet | Ja betyr |
 |---|---|---|
 | 1 | Er det en dato saken skal nå, ikke et arbeid? | En **milepæl** (`oppgave-milepael`) |
-| 2 | Står det en forespørsel ute som saken venter svar på? | En **venteoppgave** som flyten lager når forespørselen sendes (`oppgave-venter`) |
+| 2 | Står det en forespørsel ute som saken venter svar på? | En **venteoppgave** som flyten lager når forespørselen sendes (`oppgave-venter`), og en oppgave når fristen går ut uten svar (`frist-ute-gir-oppgave`) |
 | 3 | Gir vedtaket oppfølging over tid (rapporter, kontroller)? | **Én oppgave per frist**, laget av flyten med fristen fra saken (`oppgave-oppfolging-over-tid`) |
 | 4 | Gir den først mening når noe har skjedd (en klage, et vedtak)? | `instantiateOnCaseCreation: false`, og **flyten lager den fra malen** (`oppgave-ved-hendelse`) |
 | 5 | Avgjøres varianten først inne i saken? | **Én mal per verdi**, laget av en handling (`oppgave-variant-senere`) |
@@ -89,7 +89,7 @@ opphav: praksis
 - **Gjør:** Sett steget på hver oppgave, med gruppens og stegets navn. Legg oppgavene i rekkefølgen de gjøres;
   rekkefølgen i lista er rekkefølgen i saken.
 - **Ikke gjør:** Ikke lag en status for hvert stykke arbeid.
-- **Hvorfor:** Steget pekes ut med navnene og slås opp i sakstypens statusløp ved deploy. Uten steg lander oppgavene
+- **Hvorfor:** Steget pekes ut med navnene og slås opp i sakstypens statusløp når fila skrives i Neo. Uten steg lander oppgavene
   under «uten steg», og saksbehandleren mister orienteringen status og oppgaver skal gi sammen.
 
 ```yaml
@@ -269,6 +269,42 @@ opphav: forslag
   instantiateOnCaseCreation: false
 ```
 
+## frist-varsles-av-neo Varselet om en frist kommer fra oppgaven, ikke fra en flyt
+
+```yaml
+id: frist-varsles-av-neo
+klasse: standard
+gjelder: [taskTemplateSet.tasks.dueOffsetDays, CreateTask.dueDate, AssignTask]
+krever: [oppgave-frist, oppgave-milepael]
+opphav: skrevet
+```
+
+- **Gjør:** Gi oppgaven eller milepælen fristen og en ansvarlig. Sett i varslingsoppsettet for kategorien «Frister» hvor
+  mange virkedager før fristen Neo skal varsle (steg i Neo, én gang for organisasjonen).
+- **Ikke gjør:** Ikke bygg en flyt med «Vent» bare for å varsle om en frist. Ikke la en oppgave med frist stå uten
+  ansvarlig.
+- **Hvorfor:** Neo går over de åpne oppgavene hver morgen og varsler den ansvarlige i appen og på e-post når fristen
+  nærmer seg og når den er passert. Uten ansvarlig er det ingen å varsle, og uten antall dager i varslingsoppsettet kommer
+  bare varselet om at fristen er passert.
+
+## frist-ute-gir-oppgave Går fristen på en venteoppgave ut uten svar, lager flyten en oppgave til saksbehandleren
+
+```yaml
+id: frist-ute-gir-oppgave
+klasse: valg
+gjelder: [Vent, HentOppgaver, CreateTask, taskTemplateSet.tasks.instantiateOnCaseCreation]
+krever: [oppgave-venter, 07-flyt.md#flyt-oppgaven-finnes, 07-flyt.md#flyt-handling-leser-objektet]
+opphav: praksis
+```
+
+- **Gjør:** La flyten som sender forespørselen, vente med «Vent» til svarfristen er ute, lese venteoppgaven på nytt med
+  «Hent oppgaver», og lage oppgaven «Fristen er ute: <hva det ventes på>» fra malen hvis venteoppgaven fortsatt er åpen.
+  Beskrivelsen sier valgene: purre med en ny frist, eller avgjøre saken på det som foreligger.
+- **Ikke gjør:** Ikke la flyten purre, forlenge fristen eller avgjøre saken av seg selv. Ikke la saken bli stående i
+  ventestatus uten at noen får arbeidet.
+- **Hvorfor:** Hva som skjer når parten ikke svarer, er skjønn: om saken er godt nok opplyst, eller om parten skal få en
+  ny sjanse. Varselet om fristen forsvinner i bjella; oppgaven står i køen til noen har tatt valget.
+
 ## oppgave-handling Automatiseringen i et steg henger på oppgaven steget gjøres i
 
 ```yaml
@@ -302,7 +338,7 @@ gjelder: [caseType.taskTemplateSets, caseType.taskTemplateSets.taskTemplateSet, 
 opphav: praksis
 ```
 
-- **Gjør:** Lag ett sett per sakstype. Trenger flere sakstyper de samme oppgavene (klagesporet, foreløpig svar), lag en
+- **Gjør:** Lag ett sett per sakstype. Trenger flere sakstyper de samme oppgavene (foreløpig svar, forhåndsvarsel), lag en
   kopi i hvert sett og hold kilden samlet i én definisjon du kopierer fra.
 - **Ikke gjør:** Ikke knytt samme sett til flere sakstyper.
 - **Hvorfor:** Oppgavens steg er én rad i én sakstypes statusløp. På en annen sakstype får oppgaven ikke steget sitt, og
@@ -356,7 +392,7 @@ opphav: forslag
   oppgave per frist, med fristen fra datoene i saken.
 - **Ikke gjør:** Ikke legg oppfølgingsoppgavene på saken fra start med faste dager.
 - **Hvorfor:** Fristene kommer fra vedtaket, ikke fra mottaket. Oppgavemalen har ingen gjentakende oppgave, så hver
-  frist er sin egen oppgave. Vi har ikke sett mønsteret prøvd.
+  frist er sin egen oppgave.
 
 Eksempel: Et tilsagn krever delrapport og sluttrapport. Rapportdatoene står i saken: som datofelt når det er én av
 hver, som rader i en tabell i saksdata når det er flere. Handlingen som sender tilsagnet, lager én «Vurder

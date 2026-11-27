@@ -10,13 +10,13 @@
     {
       "name": "forvaltning",
       "source": "./plugins/forvaltning",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "category": "forvaltning"
     },
     {
       "name": "solution",
       "source": "./plugins/solution",
-      "version": "0.7.0",
+      "version": "0.8.0",
       "category": "forvaltning"
     },
     {

@@ -1,21 +1,24 @@
 # Navn, pakking og versjoner
 
-Reglene som gjelder alle flatene: hva objektene i oppsettet heter, hvordan de pakkes i Løsninger (`solution`) og
-implementasjonsprofiler (`implementationProfile`), hvordan en endring publiseres og rulles ut, og hvordan oppsettet
-prøves før det er i bruk. Les denne før de andre filene: navnet og pakken er det vanskeligste å endre etterpå.
+Reglene som gjelder alle flatene: hva objektene i oppsettet heter, hvordan de ligger som filer i `oppsett/`, hvordan
+det Neo leverer tas inn, hvordan en endring kommer fra sandkassen til produksjonen, og hvordan oppsettet prøves før det
+er i bruk. Les denne før de andre filene: navnet er det vanskeligste å endre etterpå.
+
+Filene peker på hverandre med navn (`ref:<type>:<navn>`). De gjennomføres i kundens sandkasse etter en godkjent PR, og
+kundens org-admin promoterer fra sandkassen til produksjonen i Neo. Oppsettet kan like gjerne endres i Neo; reglene
+gjelder likt, og det som er endret i Neo, tas inn i repoet før neste plan (`endringer-i-neo-tas-inn`).
 
 ## Kortversjonen
 
 | Spørsmålet | Et ja betyr | Regelen |
 |---|---|---|
-| Skal objektet rulles ut til en kunde? | Bestem navnet først, og endre det ikke etterpå | `navn-er-nokkelen` |
-| Hører det til ett bruksområde (en sakstype med det den trenger)? | Én Løsning for bruksområdet | `losning-per-bruksomrade` |
-| Skal flere bruksområder bruke det (et arkiv, et register)? | En egen Løsning | `losning-per-bruksomrade` |
-| Peker en flyt på det? | Med i samme Løsning, eller en Løsning som tas i bruk først | `losning-har-det-den-peker-pa` |
-| Skal flere organisasjoner ha samme helhet? | En implementasjonsprofil | `implementasjon-er-kundens-helhet` |
-| Er det en veiviser, en relasjonsvisning eller en lagret visning av relasjonstabellen? | Settes opp i hver organisasjon; følger ikke med Løsningen | `03-veiviser.md#en-per-sakstype`, `04-relasjoner.md#org-eide-visninger` |
-| Er organisasjonen i bruk? | Endringen lages og prøves i sandboxen | `endre-i-sandboxen`, `test-i-sandboxen` |
-| Er en ny flyt rullet ut eller promotert? | Les gapene og aktiver | `flyter-lander-som-utkast` |
+| Peker en fil på objektet? | Bestem navnet først, og endre det ikke etterpå | `navn-er-nokkelen` |
+| Bruker flere løsninger det (et felt uten sakstype, et statussett, en innboks-tagg)? | Én felles fil i `oppsett/` | `felles-er-en-fil` |
+| Peker en flyt på det? | Det finnes som fil i `oppsett/`, eller er satt opp i Neo før gjennomføringen | `oppsettet-har-det-flyten-peker-pa` |
+| Er noe endret i Neo (i UI, en katalogløsning, en ny versjon)? | Tas inn i `oppsett/` før neste plan | `endringer-i-neo-tas-inn` |
+| Er det noe Neo ikke skriver som fil (skjema, strøm, visning, søk, Innsikt, tilgang)? | Et steg i Neo, i sandkassen, og promoteres | `endre-i-sandboxen` |
+| Er organisasjonen i bruk? | Endringen gjennomføres og prøves i sandkassen, og promoteres | `endre-i-sandboxen`, `test-i-sandboxen` |
+| Er en ny flyt gjennomført eller promotert? | Les gapene og aktiver | `flyter-lander-som-utkast` |
 | Skal en publisert hendelsestype endres? | Legg til felt, eller lag en ny type | `hendelsestypen-brytes-ikke` |
 
 ## Navngiving
@@ -38,11 +41,10 @@ Navnene per objekt, og hvor regelen står:
 | Visning | `savedView` | «<Sakstype> — <utvalg>» | `12-visninger.md#sakstype-i-navnet` |
 | Søk | `organizationSearch` | Det medlemmet søker i | `17-sok.md#sok-navn-er-kilden` |
 | Tilgangsgruppe | (`Team`) | Sakstypen og jobben | `14-tilgang.md#gruppa-har-alle-som-ma-lese` |
-| Løsning | `solution` | Bruksområdet eller integrasjonen | `losning-per-bruksomrade` |
 
 Tankestreken i navnene er en del av navneformen; den skiller sakstypen fra resten i lister der alt står samlet.
 
-## navn-er-nokkelen Bestem navnet før første utrulling, og ikke endre et navn noe finner objektet på
+## navn-er-nokkelen Bestem navnet før første gjennomføring, og ikke endre et navn noe finner objektet på
 
 ```yaml
 id: navn-er-nokkelen
@@ -53,16 +55,15 @@ opphav: skrevet
 sjekkes: maskinelt
 ```
 
-- **Gjør:** Bestem navnet på hvert objekt før det rulles ut eller promoteres fra sandboxen. Velg navn som ikke kolliderer
+- **Gjør:** Bestem navnet på hvert objekt før det gjennomføres i sandkassen første gang. Velg navn som ikke kolliderer
   med det kunden har fra før, med prefikset og sakstypen i navnet. Endre det som vises (etiketten, beskrivelsen) når
   kunden vil ha et annet ord.
 - **Ikke gjør:** Ikke gi nytt navn til en status, et felt eller en hendelsestype som er i bruk. Ikke bruk samme navn på
   to objekter av samme type hos samme eier.
-- **Hvorfor:** Utrullingen finner kundens kopi på malen den kom fra, ikke på navnet. Navnet er likevel unikt per eier:
-  kolliderer det med et objekt kunden har fra en annen mal, får kopien et navn med et tillegg («(2)»). Flytene peker på
-  id og tåler det, men det som finner objektet på navnet, gjør ikke det: statusen i «Finn steg» og betingelsene i
-  veiviseren, feltet i en flettekode, og feltene i en hendelse. For en status og en hendelsestype er navnet selve
-  nøkkelen.
+- **Hvorfor:** Filene peker på hverandre med navnet (`ref:caseDataTemplate:Arkiv`), og planen finner objektet i Neo på
+  navnet. Får et objekt nytt navn, peker filene på et som ikke finnes, eller planen lager et nytt ved siden av. Det
+  samme gjelder det i Neo som finner objektet på navnet: statusen i «Finn steg» og betingelsene i veiviseren, feltet i
+  en flettekode, og feltene i en hendelse. For en status og en hendelsestype er navnet selve nøkkelen.
 
 ## navn-sakstype-forst Flyter, strømmer og skjema heter «<Sakstype> — <hva den gjør>»
 
@@ -140,105 +141,70 @@ krever: [06-oppgaver.md#oppgave-ett-sett-per-sakstype]
 opphav: forslag
 ```
 
-- **Gjør:** Kall settet det samme som sakstypen. Et delt sett (for eksempel klagesporet) får navnet på sporet.
+- **Gjør:** Kall settet det samme som sakstypen. Et delt sett (for eksempel foreløpig svar) får navnet på det det gjør.
 - **Ikke gjør:** Ikke kall settet «Standard» eller «Oppgaver».
 - **Hvorfor:** Settet velges i en liste der alle sakstypers sett står.
 
-## Pakking
+## Filene og det Neo leverer
 
-## losning-per-bruksomrade Lag én Løsning per bruksområde eller integrasjon
+## felles-er-en-fil Det flere løsninger bruker, er én fil i `oppsett/`
 
 ```yaml
-id: losning-per-bruksomrade
+id: felles-er-en-fil
 klasse: valg
-gjelder: [solution]
-krever: [11-integrasjoner.md#arkiv-fra-katalogen, 11-integrasjoner.md#registre-fra-katalogen]
+gjelder: [customFieldDefinition, caseTypeStatusGroup, inboxTag, caseDataTemplate, flowEventType]
 opphav: praksis
 ```
 
-- **Gjør:** Pakk en sakstype med det den trenger for å virke (strøm, skjema, flyter, saksdatamaler, visninger) i én
-  Løsning. Pakk en integrasjon eller et register som sin egen Løsning, så flere bruksområder kan ta den i bruk.
-- **Ikke gjør:** Ikke lag én stor Løsning med alt kunden skal ha. Ikke legg et register inn i grunnoppsettet.
-- **Hvorfor:** En Løsning tas i bruk, oppgraderes og aktiveres som en helhet. Er den for stor, kan kunden ikke ta i bruk
-  en del uten resten.
+- **Gjør:** Legg det som hører til én løsning (sakstypen, flytene, malene, oppgavene), i filene for den. Legg det flere
+  løsninger bruker (et felt uten sakstype, et statussett, en innboks-tagg, en saksdatamal for arkivet), i én fil i
+  `oppsett/`, og la kravene i hver løsning vise til den.
+- **Ikke gjør:** Ikke lag en kopi av et felles objekt for hver løsning. Ikke legg alt kunden skal ha, i én løsning.
+- **Hvorfor:** Neo har ett objekt per navn hos en eier. To filer med samme objekt skriver over hverandre, og en løsning
+  som eier noe andre bruker, kan ikke endres uten å treffe dem.
+
+## oppsettet-har-det-flyten-peker-pa Alt en flyt peker på, finnes som fil eller er satt opp i Neo før gjennomføringen
 
 ```yaml
-solution:
-  name: "Tilskudd"
-  components:
-    - { rootType: caseType, templateId: <Tilskudd> }
-    - { rootType: stream,   templateId: <Tilskudd — innsendinger fra Altinn> }
-    - { rootType: form,     templateId: <Tilskudd — registrer vedtak> }
-    - { rootType: workflow, templateId: <Tilskudd — søknad mottatt fra Altinn> }
-# Arkivet og registrene er egne Løsninger kunden tar i bruk ved siden av.
-```
-
-## losning-har-det-den-peker-pa Alt i Løsningen har en jobb, og alt en flyt peker på, er med
-
-```yaml
-id: losning-har-det-den-peker-pa
+id: oppsettet-har-det-flyten-peker-pa
 klasse: felle
-gjelder: [solution, workflow]
+gjelder: [workflow]
 krever: [07-flyt.md#flyt-identitet-er-id, 07-flyt.md#flyt-aktivering]
 opphav: skrevet
 ```
 
-- **Gjør:** Legg feltene, statusene, malene, skjemaene og hendelsestypene flytene peker på, inn i samme Løsning. Peker en
-  flyt på noe fra en annen Løsning, skriv i beskrivelsen at den Løsningen må tas i bruk først. Ta bare med objekter et
-  krav trenger.
+- **Gjør:** Legg feltene, statusene, malene og hendelsestypene en flyt peker på, i `oppsett/`. Det Neo ikke skriver som
+  fil (skjemaet, strømmen, integrasjonen, postboksen), settes opp i sandkassen før gjennomføringen, med det navnet
+  flyten peker på. Ta bare med objekter et krav trenger.
 - **Ikke gjør:** Ikke gå ut fra at kunden har et felt eller en status med samme navn. Ikke legg med objekter «i tilfelle».
-- **Hvorfor:** Ved utrulling skrives pekerne om til kundens kopier. En peker uten kopi blir et gap, og flyten kan ikke
-  aktiveres før gapet er løst. Et objekt ingen leser, har ingen jobb hos kunden heller.
+- **Hvorfor:** Planen stopper på en peker til et objekt som ikke finnes. Ved promoteringen skrives pekerne om til
+  produksjonens objekter, og mangler produksjonen en integrasjon eller en postboks, står det som et gap på flyten til
+  det er satt opp der. Et objekt ingen leser, har ingen jobb hos kunden heller.
 
-## losning-er-en-mal Lag Løsningen som en mal hos partneren, ikke i kundens organisasjon
+## endringer-i-neo-tas-inn Oppsettet kan endres både i Neo og i repoet; det som er endret i Neo, tas inn før neste plan
 
 ```yaml
-id: losning-er-en-mal
+id: endringer-i-neo-tas-inn
 klasse: felle
-gjelder: [solution]
+gjelder: [solution, workflow, caseType]
+krever: [endre-i-sandboxen]
 opphav: skrevet
 ```
 
-- **Gjør:** Lag og endre Løsningen der partneren (eller Neo) eier den, og rull den ut til kundene.
-- **Ikke gjør:** Ikke bygg i én kundes organisasjon og forsøk å kopiere derfra til en annen.
-- **Hvorfor:** Oppsettet går fra mal til organisasjon, aldri fra organisasjon til organisasjon; en rad en organisasjon
-  eier, avvises som kilde. En partners mal kan bare rulles ut til kunder partneren har en aktiv forvaltningsavtale med.
-
-## implementasjon-er-kundens-helhet En implementasjonsprofil er Løsningene og den løse konfigen én slags kunde skal ha
-
-```yaml
-id: implementasjon-er-kundens-helhet
-klasse: valg
-gjelder: [implementationProfile, solution]
-krever: [00-navn-pakking-og-versjoner.md#losning-per-bruksomrade]
-opphav: forslag
-```
-
-- **Gjør:** Lag en implementasjonsprofil når flere organisasjoner skal få samme helhet, for eksempel alle kommunene i et
-  samarbeid. Legg inn Løsningene, og som løs konfig bare det som er særegent for helheten.
-- **Ikke gjør:** Ikke legg det som hører til et bruksområde, inn som løs konfig i profilen. Ikke lag en profil for én
-  Løsning.
-- **Hvorfor:** Profilen ruller ut Løsningene først og den løse konfigen etterpå, og samler gapene i én liste. Det som
-  ligger løst, kan ikke tas i bruk alene og får ikke Løsningens oppgradering.
+- **Gjør:** Endre oppsettet der det passer den som gjør det: i Neo (i UI, med «Ta i bruk» av en katalogløsning eller et
+  objekt fra biblioteket, med «Adopter endringer»), eller i filene i repoet. Har organisasjonen et repo, ta snapshot før
+  hver plan, og legg det som er endret i Neo, inn i `oppsett/` med en PR før endringen fra repoet planlegges. Les hva en
+  ny versjon fra Neo endrer i flytene og feltene kunden alt bruker, før den adopteres.
+- **Ikke gjør:** Ikke lag en plan på filer som er eldre enn sandkassen. Ikke behandle en endring gjort i Neo som en feil;
+  det er en like god vei.
+- **Hvorfor:** Planen sender alle filene i `oppsett/`, og en fil som ikke er lik sandkassen, blir skrevet. Er noe endret
+  i Neo og ikke tatt inn, setter gjennomføringen det tilbake uten at noen har bestemt det. Neo endrer ingenting av seg
+  selv: «Ta i bruk» og «Adopter endringer» er valg et menneske tar. En organisasjon uten repo endrer bare i Neo, og
+  reglene gjelder likt.
 
 ## Versjoner og publisering
 
-## publiser-malen-med-versjon En mal publiseres med en versjon; kundens kopi oppgraderes med «Adopter endringer»
-
-```yaml
-id: publiser-malen-med-versjon
-klasse: felle
-gjelder: [solution]
-opphav: skrevet
-```
-
-- **Gjør:** Publiser malen når en endring er klar. Si til kundene hva som er endret, og la dem ta det inn med «Adopter
-  endringer».
-- **Ikke gjør:** Ikke forvent at en publisering endrer kopien hos kunden av seg selv.
-- **Hvorfor:** Kopien husker versjonen den kom fra. Er malens versjon nyere, får kunden tilbud om å oppgradere. En rad
-  organisasjonen eier selv, får ingen versjon.
-
-## endre-i-sandboxen Endringer i en organisasjon som er i bruk, lages i sandboxen og promoteres objekt for objekt
+## endre-i-sandboxen Endringer i en organisasjon som er i bruk, gjøres i sandkassen og promoteres
 
 ```yaml
 id: endre-i-sandboxen
@@ -248,22 +214,23 @@ krever: [14-tilgang.md#jobbroller-etter-jobben]
 opphav: skrevet
 ```
 
-- **Gjør:** Lag en sandbox for organisasjonen, gjør endringen der, prøv den, og promoter de objektene som er klare.
+- **Gjør:** Gjennomfør filene i sandkassen etter en godkjent PR, og gjør stegene i Neo der. Prøv endringen, og la
+  kundens org-admin promotere de objektene som er klare.
 - **Ikke gjør:** Ikke endre en aktiv flyt eller en sakstype med saker direkte i produksjon for å se hva som skjer.
 - **Hvorfor:** Promoteringen lagrer versjonen før og etter, og en endring som bryter en aktiv flyt eller fjerner en
-  status som er i bruk, avvises uten at noe endres. Sandboxen krever at organisasjonen har den låst opp.
+  status som er i bruk, avvises uten at noe endres. Sandkassen krever at organisasjonen har den låst opp.
 
-## flyter-lander-som-utkast Etter utrulling og promotering er nye flyter utkast til noen aktiverer dem
+## flyter-lander-som-utkast Etter gjennomføring og promotering er nye flyter utkast til noen aktiverer dem
 
 ```yaml
 id: flyter-lander-som-utkast
 klasse: felle
-gjelder: [workflow, solution]
+gjelder: [workflow]
 krever: [07-flyt.md#flyt-aktivering]
 opphav: skrevet
 ```
 
-- **Gjør:** Etter «Ta i bruk», utrulling eller promotering av noe nytt: les gapene og aktiver Løsningen.
+- **Gjør:** Etter gjennomføringen, «Ta i bruk» eller promoteringen av noe nytt: les gapene og aktiver flytene.
 - **Ikke gjør:** Ikke meld at oppsettet er på plass før flytene er aktive.
 - **Hvorfor:** Nye flyter lander som utkast, og hjemmelen til å skrive i sakene følger ikke med. En oppdatert flyt
   beholder statusen sin.
@@ -271,12 +238,13 @@ opphav: skrevet
 Eksempel: slik kommer et oppsett i drift hos en kunde.
 
 1. Bestem navnene (`navn-er-nokkelen`).
-2. Pakk én Løsning per bruksområde, med arkivet og registrene som egne Løsninger (`losning-per-bruksomrade`).
-3. Prøv i sandboxen med testsaker for hver gren (`test-i-sandboxen`, `en-testsak-per-gren`).
-4. Rull ut, les gapene og aktiver flytene. Publiser skjemaene og saksdatainstruksene.
-5. Sett opp det som ikke følger med Løsningen, i hver organisasjon: veiviseren, relasjonsvisningene, rapportene og
-   dashbordene, KI-reglene for organisasjonen og plassen til søkene.
-6. Endre senere med versjon: publiser malen og la kunden adoptere (`publiser-malen-med-versjon`).
+2. Ta i bruk katalogløsningene kunden trenger, i sandkassen, og ta filene inn i repoet (`endringer-i-neo-tas-inn`).
+3. Bygg filene i `oppsett/`, det felles én gang (`felles-er-en-fil`), og få planen godkjent i PR-en.
+4. Gjennomfør i sandkassen. Gjør stegene i Neo der: skjemaene, strømmene, visningene, søkene, Innsikt og tilgangen.
+   Les gapene, aktiver flytene, og publiser veiviseren og saksdatainstruksene.
+5. Prøv med testsaker for hver gren (`test-i-sandboxen`, `en-testsak-per-gren`).
+6. Kundens org-admin promoterer til produksjonen. Les gapene der, og aktiver.
+7. Endre senere i repoet eller i Neo. Det som endres i Neo, tas inn i repoet før neste plan.
 
 ## hendelsestypen-brytes-ikke En publisert hendelsestype endres ved å legge til, ikke ved å bytte ut
 
@@ -295,22 +263,22 @@ opphav: skrevet
 
 ## Prøving
 
-## test-i-sandboxen Prøv oppsettet i sandboxen, der ingenting sendes ut, med testsaker laget der
+## test-i-sandboxen Prøv oppsettet i sandkassen, der ingenting sendes ut, med testsaker laget der
 
 ```yaml
 id: test-i-sandboxen
 klasse: felle
-gjelder: [workflow, solution]
+gjelder: [workflow]
 krever: [00-navn-pakking-og-versjoner.md#endre-i-sandboxen]
 opphav: skrevet
 ```
 
-- **Gjør:** Kjør flytene i sandboxen, og les «Sperret utgående» for å se hva som ville blitt sendt, og til hvem. Lag
+- **Gjør:** Kjør flytene i sandkassen, og les «Sperret utgående» for å se hva som ville blitt sendt, og til hvem. Lag
   testsakene der, etter at konfigen er klonet. La sending stå sperret; slå den på bare for en avtalt demo mot mottakere
   dere selv eier, og av igjen etterpå.
 - **Ikke gjør:** Ikke prøv en flyt som sender brev, arkiverer eller skriver til Altinn i produksjon. Ikke lag testsaker i
-  kundens produksjon, og ikke bruk kundens ekte saker. Ikke legg testsaker i en Løsning.
-- **Hvorfor:** Sandboxen sender ingen e-post, webhook, HTTP-kall eller skriving til arkiv, Altinn eller SvarUt, og
+  kundens produksjon, og ikke bruk kundens ekte saker. Ikke legg testsaker i `oppsett/`.
+- **Hvorfor:** Sandkassen sender ingen e-post, webhook, HTTP-kall eller skriving til arkiv, Altinn eller SvarUt, og
   kjøringen stopper etter steget som ble sperret, så stegene etter må prøves for seg. Kloningen tar med konfigen, ikke
   saker. En testsak i produksjon kommer med i køene, Innsikt og arkivet.
 
@@ -336,5 +304,5 @@ opphav: forslag
 - { tittel: "Test — innvilget i sin helhet",   tsk_utfall: innvilget }
 - { tittel: "Test — avslag",                    tsk_utfall: avslag }
 - { tittel: "Test — venter på ettersending",    status: "Venter på svar" }
-- { tittel: "Test — klage på avslag",           status: "Klage mottatt" }
+- { tittel: "Test — venter på klagefrist",    status: "Venter på klagefrist" }
 ```

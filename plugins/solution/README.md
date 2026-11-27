@@ -22,7 +22,8 @@ pluginen [`forvaltning`](../forvaltning/README.md).
 
 01 tas én gang per repo; resten per løsning. 08 og 09 går i runder, med 05,
 06 og 07 imellom, til funnene er tatt. Promoteringen fra sandkassen til produksjonen gjør kundens org-admin i Neo.
-Publiseringen av en løsning står ikke i løypa før Neo har den.
+Å pakke løsningen som en Løsning i Neo er ikke en del av løypa: i dag lager bare Neo og partnere Løsninger,
+og kunden tar dem i bruk fra katalogen.
 
 **07–09 har sitt hjem her.** Testene for konfig i Neo skrives, kjøres og sorteres med disse skillene; det finnes ingen
 egen kopi andre steder. Testcasene og personaene lages i sandkassen av et menneske, til Neo har et API for det; 07
@@ -68,13 +69,20 @@ test/personaer/               testbrukerne, felles for alle løsningene
 |---|---|
 | `scripts/rules.mjs` | Reglene i mønstrene som kan sjekkes maskinelt, kjørt på konfigen slik den kjører i et miljø. Hver regel har samme id som i mønstrene |
 | `scripts/uttrekk.mjs` | Henter det reglene leser (sakstypene, feltene og flytene) rett fra Neo sitt API med maskinklienten i `neo.byEnv.<miljø>.apiClient` |
-| `scripts/docs.mjs` | Hvor mønstrene står i pluginen |
+| `scripts/docs.mjs` | Hvor mønstrene og oppskriftene står i pluginen |
 
 ## Dokumentasjonen
 
 | Fil | Hva |
 |---|---|
-| [`docs/monstre/`](docs/monstre/README.md) | Mønstrene for god konfig: grunnreglene, og reglene per flate med beslutningstabellene |
+| [`docs/monstre/`](docs/monstre/README.md) | Reglene for god konfig: grunnreglene, og reglene per flate med beslutningstabellene |
+| [`docs/oppskrifter/`](docs/oppskrifter/README.md) | Oppskriftene: hvordan klossene i Neo settes sammen for behov man kjenner igjen, med reglene hver kloss følger |
+
+**Tre begreper, ett sted hver.** En **regel** er én vurdering om én kloss i konfigen (id, hva den gjelder, gjør, ikke
+gjør, hvorfor). En **flate** er alle reglene for én del av konfigen i én fil, med en beslutningstabell øverst; samlingen
+av flatene heter mønstrene. En **oppskrift** setter klossene sammen for et kjent behov (godkjenning, innhenting fra
+parten, vedtak …): hvilke klosser, hvordan de kobles, i hvilken rekkefølge, og hva hvert steg blir. Den har ingen
+kunnskap av egen; den viser til reglene. 04 velger oppskriftene, og 05 bygger etter dem.
 | [`docs/esignering.md`](docs/esignering.md) | eSignering hos Digdir |
 
 ## Config

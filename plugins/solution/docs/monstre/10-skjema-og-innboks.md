@@ -126,12 +126,13 @@ krever: [14-tilgang.md#jobbroller-etter-jobben]
 opphav: skrevet
 ```
 
-- **Gjør:** Tildel skjema-steget en rolle når flyten ligger i en Løsning eller skal rulles ut. Tildel en person bare i en
-  flyt som er organisasjonens egen.
-- **Ikke gjør:** Ikke pek på et medlem i en flyt som skal til andre organisasjoner. Ikke regn med at en frist på steget
-  (`deadline`) når fram.
-- **Hvorfor:** En rolle beholdes uendret ved utrulling; en person som ikke finnes hos kunden, tømmes, og steget står da
-  utildelt. Noden sender bare forhåndsverdiene, versjonen og tildelingen videre, ikke fristen.
+- **Gjør:** Tildel skjema-steget en rolle når flyten skal være en fil i `oppsett/workflows/`. Tildel en person bare i en
+  flyt som settes opp i Neo og blir der (steg i Neo).
+- **Ikke gjør:** Ikke pek på et medlem i en flyt som skal gjennomføres fra filene eller tas i bruk av andre. Ikke regn
+  med at en frist på steget (`deadline`) når fram.
+- **Hvorfor:** En rolle står uendret i fila og ved promoteringen. En flyt som peker på et medlem, kan ikke skrives som
+  fil og står i `ikke-med.md` i snapshotet. Noden sender bare forhåndsverdiene, versjonen og tildelingen videre, ikke
+  fristen.
 
 ## skjema-knappen-sier-handlingen Innsendingsknappen sier hva som skjer, eller står som standard
 
@@ -276,10 +277,10 @@ opphav: skrevet
 ```
 
 - **Gjør:** La flyten starte på `inbox_item.tag_applied` med strømfilteret på taggen, og la den sette en annen tagg når den
-  er ferdig («Overfør til fagsystem» → «Overført til fagsystem»). Pek på taggen med id.
+  er ferdig («Overfør til fagsystem» → «Overført til fagsystem»). Pek på taggen med navnet (`ref:inboxTag:<navn>`).
 - **Ikke gjør:** Ikke la flyten sette den samme taggen som startet den.
-- **Hvorfor:** Med samme tagg starter flyten seg selv. Id-en skrives om til kundens kopi ved utrulling. En tagg som er
-  slettet eller slått av, stopper noden.
+- **Hvorfor:** Med samme tagg starter flyten seg selv. Noden bærer id-en; den slås opp fra navnet i sandkassen og skrives
+  om ved promoteringen. En tagg som er slettet eller slått av, stopper noden.
 
 ## tagg-av-ikke-slett Slå av en tagg som ikke skal brukes lenger; slett den bare når den aldri er brukt
 

@@ -229,8 +229,7 @@ opphav: forslag
   feltene instruksen skal fylle, med navnene i malen.
 - **Ikke gjør:** Ikke la instruksen bestemme formen selv.
 - **Hvorfor:** Med malen blir to kjøringer sammenlignbare, og saksbehandleren ser feltene før kjøringen. Neo kan koble
-  instruksen til malen, men oppsettet bærer ikke koblingen, så den følger ikke med ved utrulling. Navnet og feltene i
-  instruksen er det som binder dem.
+  instruksen til malen, men filene bærer ikke koblingen. Navnet og feltene i instruksen er det som binder dem.
 
 ## instruks-staa-alene En saksdatainstruks har med seg kriteriene den trenger
 
@@ -336,8 +335,8 @@ krever: [instruks-kjoring-for-sakstypen]
 opphav: skrevet
 ```
 
-- **Gjør:** Hold saksdatainstruksen upublisert mens den skrives og prøves. Publiser den når den er klar, og sjekk etter
-  utrullingen at den står som publisert hos kunden.
+- **Gjør:** Hold saksdatainstruksen upublisert mens den skrives og prøves. Publiser den når den er klar (`isPublished` i fila), og
+  sjekk etter promoteringen at den står som publisert i produksjonen.
 - **Ikke gjør:** Ikke regn med at en saksdatainstruks syns fordi den er koblet til sakstypen.
 - **Hvorfor:** Velgeren på saken viser bare publiserte, og den leser den publiserte utgaven. En upublisert instruks er
   usynlig, uten feilmelding. Behandlingsregelen virker uansett, fordi den ikke filtreres på publisering.
@@ -399,4 +398,4 @@ opphav: forslag
   kriterium, med poeng, begrunnelse og sitat. La rangeringen og likebehandlingen på tvers skje hos mennesker.
 - **Ikke gjør:** Ikke be agenten rangere sakene mot hverandre.
 - **Hvorfor:** En sakskjøring skriver ett resultat i én sak. Vi kjenner ingen måte en instruks kan lese og sammenligne
-  mange saker på i Neo. Mønsteret er ikke prøvd i drift.
+  mange saker på i Neo.

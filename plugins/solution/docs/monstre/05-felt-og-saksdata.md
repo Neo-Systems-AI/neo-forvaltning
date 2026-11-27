@@ -230,11 +230,12 @@ opphav: skrevet
 ```
 
 - **Gjør:** Legg integrasjonens data om saken (arkivets saksmappe, journalpostene, et fagsystems svar) i en saksdatamal
-  integrasjonen tar med seg i sin Løsning, for eksempel «Arkiv». Del den mellom sakstypene integrasjonen gjelder.
+  integrasjonen tar med seg, for eksempel «Arkiv» i katalogløsningen «Documaster», som tas i bruk i Neo. Del den
+  mellom sakstypene integrasjonen gjelder.
 - **Ikke gjør:** Ikke lag et saksfelt for saksmappens id eller en annen ekstern id som bare integrasjonens flyt leser.
   Unntaket er en id en flyt skal finne saken på: «Finn sak» leser bare felt.
-- **Hvorfor:** Den eneste leseren er flyten, og den leser saksdata. Malen er integrasjonens, så den følger Løsningen og
-  er lik hos alle sakstypene.
+- **Hvorfor:** Den eneste leseren er flyten, og den leser saksdata. Malen er integrasjonens, så den følger
+  katalogløsningen og er lik hos alle sakstypene.
 
 ## en-vurderingsmal-per-sakstype Vurderingen av sakstypens vilkår har sin egen mal i hver sakstype
 
@@ -668,8 +669,8 @@ opphav: skrevet
 
 - **Gjør:** Lag et kontaktfelt for opplysninger om personen eller virksomheten som gjelder uansett sak: reservasjonen
   mot digital post, når kontakten sist ble kontrollert mot et register. Legg feltene i en seksjon med kildens navn.
-- **Ikke gjør:** Ikke lag kontaktfelt for det som gjelder én sak. Ikke lag egne felt for det en register-Løsning alt
-  gir.
+- **Ikke gjør:** Ikke lag kontaktfelt for det som gjelder én sak. Ikke lag egne felt for det katalogløsningen for
+  registeret alt gir.
 - **Hvorfor:** Kontaktfeltet følger kontakten til hver sak og kan leses i veiviseren («alle partene er sjekket mot
   registeret»). En endring gir ingen saksaktivitet, fordi kontakten ikke har en sak.
 
@@ -713,4 +714,5 @@ opphav: forslag
   slag adresse ingen av dem dekker, og bestem etiketten før en flyt skriver den.
 - **Ikke gjør:** Ikke gi en egen type nytt navn når en flyt skriver den. Ikke gi en kontakt to adresser av samme type.
 - **Hvorfor:** En flyt finner en egen adressetype på etiketten; finnes den ikke, eller har kontakten to adresser av
-  typen, stopper flyten uten å endre kontakten. Adressetypene settes i hver organisasjon og følger ikke med en Løsning.
+  typen, stopper flyten uten å endre kontakten. Adressetypene er ikke filer; de settes opp i Neo i hver organisasjon
+  (steg i Neo).

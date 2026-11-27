@@ -15,8 +15,8 @@ Et tall i en rapport hviler alltid på de samme fire leddene:
    skriver med «Skriv hendelse» der det skjer, med verdiene slik de var da.
 4. **Flyten** som skriver den, og det som starter flyten.
 
-Rapportene og dashbordene er ikke konfig: de ligger ikke i en Løsning og bygges i hver org. Oppsettet leverer
-hendelsestypene, flytene som skriver dem, og strømmen. Innsikt regner bare vanlige rapporter: trakt, flyt og retensjon
+Filene i oppsettet har hendelsestypene og flytene som skriver dem. Strømmen, rapportene og dashbordene er ikke filer:
+de settes opp i Neo (steg i Neo). Innsikt regner bare vanlige rapporter: trakt, flyt og retensjon
 finnes som typer, men regnes ikke. Det finnes ingen varsler på en terskel, og ingen sum over saksdata.
 
 ## Kortversjonen
@@ -77,13 +77,13 @@ krever: [07-flyt.md#strom-pause-er-tap]
 opphav: skrevet
 ```
 
-- **Gjør:** Ta strømmen med i oppsettet sammen med hendelsestypene, aktiv, med hver hendelse rapportene trenger slått
-  på. Rulles den ut til en org som alt har strømmen, sjekk at den har en aktiv abonnent. Gjør det før de første sakene
-  kommer.
+- **Gjør:** Lag strømmen i Neo sammen med hendelsestypene (steg i Neo), aktiv, med hver hendelse rapportene trenger
+  slått på. Promoteres den til en produksjon som alt har strømmen, sjekk at den har en aktiv abonnent. Gjør det før de
+  første sakene kommer.
 - **Ikke gjør:** Ikke sett Innsikt-strømmen på pause, og ikke slå av abonnenten.
 - **Hvorfor:** En hendelse leveres bare til aktive strømmer med minst én aktiv abonnent, én gang, når den skjer. En
-  strøm som opprettes i org-en ved utrullingen, får standardabonnenten og leverer fra første hendelse. En strøm som
-  fantes fra før, beholder abonnentene org-en har valgt. Det som skjedde før strømmen leverte, kan ikke telles.
+  strøm som opprettes i produksjonen ved promoteringen, får standardabonnenten og leverer fra første hendelse. En strøm
+  som fantes fra før, beholder abonnentene org-en har valgt. Det som skjedde før strømmen leverte, kan ikke telles.
 
 ## en-strom-for-innsikt Gi Innsikt en egen strøm per område
 
@@ -99,7 +99,7 @@ opphav: forslag
   rapportene bygger på. Si i beskrivelsen at rapportene leser den. Gi hver hendelse i strømmen et `customName` som står.
 - **Ikke gjør:** Ikke bygg rapporter på en strøm som finnes for en integrasjon eller for å starte en flyt. Ikke gi
   hendelsene nytt `customName`.
-- **Hvorfor:** Endres en strøm for en annen jobb, endres tallene. `customName` er nøkkelen en ny utrulling kjenner
+- **Hvorfor:** Endres en strøm for en annen jobb, endres tallene. `customName` er nøkkelen promoteringen kjenner
   hendelsen i strømmen igjen på, og rapportens metrikk peker på den.
 
 ## mappingen-beholder-det-som-telles En strøm for Innsikt leverer hele hendelsen, eller alt rapportene leser

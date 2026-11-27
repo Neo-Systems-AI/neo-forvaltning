@@ -300,6 +300,8 @@ gjelder: [caseType.relationViews, caseType.relationTableViews, solution]
 opphav: skrevet
 ```
 
-- **Gjør:** Lag relasjonsvisningene og de lagrede visningene av relasjonstabellen i organisasjonen som bruker dem.
-- **Ikke gjør:** Ikke regn med at de følger med en Løsning.
-- **Hvorfor:** De er ikke med i sakstypen som kopieres ved utrulling.
+- **Gjør:** Legg relasjonsvisningene i `oppsett/relation-views/`, én fil per visning. Lag de lagrede visningene av
+  relasjonstabellen i Neo (steg i Neo).
+- **Ikke gjør:** Ikke regn med at de lagrede visningene av tabellen står i filene.
+- **Hvorfor:** Relasjonsvisningen er en fil, nøklet på sakstypene, retningen og navnet. De lagrede visningene er det
+  ikke: de står i `ikke-med.md` i snapshotet.
